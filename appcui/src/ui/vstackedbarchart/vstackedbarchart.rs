@@ -246,7 +246,8 @@ where
         let theme_bars = theme.chart.bar;
         self.surface.reset_clip();
         self.surface.clear(Character::with_attributes(' ', background));
-        self.paint_yaxis(axis_attr, grid_attr, label_attr);
+        let size = self.size();
+        self.paint_yaxis(size.width as i32, size.height as i32, axis_attr, grid_attr, label_attr);
         self.paint_xaxis(axis_attr, label_attr);
         let bar_colors = theme_bars;
         let width = self.size().width as i32;
@@ -293,8 +294,8 @@ where
         }
         self.surface.reset_clip();
     }
-    fn paint_yaxis(&mut self, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
-        let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
+    pub(super) fn paint_yaxis(&mut self, width: i32, height: i32, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
+        let bottom = height - if self.xaxis.label_format.is_none() { 1 } else { 2 };
         if self.yaxis.visible && self.yaxis.width > 0 {
             self.surface
                 .draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, axis_attr);
@@ -308,7 +309,7 @@ where
         }
         if self.yaxis.show_grid && self.yaxis.step > 0 {
             let x_poz = self.x_axis_left_margin();
-            let right = self.size().width as i32;
+            let right = width;
             let ch = Character::with_attributes('┈', grid_attr);
             let format = if matches!(self.scale, StackBarScale::Percentage) {
                 &self.percentage_format
@@ -326,6 +327,16 @@ where
                 }
                 y -= self.yaxis.step as i32;
                 bottom_value -= self.yaxis.bottom_step;
+            }
+            if self.flags.contains(Flags::ShowZeroLineOnYAxis) && self.yaxis.bottom_step != 0.0 {
+                let y_zero = bottom - ((self.yaxis.bottom_value * self.yaxis.step as f64) / self.yaxis.bottom_step).round() as i32;
+                if (0..=bottom).contains(&y_zero) {
+                    self.surface.draw_horizontal_line(x_poz, y_zero, right, LineType::Single, grid_attr);
+                    if let Some(value) = format.write_float(0f64, &mut buffer) {
+                        self.surface
+                            .write_ascii(x_poz - value.len() as i32 - 1, y_zero, value.as_bytes(), label_attr, false);
+                    }
+                }
             }
         }
     }

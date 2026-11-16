@@ -3277,3 +3277,145 @@ fn check_paint_stacks_bar_attr_wins_over_default_attr() {
         assert_eq!(plot_cell(&chart, 9, 1).1, Color::Red);
     });
 }
+
+fn zero_line_chart(flags: vstackedbarchart::Flags, width: u32, height: u32) -> VStackedBarChart<i32> {
+    let mut chart = VStackedBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), flags);
+    chart.surface = Surface::new(width, height);
+    chart.surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    chart
+}
+
+fn paint_axis(chart: &mut VStackedBarChart<i32>, width: u32, height: u32) {
+    chart.surface.reset_clip();
+    chart.surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let plot_bottom = height - if chart.xaxis.label_format.is_none() { 1 } else { 3 };
+    chart.update_plot_layout(plot_bottom);
+    chart.paint_yaxis(width as i32, height as i32, charattr!("gray,black"), charattr!("silver,black"), charattr!("white,black"));
+}
+
+#[test]
+fn check_zero_line_is_drawn_when_flag_is_set() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        chart.add_stack([6, -5]);
+        paint_axis(&mut chart, 20, 12);
+        for x in 8..20 {
+            assert_eq!(chart.surface.char(x, 6).unwrap().code, '\u{2500}');
+        }
+        assert_eq!(chart.surface.char(6, 6).unwrap().code, '0');
+    });
+}
+
+#[test]
+fn check_zero_line_is_not_drawn_without_flag() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 12);
+        chart.add_stack([6, -5]);
+        paint_axis(&mut chart, 20, 12);
+        for x in 8..20 {
+            assert_eq!(chart.surface.char(x, 6).unwrap().code, ' ');
+        }
+        assert_eq!(chart.surface.char(6, 6).unwrap().code, ' ');
+    });
+}
+
+#[test]
+fn check_zero_line_requires_grid() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        chart.add_stack([6, -5]);
+        chart.set_yaxis_show_grid(false);
+        paint_axis(&mut chart, 20, 12);
+        for x in 8..20 {
+            assert_eq!(chart.surface.char(x, 6).unwrap().code, ' ');
+        }
+    });
+}
+
+#[test]
+fn check_zero_line_at_bottom_for_positive_only_data() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        chart.add_stack([10]);
+        paint_axis(&mut chart, 20, 12);
+        for x in 8..20 {
+            assert_eq!(chart.surface.char(x, 11).unwrap().code, '\u{2500}');
+        }
+        assert_eq!(chart.surface.char(6, 11).unwrap().code, '0');
+    });
+}
+
+#[test]
+fn check_zero_line_hidden_when_zero_is_outside_range() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        chart.add_stack([5]);
+        chart.add_stack([10]);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        paint_axis(&mut chart, 20, 12);
+        for y in 0..12 {
+            for x in 8..20 {
+                assert_ne!(chart.surface.char(x, y).unwrap().code, '\u{2500}');
+            }
+        }
+    });
+}
+
+#[test]
+fn check_zero_line_skipped_for_degenerate_range() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        paint_axis(&mut chart, 20, 12);
+        chart.add_stack([0, 0]);
+        paint_axis(&mut chart, 20, 12);
+        for y in 0..12 {
+            for x in 8..20 {
+                assert_ne!(chart.surface.char(x, y).unwrap().code, '\u{2500}');
+            }
+        }
+    });
+}
+
+#[test]
+fn check_zero_line_with_xaxis_labels() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        chart.add_stack([6, -5]);
+        chart.set_xaxis_label_mode(XAxisLabelMode::Index(0));
+        paint_axis(&mut chart, 20, 12);
+        let mut found = 0;
+        for y in 0..10 {
+            if chart.surface.char(8, y).unwrap().code == '\u{2500}' {
+                found += 1;
+            }
+        }
+        assert_eq!(found, 1);
+    });
+}
+
+#[test]
+fn check_zero_line_label_uses_percentage_format() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 11);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([1, -1]);
+        paint_axis(&mut chart, 20, 11);
+        for x in 8..20 {
+            assert_eq!(chart.surface.char(x, 5).unwrap().code, '\u{2500}');
+        }
+        assert_eq!(chart.surface.char(5, 5).unwrap().code, '0');
+        assert_eq!(chart.surface.char(6, 5).unwrap().code, '%');
+    });
+}
+
+#[test]
+fn check_zero_line_is_painted_below_the_bars() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis, 20, 12);
+        chart.add_stack([6, -5]);
+        paint_axis(&mut chart, 20, 12);
+        chart.paint_stacks(&plot_colors(), 20, 11);
+        assert_eq!(chart.surface.char(9, 6).unwrap().code, '\u{2588}');
+        assert_eq!(chart.surface.char(12, 6).unwrap().code, '\u{2500}');
+    });
+}
