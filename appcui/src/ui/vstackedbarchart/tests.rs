@@ -3550,7 +3550,7 @@ fn check_hash(hash: u64, build: impl FnOnce() -> VStackedBarChart<i32> + 'static
 
 #[test]
 fn check_hash_all_positive() {
-    check_hash(0x0, || {
+    check_hash(0xF781B8428265DA81, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         add_positive_stacks(&mut chart);
         chart
@@ -3559,7 +3559,7 @@ fn check_hash_all_positive() {
 
 #[test]
 fn check_hash_all_negative() {
-    check_hash(0x0, || {
+    check_hash(0x83050BDE5C568442, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         add_negative_stacks(&mut chart);
         chart
@@ -3568,7 +3568,7 @@ fn check_hash_all_negative() {
 
 #[test]
 fn check_hash_mixed() {
-    check_hash(0x0, || {
+    check_hash(0x2320A53E13C8684C, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         add_mixed_stacks(&mut chart);
         chart
@@ -3577,7 +3577,7 @@ fn check_hash_mixed() {
 
 #[test]
 fn check_hash_draw_mode_fill() {
-    check_hash(0x0, || {
+    check_hash(0xC02F95A2AB87FBE0, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(3);
         chart.set_default_bar_drawmode(StackBarDrawMode::Fill(BarFillType::Shade50));
@@ -3588,7 +3588,7 @@ fn check_hash_draw_mode_fill() {
 
 #[test]
 fn check_hash_draw_mode_rectangle() {
-    check_hash(0x0, || {
+    check_hash(0x53297C629425A1D3, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(3);
         chart.set_default_bar_drawmode(rect());
@@ -3599,7 +3599,7 @@ fn check_hash_draw_mode_rectangle() {
 
 #[test]
 fn check_hash_draw_mode_filled_rectangle() {
-    check_hash(0x0, || {
+    check_hash(0xE69AFA45E478C25C, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(3);
         chart.set_default_bar_drawmode(filled_rect());
@@ -3610,7 +3610,7 @@ fn check_hash_draw_mode_filled_rectangle() {
 
 #[test]
 fn check_hash_draw_modes_per_bar() {
-    check_hash(0x0, || {
+    check_hash(0x741280BFDEE16811, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(3);
         chart.add_stack(
@@ -3632,7 +3632,7 @@ fn check_hash_draw_modes_per_bar() {
 
 #[test]
 fn check_hash_scale_from_zero() {
-    check_hash(0x0, || {
+    check_hash(0x2320A53E13C8684C, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_stacks_scale(StackBarScale::FromZero);
         add_mixed_stacks(&mut chart);
@@ -3642,7 +3642,7 @@ fn check_hash_scale_from_zero() {
 
 #[test]
 fn check_hash_scale_from_zero_min_range() {
-    check_hash(0x0, || {
+    check_hash(0xBB381BBFFD0E57CF, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -10, max: 20 });
         add_mixed_stacks(&mut chart);
@@ -3652,7 +3652,7 @@ fn check_hash_scale_from_zero_min_range() {
 
 #[test]
 fn check_hash_scale_fit_data() {
-    check_hash(0x0, || {
+    check_hash(0x1E5A0B4F8D23F18A, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_stacks_scale(StackBarScale::FitData);
         add_positive_stacks(&mut chart);
@@ -3662,7 +3662,7 @@ fn check_hash_scale_fit_data() {
 
 #[test]
 fn check_hash_scale_fit_data_mixed() {
-    check_hash(0x0, || {
+    check_hash(0x2320A53E13C8684C, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_stacks_scale(StackBarScale::FitData);
         add_mixed_stacks(&mut chart);
@@ -3672,7 +3672,7 @@ fn check_hash_scale_fit_data_mixed() {
 
 #[test]
 fn check_hash_scale_fixed() {
-    check_hash(0x0, || {
+    check_hash(0xC2853F5FFB096992, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_stacks_scale(StackBarScale::Fixed { min: -3, max: 6 });
         add_mixed_stacks(&mut chart);
@@ -3682,7 +3682,7 @@ fn check_hash_scale_fixed() {
 
 #[test]
 fn check_hash_scale_percentage() {
-    check_hash(0x0, || {
+    check_hash(0x895F6859162D148F, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_stacks_scale(StackBarScale::Percentage);
         add_positive_stacks(&mut chart);
@@ -3692,7 +3692,7 @@ fn check_hash_scale_percentage() {
 
 #[test]
 fn check_hash_scale_percentage_mixed() {
-    check_hash(0x0, || {
+    check_hash(0x2918A56A539EBC5F, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis);
         chart.set_stacks_scale(StackBarScale::Percentage);
         add_mixed_stacks(&mut chart);
@@ -3702,7 +3702,7 @@ fn check_hash_scale_percentage_mixed() {
 
 #[test]
 fn check_hash_thickness_1() {
-    check_hash(0x0, || {
+    check_hash(0x2320A53E13C8684C, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(1);
         add_mixed_stacks(&mut chart);
@@ -3712,7 +3712,7 @@ fn check_hash_thickness_1() {
 
 #[test]
 fn check_hash_thickness_2() {
-    check_hash(0x0, || {
+    check_hash(0x891E781D8F01699C, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(2);
         add_mixed_stacks(&mut chart);
@@ -3722,7 +3722,7 @@ fn check_hash_thickness_2() {
 
 #[test]
 fn check_hash_thickness_3() {
-    check_hash(0x0, || {
+    check_hash(0xAF5E0C41AE1659CC, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(3);
         add_mixed_stacks(&mut chart);
@@ -3732,7 +3732,7 @@ fn check_hash_thickness_3() {
 
 #[test]
 fn check_hash_colors_by_bar_index() {
-    check_hash(0x0, || {
+    check_hash(0xFD2AB15539291F1B, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(2);
         chart.add_stack([2, 2, 2, 2, 2, 2]);
@@ -3744,7 +3744,7 @@ fn check_hash_colors_by_bar_index() {
 
 #[test]
 fn check_hash_colors_with_default_and_bar_attr() {
-    check_hash(0x0, || {
+    check_hash(0x49E58B4A2373B38E, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(2);
         chart.set_default_bar_attr(charattr!("aqua,black"));
@@ -3756,7 +3756,7 @@ fn check_hash_colors_with_default_and_bar_attr() {
 
 #[test]
 fn check_hash_zero_line() {
-    check_hash(0x0, || {
+    check_hash(0xDA6A2835257C4AD4, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis);
         add_mixed_stacks(&mut chart);
         chart
@@ -3765,7 +3765,7 @@ fn check_hash_zero_line() {
 
 #[test]
 fn check_hash_xaxis_stack_labels() {
-    check_hash(0x0, || {
+    check_hash(0x5B80C8C154532C48, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_default_bar_width(3);
         chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
@@ -3776,7 +3776,7 @@ fn check_hash_xaxis_stack_labels() {
 
 #[test]
 fn check_hash_xaxis_index() {
-    check_hash(0x0, || {
+    check_hash(0x63FF04D378FF70CC, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
         add_mixed_stacks(&mut chart);
@@ -3786,7 +3786,7 @@ fn check_hash_xaxis_index() {
 
 #[test]
 fn check_hash_yaxis_hidden() {
-    check_hash(0x0, || {
+    check_hash(0xC014CA0EC56497C5, || {
         let mut chart = hash_chart(vstackedbarchart::Flags::None);
         chart.set_yaxis_visible(false);
         add_mixed_stacks(&mut chart);
