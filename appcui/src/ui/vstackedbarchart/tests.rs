@@ -3419,3 +3419,377 @@ fn check_zero_line_is_painted_below_the_bars() {
         assert_eq!(chart.surface.char(12, 6).unwrap().code, '\u{2500}');
     });
 }
+
+#[test]
+fn check_percentage_axis_labels_have_percent_suffix() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 11);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([1, 1]);
+        paint_axis(&mut chart, 20, 11);
+        assert_eq!(row_of(&chart.surface, 10, 4, 6), " 0%");
+        assert_eq!(row_of(&chart.surface, 7, 4, 6), "30%");
+        assert_eq!(row_of(&chart.surface, 4, 4, 6), "60%");
+        assert_eq!(row_of(&chart.surface, 1, 4, 6), "90%");
+    });
+}
+
+#[test]
+fn check_non_percentage_axis_labels_have_no_percent_suffix() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 11);
+        chart.add_stack([10]);
+        paint_axis(&mut chart, 20, 11);
+        for y in 0..11 {
+            assert!(!row_of(&chart.surface, y, 0, 6).contains('%'));
+        }
+    });
+}
+
+#[test]
+fn check_axis_labels_follow_scale_changes() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 11);
+        chart.add_stack([1, 1]);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        paint_axis(&mut chart, 20, 11);
+        assert!(row_of(&chart.surface, 10, 0, 6).contains('%'));
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        paint_axis(&mut chart, 20, 11);
+        for y in 0..11 {
+            assert!(!row_of(&chart.surface, y, 0, 6).contains('%'));
+        }
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        paint_axis(&mut chart, 20, 11);
+        assert!(row_of(&chart.surface, 10, 0, 6).contains('%'));
+    });
+}
+
+#[test]
+fn check_percentage_axis_uses_percentage_format() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 11);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.set_percentage_format(FormatNumber::new(10).suffix("pct"));
+        chart.add_stack([1, 1]);
+        paint_axis(&mut chart, 20, 11);
+        assert_eq!(row_of(&chart.surface, 7, 2, 6), "30pct");
+    });
+}
+
+#[test]
+fn check_percentage_axis_ignores_number_format() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 11);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.set_number_format(FormatNumber::new(10).suffix("units"));
+        chart.add_stack([1, 1]);
+        paint_axis(&mut chart, 20, 11);
+        assert_eq!(row_of(&chart.surface, 7, 4, 6), "30%");
+    });
+}
+
+#[test]
+fn check_number_axis_ignores_percentage_format() {
+    in_app(|| {
+        let mut chart = zero_line_chart(vstackedbarchart::Flags::None, 20, 11);
+        chart.set_percentage_format(FormatNumber::new(10).suffix("pct"));
+        chart.add_stack([10]);
+        paint_axis(&mut chart, 20, 11);
+        for y in 0..11 {
+            assert!(!row_of(&chart.surface, y, 0, 6).contains("pct"));
+        }
+    });
+}
+
+fn hash_chart(flags: vstackedbarchart::Flags) -> VStackedBarChart<i32> {
+    VStackedBarChart::<i32>::new(layout!("d:f"), flags)
+}
+
+fn add_positive_stacks(chart: &mut VStackedBarChart<i32>) {
+    chart.add_stack(BarsStackBuilder::new().label("A").bars([3, 2]).build());
+    chart.add_stack(BarsStackBuilder::new().label("B").bars([5, 1]).build());
+    chart.add_stack(BarsStackBuilder::new().label("C").bars([4, 4, 2]).build());
+    chart.add_stack(BarsStackBuilder::new().label("D").bars([6]).build());
+}
+
+fn add_negative_stacks(chart: &mut VStackedBarChart<i32>) {
+    chart.add_stack(BarsStackBuilder::new().label("A").bars([-3, -2]).build());
+    chart.add_stack(BarsStackBuilder::new().label("B").bars([-5, -1]).build());
+    chart.add_stack(BarsStackBuilder::new().label("C").bars([-4, -4, -2]).build());
+    chart.add_stack(BarsStackBuilder::new().label("D").bars([-6]).build());
+}
+
+fn add_mixed_stacks(chart: &mut VStackedBarChart<i32>) {
+    chart.add_stack(BarsStackBuilder::new().label("A").bars([4, -2, 3]).build());
+    chart.add_stack(BarsStackBuilder::new().label("B").bars([-5, 2]).build());
+    chart.add_stack(BarsStackBuilder::new().label("C").bars([6, -1, -3]).build());
+    chart.add_stack(BarsStackBuilder::new().label("D").bars([2, 2, 2, 2, 2, 2]).build());
+}
+
+fn check_hash(hash: u64, build: impl FnOnce() -> VStackedBarChart<i32> + 'static) {
+    let script = format!(
+        "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x{hash:X})
+    "
+    );
+    App::new()
+        .size(Size::new(50, 16))
+        .debug_script(&script)
+        .window(move || {
+            let chart = build();
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_hash_all_positive() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        add_positive_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_all_negative() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        add_negative_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_mixed() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_draw_mode_fill() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(3);
+        chart.set_default_bar_drawmode(StackBarDrawMode::Fill(BarFillType::Shade50));
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_draw_mode_rectangle() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(3);
+        chart.set_default_bar_drawmode(rect());
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_draw_mode_filled_rectangle() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(3);
+        chart.set_default_bar_drawmode(filled_rect());
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_draw_modes_per_bar() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(3);
+        chart.add_stack(
+            BarsStackBuilder::new()
+                .bar(StackBarBuilder::new(4).draw_mode(rect()).build())
+                .bar(StackBarBuilder::new(3).draw_mode(filled_rect()).build())
+                .bar(StackBarBuilder::new(2).build())
+                .build(),
+        );
+        chart.add_stack(
+            BarsStackBuilder::new()
+                .bar(StackBarBuilder::new(-3).draw_mode(filled_rect()).build())
+                .bar(StackBarBuilder::new(-4).draw_mode(rect()).build())
+                .build(),
+        );
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_from_zero() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_from_zero_min_range() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -10, max: 20 });
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_fit_data() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        add_positive_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_fit_data_mixed() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_fixed() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -3, max: 6 });
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_percentage() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        add_positive_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_scale_percentage_mixed() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_thickness_1() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(1);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_thickness_2() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(2);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_thickness_3() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(3);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_colors_by_bar_index() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(2);
+        chart.add_stack([2, 2, 2, 2, 2, 2]);
+        chart.add_stack([3, 3, 3, 3, 3]);
+        chart.add_stack([1, 4, 1, 4, 1, 4]);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_colors_with_default_and_bar_attr() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(2);
+        chart.set_default_bar_attr(charattr!("aqua,black"));
+        chart.add_stack(BarsStackBuilder::new().bar(3).bar(StackBarBuilder::new(3).attr(charattr!("red,black")).build()).bar(3).build());
+        chart.add_stack([4, 4, 4]);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_zero_line() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::ShowZeroLineOnYAxis);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_xaxis_stack_labels() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(3);
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_xaxis_index() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
+
+#[test]
+fn check_hash_yaxis_hidden() {
+    check_hash(0x0, || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::None);
+        chart.set_yaxis_visible(false);
+        add_mixed_stacks(&mut chart);
+        chart
+    });
+}
