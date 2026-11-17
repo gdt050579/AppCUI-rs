@@ -96,6 +96,22 @@ impl Surface {
         s
     }
 
+    pub(super) fn from_chars(chars: Vec<Character>, size: Size) -> Surface {
+        let w = size.width.saturating_sub(1) as i32;
+        let h = size.height.saturating_sub(1) as i32;
+        Self {
+            size,
+            chars,
+            origin: Point::default(),
+            base_origin: Point::default(),
+            clip: ClipArea::new(0, 0, w, h),
+            base_clip: ClipArea::new(0, 0, w, h),
+            cursor: Cursor::new(),
+            right_most: w,
+            bottom_most: h,    
+        }
+    }
+
     /// Creates a new surface from a string with the specified size.
     /// The string will be written to the surface starting at position (0, 0).
     /// All characters will have white foreground and black background.

@@ -1,4 +1,4 @@
-use super::{Character, Size};
+use super::{Character, Size, Surface};
 
 pub struct Sprite {
     chars: Vec<Character>,
@@ -44,5 +44,13 @@ impl Sprite {
         self.chars.resize(count, ch);
         self.chars.fill(ch);
         self.size = Size::new(w, h);
+    }
+    #[inline(always)]
+    pub fn edit(&mut self, f: impl Fn(&mut Surface)) {
+        let chars = std::mem::take(&mut self.chars);
+        let mut surface = Surface::from_chars(chars, self.size);
+        f(&mut surface);
+        self.size = surface.size();
+        std::mem::swap(&mut self.chars, &mut surface.chars);
     }
 }
