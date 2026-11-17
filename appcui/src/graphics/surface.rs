@@ -48,8 +48,8 @@ impl From<char> for CharacterType {
     }
 }
 
-const MAX_SURFACE_WIDTH: u32 = 10000;
-const MAX_SURFACE_HEIGHT: u32 = 10000;
+pub(super) const MAX_SURFACE_WIDTH: u32 = 10000;
+pub(super) const MAX_SURFACE_HEIGHT: u32 = 10000;
 
 /// A structure that represents a 2D surface for drawing characters and images.
 /// The surface is defined as a matrix (width x height) of characters, where each character is of type [Character].
