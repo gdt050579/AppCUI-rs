@@ -1436,6 +1436,33 @@ impl Surface {
         }
     }
 
+    /// Draws a [`Sprite`] at the specified position.
+    /// The top-left corner of the sprite is placed at `(x, y)`, and its characters are written
+    /// from left to right, then top to bottom.
+    /// Each character is written with [`write_char`](Self::write_char), so the surface origin and clip area apply.
+    /// Cells that fall outside the clip area are skipped. If the clip area is not visible, nothing is drawn.
+    ///
+    /// [`write_char`](Self::write_char) updates a cell through [`Character::set`]:
+    /// a code of `'\0'` does not replace the glyph, and a [`Color::Transparent`] foreground or background
+    /// does not replace that color. Flags are always written.
+    ///
+    /// # Parameters
+    /// - `x`: The x-coordinate of the sprite's top-left corner, relative to the surface origin.
+    /// - `y`: The y-coordinate of the sprite's top-left corner, relative to the surface origin.
+    /// - `sprite`: The sprite to draw.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::{CharFlags, Character, Color, Sprite, Surface};
+    ///
+    /// let mut surface = Surface::new(20, 10);
+    /// let mut sprite = Sprite::new(3, 2);
+    /// sprite.set(0, 0, Character::new('A', Color::Yellow, Color::Black, CharFlags::None));
+    /// sprite.set(1, 0, Character::new('B', Color::Yellow, Color::Black, CharFlags::None));
+    /// surface.draw_sprite(2, 2, &sprite);
+    /// assert_eq!(surface.char(2, 2).unwrap().code, 'A');
+    /// assert_eq!(surface.char(3, 2).unwrap().code, 'B');
+    /// ```
     pub fn draw_sprite(&mut self, x: i32, y: i32, sprite: &Sprite) {
         if !self.clip.is_visible() {
             return;
