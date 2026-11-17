@@ -40,6 +40,7 @@ where
     pub(super) stacks_width: u32,
     pub(super) left_scroll: i32,
     pub(super) first_visible_stack: u32,
+    pub(super) scrollbars: ScrollBars,
     pub(super) surface: Surface,
     pub(super) defaults: Defaults,
     pub(super) scale: StackBarScale<T>,
@@ -66,6 +67,7 @@ where
             stacks_width: 0,
             left_scroll: 0,
             first_visible_stack: 0,
+            scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             surface: Surface::new(1, 1),
             defaults: Defaults {
                 thickness: 1,
@@ -234,8 +236,33 @@ where
             0
         }
     }
+    pub(super) fn max_left_scroll(&self) -> i32 {
+        let content_width = self.stacks_width as i32 + self.x_axis_left_margin() + 1;
+        (content_width - self.size().width as i32).max(0)
+    }
+    pub(super) fn update_first_visible_stack(&mut self) {
+        let left_scroll = self.left_scroll;
+        self.first_visible_stack = (self.stacks.partition_point(|s| s.pos < left_scroll) as u32).saturating_sub(1);
+    }
+    pub(super) fn sync_scrollbars(&mut self) {
+        let content_width = self.stacks_width as u64 + self.x_axis_left_margin() as u64 + 1;
+        let height = self.size().height as u64;
+        self.scrollbars.resize(content_width, height, &self.base);
+        self.scrollbars.set_indexes(self.left_scroll as u64, 0);
+    }
+    pub(super) fn update_scroll_state(&mut self) {
+        self.left_scroll = self.left_scroll.clamp(0, self.max_left_scroll());
+        self.update_first_visible_stack();
+        self.sync_scrollbars();
+    }
+    pub(super) fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.left_scroll = self.scrollbars.horizontal_index() as i32;
+        self.update_first_visible_stack();
+        self.repaint_surface();
+    }
     fn repaint_surface(&mut self) {
         self.update_layout();
+        self.update_scroll_state();
         let height = self.visible_height();
         self.update_plot_layout(height);
         let theme = self.theme();
@@ -593,6 +620,10 @@ where
     T: Number + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        if self.has_focus() && self.flags.contains(Flags::ScrollBars) {
+            self.scrollbars.paint(surface, theme, self);
+            surface.reduce_clip_by(0, 0, 1, 1);
+        }
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::ops::DerefMut;
 use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
@@ -3791,5 +3792,108 @@ fn check_hash_yaxis_hidden() {
         chart.set_yaxis_visible(false);
         add_mixed_stacks(&mut chart);
         chart
+    });
+}
+
+fn scroll_chart(flags: vstackedbarchart::Flags, stacks: usize) -> VStackedBarChart<i32> {
+    let mut chart = VStackedBarChart::<i32>::new(layout!("x:0,y:0,w:30,h:8"), flags);
+    chart.deref_mut().layout.update(60, 20);
+    for i in 0..stacks {
+        chart.add_stack([(i as i32 % 4) + 1]);
+    }
+    chart
+}
+
+#[test]
+fn check_scroll_max_left_scroll_zero_when_content_fits() {
+    in_app(|| {
+        let chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 3);
+        assert_eq!(chart.max_left_scroll(), 0);
+    });
+}
+
+#[test]
+fn check_scroll_max_left_scroll_when_content_is_wider() {
+    in_app(|| {
+        let chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        let expected = chart.stacks_width as i32 + chart.x_axis_left_margin() + 1 - chart.size().width as i32;
+        assert!(expected > 0);
+        assert_eq!(chart.max_left_scroll(), expected);
+    });
+}
+
+#[test]
+fn check_scroll_left_scroll_is_clamped_after_repaint() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        let max = chart.max_left_scroll();
+        chart.left_scroll = max + 50;
+        chart.update_scroll_state();
+        assert_eq!(chart.left_scroll, max);
+        chart.left_scroll = -5;
+        chart.update_scroll_state();
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+#[test]
+fn check_scroll_left_scroll_is_clamped_when_stacks_are_removed() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = chart.max_left_scroll();
+        chart.clear();
+        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.first_visible_stack, 0);
+    });
+}
+
+#[test]
+fn check_scroll_first_visible_stack_follows_left_scroll() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = 0;
+        chart.update_scroll_state();
+        assert_eq!(chart.first_visible_stack, 0);
+        for scroll in 1..=chart.max_left_scroll() {
+            chart.left_scroll = scroll;
+            chart.update_scroll_state();
+            let first = chart.first_visible_stack as usize;
+            assert!(chart.stacks[first].pos <= scroll || first == 0);
+            if first + 1 < chart.stacks.len() {
+                assert!(chart.stacks[first + 1].pos >= scroll);
+            }
+        }
+    });
+}
+
+#[test]
+fn check_scroll_scrollbar_index_follows_left_scroll() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = 4;
+        chart.update_scroll_state();
+        assert_eq!(chart.scrollbars.horizontal_index(), 4);
+    });
+}
+
+#[test]
+fn check_scroll_position_from_scrollbars() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.scrollbars.set_indexes(7, 0);
+        chart.update_scroll_pos_from_scrollbars();
+        assert_eq!(chart.left_scroll, 7);
+        assert_eq!(chart.scrollbars.horizontal_index(), 7);
+    });
+}
+
+#[test]
+fn check_scroll_resize_keeps_scroll_in_range() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = chart.max_left_scroll();
+        chart.on_resize(Size::new(30, 8), Size::new(60, 8));
+        assert!(chart.left_scroll <= chart.max_left_scroll());
+        assert_eq!(chart.surface.size().width, 60);
     });
 }
