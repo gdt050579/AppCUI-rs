@@ -228,7 +228,7 @@ impl Arguments {
             if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
                 if appcui_trait.trait_type() != TraitType::ControlEvent {
                     panic!(
-                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
+                        "Trait {trait_name} can not be used with the 'events' attribute. Allowed traits for the 'events' attribute are: {}",
                         config.traits_of_type(TraitType::ControlEvent)
                     );
                 }
@@ -240,7 +240,7 @@ impl Arguments {
                 }
             } else {
                 panic!(
-                    "Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}",
+                    "Unknown trait: '{trait_name}'. Allowed traits for events are: {}",
                     config.traits_of_type(TraitType::ControlEvent)
                 );
             }
