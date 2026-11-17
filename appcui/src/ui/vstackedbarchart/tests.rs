@@ -145,7 +145,7 @@ fn check_bars_stack_add_bar_and_bars() {
     let mut stack = BarsStack::<i32>::new();
     stack.add_bar(1).add_bar(StackBarBuilder::new(-2).label("neg").build());
     stack.add_bars([3, -4]);
-    stack.add_bars(&[5, 6]);
+    stack.add_bars([5, 6]);
     assert_eq!(values_of(&stack), vec![1, -2, 3, -4, 5, 6]);
     assert_eq!(stack.get(1).unwrap().label(), "neg");
     assert!(stack.get(6).is_none());
@@ -373,9 +373,9 @@ fn check_add_stack_from_values() {
     in_app(|| {
         let mut chart = new_chart();
         chart.add_stack([1, 2, 3]);
-        chart.add_stack(&[4, 5]);
+        chart.add_stack([4, 5]);
         chart.add_stack(vec![6]);
-        chart.add_stack(&vec![7, 8]);
+        chart.add_stack(vec![7, 8]);
         chart.add_stack(&[9, 10, 11][..]);
         assert_eq!(chart.stacks_count(), 5);
         assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
@@ -399,7 +399,7 @@ fn check_add_stack_keeps_negative_and_positive_values_in_order() {
 fn check_add_stack_flat_list_is_one_stack() {
     in_app(|| {
         let mut chart = new_chart();
-        chart.add_stack(&[1, 2, 3]);
+        chart.add_stack([1, 2, 3]);
         assert_eq!(chart.stacks_count(), 1);
         assert_eq!(chart.get_stack(0).unwrap().count(), 3);
     });
