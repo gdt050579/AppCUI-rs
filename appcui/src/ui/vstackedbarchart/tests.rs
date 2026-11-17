@@ -3998,3 +3998,201 @@ fn check_ensure_visible_wider_than_view_scrolls_to_left_edge() {
         assert_eq!(chart.left_scroll, chart.stacks[2].pos.min(chart.max_left_scroll()));
     });
 }
+
+fn press(chart: &mut VStackedBarChart<i32>, key: u16) -> EventProcessStatus {
+    chart.on_key_pressed(Key::from(key), '\0')
+}
+
+#[test]
+fn check_keys_right_and_left_scroll_one_cell() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        assert!(matches!(press(&mut chart, key!("Right")), EventProcessStatus::Processed));
+        assert_eq!(chart.left_scroll, 1);
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.left_scroll, 2);
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.left_scroll, 1);
+        assert_eq!(chart.scrollbars.horizontal_index(), 1);
+    });
+}
+
+#[test]
+fn check_keys_left_at_start_does_nothing() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        assert!(matches!(press(&mut chart, key!("Left")), EventProcessStatus::Processed));
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+#[test]
+fn check_keys_right_stops_at_max() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        let max = chart.max_left_scroll();
+        for _ in 0..max + 10 {
+            press(&mut chart, key!("Right"));
+        }
+        assert_eq!(chart.left_scroll, max);
+    });
+}
+
+#[test]
+fn check_keys_home_and_end() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        press(&mut chart, key!("End"));
+        assert_eq!(chart.left_scroll, chart.max_left_scroll());
+        assert!(chart.first_visible_stack > 0);
+        press(&mut chart, key!("Home"));
+        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.first_visible_stack, 0);
+    });
+}
+
+#[test]
+fn check_keys_ctrl_right_aligns_to_next_stack() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        assert_eq!(chart.left_scroll, 0);
+        press(&mut chart, key!("Ctrl+Right"));
+        assert_eq!(chart.left_scroll, chart.stacks[0].pos);
+        press(&mut chart, key!("Ctrl+Right"));
+        assert_eq!(chart.left_scroll, chart.stacks[1].pos);
+        press(&mut chart, key!("Ctrl+Right"));
+        assert_eq!(chart.left_scroll, chart.stacks[2].pos);
+        assert_eq!(chart.scrollbars.horizontal_index(), chart.left_scroll as u64);
+    });
+}
+
+#[test]
+fn check_keys_ctrl_right_from_between_stacks() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = chart.stacks[3].pos + 1;
+        chart.update_scroll_state();
+        press(&mut chart, key!("Ctrl+Right"));
+        assert_eq!(chart.left_scroll, chart.stacks[4].pos);
+    });
+}
+
+#[test]
+fn check_keys_ctrl_right_stops_at_max_scroll() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        for _ in 0..40 {
+            press(&mut chart, key!("Ctrl+Right"));
+        }
+        assert_eq!(chart.left_scroll, chart.max_left_scroll());
+    });
+}
+
+#[test]
+fn check_keys_ctrl_left_aligns_to_previous_stack() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = chart.stacks[5].pos;
+        chart.update_scroll_state();
+        press(&mut chart, key!("Ctrl+Left"));
+        assert_eq!(chart.left_scroll, chart.stacks[4].pos);
+        chart.left_scroll += 1;
+        chart.update_scroll_state();
+        press(&mut chart, key!("Ctrl+Left"));
+        assert_eq!(chart.left_scroll, chart.stacks[4].pos);
+        chart.left_scroll = chart.stacks[0].pos;
+        chart.update_scroll_state();
+        press(&mut chart, key!("Ctrl+Left"));
+        assert_eq!(chart.left_scroll, chart.stacks[0].pos);
+    });
+}
+
+#[test]
+fn check_keys_ctrl_right_on_empty_chart() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 0);
+        assert!(matches!(press(&mut chart, key!("Ctrl+Right")), EventProcessStatus::Processed));
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+#[test]
+fn check_keys_unknown_key_is_ignored() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        assert!(matches!(press(&mut chart, key!("A")), EventProcessStatus::Ignored));
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+fn run_script(script: &str, size: Size, build: impl FnOnce() -> VStackedBarChart<i32> + 'static) {
+    App::new()
+        .size(size)
+        .debug_script(script)
+        .window(move || {
+            let mut w = window!("Test,d:f");
+            w.add(build());
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+fn wide_chart() -> VStackedBarChart<i32> {
+    let mut chart = hash_chart(vstackedbarchart::Flags::ScrollBars);
+    chart.set_xaxis_label_mode(XAxisLabelMode::Index(0));
+    for i in 0..30 {
+        chart.add_stack(BarsStackBuilder::new().bars([(i % 5) + 1, (i % 3) + 1]).build());
+    }
+    chart
+}
+
+#[test]
+fn check_hash_scroll_wider_than_view() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Wider than the view')
+        CheckHash(0xC7699FA889F036D0)
+    ";
+    run_script(script, Size::new(50, 16), wide_chart);
+}
+
+#[test]
+fn check_hash_scroll_scrolled() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right,5)
+        Paint('1. Scrolled 5 cells')
+        CheckHash(0xA635DE772CC88CE4)
+        Key.Pressed(Left,2)
+        Paint('2. Back 2 cells')
+        CheckHash(0x17D6EB6DF2881173)
+        Key.Pressed(End)
+        Paint('3. End')
+        CheckHash(0x40044F5048424A19)
+        Key.Pressed(Home)
+        Paint('4. Home')
+        CheckHash(0xC7699FA889F036D0)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('5. Aligned to stack 3')
+        CheckHash(0xA635DE772CC88CE4)
+    ";
+    run_script(script, Size::new(50, 16), wide_chart);
+}
+
+#[test]
+fn check_hash_scroll_resized() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(End)
+        Paint('1. End')
+        CheckHash(0x40044F5048424A19)
+        Resize(80,16)
+        Paint('2. Wider terminal')
+        CheckHash(0x1B158929D18E3847)
+        Resize(30,12)
+        Paint('3. Narrower terminal')
+        CheckHash(0x78095E1AF82D5AF9)
+    ";
+    run_script(script, Size::new(50, 16), wide_chart);
+}

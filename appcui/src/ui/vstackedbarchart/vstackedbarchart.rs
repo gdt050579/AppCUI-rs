@@ -30,7 +30,7 @@ pub(super) struct XAxis {
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-#[CustomControl(overwrite = OnPaint + OnResize, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnKeyPressed, internal = true)]
 pub struct VStackedBarChart<T>
 where
     T: Number + 'static,
@@ -289,6 +289,25 @@ where
         self.left_scroll = self.left_scroll.clamp(0, self.max_left_scroll());
         self.update_first_visible_stack();
         self.sync_scrollbars();
+    }
+    pub(super) fn after_horizontal_scroll(&mut self) {
+        self.repaint_surface();
+    }
+    pub(super) fn scroll_to_next_stack(&mut self) {
+        let left_scroll = self.left_scroll;
+        let index = self.stacks.partition_point(|s| s.pos <= left_scroll);
+        if let Some(entry) = self.stacks.get(index) {
+            self.left_scroll = entry.pos.min(self.max_left_scroll());
+            self.repaint_surface();
+        }
+    }
+    pub(super) fn scroll_to_previous_stack(&mut self) {
+        let left_scroll = self.left_scroll;
+        let count = self.stacks.partition_point(|s| s.pos < left_scroll);
+        if count > 0 {
+            self.left_scroll = self.stacks[count - 1].pos;
+            self.repaint_surface();
+        }
     }
     pub(super) fn update_scroll_pos_from_scrollbars(&mut self) {
         self.left_scroll = self.scrollbars.horizontal_index() as i32;
@@ -675,5 +694,48 @@ where
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
         self.repaint_surface();
+    }
+}
+
+impl<T> OnKeyPressed for VStackedBarChart<T>
+where
+    T: Number + 'static,
+{
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Left") => {
+                if self.left_scroll > 0 {
+                    self.left_scroll -= 1;
+                    self.after_horizontal_scroll();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Right") => {
+                if self.left_scroll < self.max_left_scroll() {
+                    self.left_scroll += 1;
+                    self.after_horizontal_scroll();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Home") => {
+                self.left_scroll = 0;
+                self.after_horizontal_scroll();
+                EventProcessStatus::Processed
+            }
+            key!("End") => {
+                self.left_scroll = self.max_left_scroll();
+                self.after_horizontal_scroll();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Left") => {
+                self.scroll_to_previous_stack();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Right") => {
+                self.scroll_to_next_stack();
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
