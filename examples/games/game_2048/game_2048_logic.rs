@@ -43,14 +43,21 @@ impl Game2048Logic {
     }
 
     fn add_random_tile(&mut self) {
-        let mut empty_cells = Vec::new();
-        for i in 0..4 {
-            for j in 0..4 {
-                if self.grid[i][j].value == 0 {
-                    empty_cells.push((i, j));
-                }
-            }
-        }
+        // let mut empty_cells = Vec::new();
+        // for i in 0..4 {
+        //     for j in 0..4 {
+        //         if self.grid[i][j].value == 0 {
+        //             empty_cells.push((i, j));
+        //         }
+        //     }
+        // }
+
+        let empty_cells: Vec<(usize, usize)> = self
+            .grid
+            .iter()
+            .enumerate()
+            .flat_map(|(i, row)| row.iter().enumerate().filter(|(_, cell)| cell.value == 0).map(move |(j, _)| (i, j)))
+            .collect();
 
         if !empty_cells.is_empty() {
             let mut rng = rand::thread_rng();

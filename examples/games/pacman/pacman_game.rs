@@ -302,23 +302,23 @@ impl PacmanGame {
         let cherry = Character::with_attributes('🍒', CharAttribute::with_color(Color::Red, Color::Black));
         let food = Character::with_attributes('·', CharAttribute::with_color(Color::Gray, Color::Black));
         let line = Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, charattr!("blue,black"));
-        for y in 0..BOARD_HEIGHT {
-            for x in 0..BOARD_WIDTH {
+        for (y, row) in self.board.iter().enumerate().take(BOARD_HEIGHT) {
+            for (x, cell) in row.iter().enumerate().take(BOARD_WIDTH) {
                 let screen_x = x as i32 * 2;
                 let screen_y = y as i32 + 2;
-
-                match self.board[y][x] {
+        
+                match *cell {
                     CellType::Wall(ch) => {
                         let c = Character::with_attributes(ch, CharAttribute::with_color(Color::Blue, Color::Black));
                         surface.write_char(screen_x, screen_y, c);
-                        if ch == '─' || ch == '┌' || ch == '└' || ch == '├' || ch == '┬' {
+                        if matches!(ch, '─' | '┌' | '└' | '├' | '┬') {
                             surface.write_char(screen_x + 1, screen_y, line);
                         }
                     }
                     CellType::Food => surface.write_char(screen_x, screen_y, food),
                     CellType::Cherry => surface.write_char(screen_x, screen_y, cherry),
-                    CellType::Empty => {} //Character::with_attributes(' ', charattr!("black,black")),
-                };
+                    CellType::Empty => {}
+                }
             }
         }
         surface.write_char(

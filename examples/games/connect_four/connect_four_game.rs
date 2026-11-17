@@ -139,8 +139,8 @@ impl ConnectFourGame {
                 break;
             }
         }
-        for x in (col + 1)..BOARD_WIDTH {
-            if matches!(self.board[row][x], CellState::Occupied(p) if p == player) {
+        for cell in self.board[row].iter().take(BOARD_WIDTH).skip(col + 1) {
+            if matches!(cell, CellState::Occupied(p) if *p == player) {
                 count += 1;
             } else {
                 break;
@@ -158,13 +158,17 @@ impl ConnectFourGame {
                 break;
             }
         }
-        for y in (row + 1)..BOARD_HEIGHT {
-            if matches!(self.board[y][col], CellState::Occupied(p) if p == player) {
-                count += 1;
-            } else {
-                break;
-            }
-        }
+        count += self.board[(row + 1)..BOARD_HEIGHT]
+            .iter()
+            .take_while(|r| matches!(r[col], CellState::Occupied(p) if p == player))
+            .count();
+        // for y in (row + 1)..BOARD_HEIGHT {
+        //     if matches!(self.board[y][col], CellState::Occupied(p) if p == player) {
+        //         count += 1;
+        //     } else {
+        //         break;
+        //     }
+        // }
         if count >= 4 {
             return true;
         }
