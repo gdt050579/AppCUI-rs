@@ -4,9 +4,66 @@ A window is the core component of an application. It is the object where all eve
 
 <img src="img/window.png"/>
 
+## Window styles, backgrounds, and flags
+
+The `Type` changes a window's frame, while `Background` communicates the meaning of its content. Initialization flags control interactions such as resizing and closing.
+
+These screenshots show focused windows rendered by the [window guide example](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/window_guide) with the default theme. The example uses RGB colors (`color_schema(false)`) so the terminal's color palette does not change the theme colors. An inactive window uses the theme's inactive background instead.
+
+### Frame styles
+
+| Type                                                                         | Screenshot                                                                                                                     |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `Type::Classic`<br>Double-line frame while focused;<br>single-line when inactive or moving. | <img src="img/window-classic.png" alt="Classic window with a double-line border and a bracketed close button." width="320" /> |
+| `Type::Rounded`<br>Single-line frame with rounded corners.                   | <img src="img/window-rounded.png" alt="Rounded window with rounded corners and a bracketed close button." width="320" />      |
+| `Type::Panel`<br>Title bar with no surrounding frame.                        | <img src="img/window-panel.png" alt="Panel window with a title bar and no surrounding border." width="320" />                 |
+
+### Backgrounds
+
+The colors below are the default theme's; other themes can choose different colors.
+
+| Background                                                               | Screenshot                                                                                                    |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `Background::Normal`<br>Dark blue (`#000080`); the default.              | <img src="img/window-classic.png" alt="Normal window with a dark blue background." width="320" />            |
+| `Background::Error`<br>Dark red (`#800000`) for failures.                | <img src="img/window-error.png" alt="Error window with a dark red background." width="320" />                |
+| `Background::Warning`<br>Olive (`#808000`) for cautions.                 | <img src="img/window-warning.png" alt="Warning window with an olive background." width="320" />              |
+| `Background::Notification`<br>Dark green (`#008000`) for information.    | <img src="img/window-notification.png" alt="Notification window with a dark green background." width="320" /> |
+
+### Initialization flags
+
+| Flags                                                                         | Screenshot                                                                                                          |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `Flags::None`<br>Movable, fixed size, with a close button.                    | <img src="img/window-classic.png" alt="Default window with a close button and no resize grip." width="320" />      |
+| `Flags::Sizeable`<br>Adds the maximize/restore button<br>and the resize grip. | <img src="img/window-sizeable.png" alt="Sizeable window with maximize, close, and resize controls." width="320" /> |
+| `Flags::NoCloseButton`<br>Hides the close button.                             | <img src="img/window-no-close.png" alt="Window whose title bar has no close button." width="320" />                |
+
+`Flags::FixedPosition` prevents moving the window and adds no separate visual indicator. Flags can be combined with `|`; for example, `Flags::Sizeable | Flags::NoCloseButton` permits resizing while hiding the close button.
+
+Run the example from the repository root to try each option:
+
+```sh
+cargo run --example window_guide -- classic
+cargo run --example window_guide -- notification
+cargo run --example window_guide -- sizeable
+```
+
+The other choices are `rounded`, `panel`, `error`, `warning`, `no-close`, and `fixed-position`.
+
+For example, a resizable error dialog can combine `Flags::Sizeable` with `Background::Error`:
+
+```rust
+let window = Window::with_type(
+    "Import failed",
+    layout!("a:c,w:40,h:10"),
+    window::Flags::Sizeable,
+    window::Type::Rounded,
+    window::Background::Error,
+);
+```
+
 To create a Window use:
 * `Window::new` method (with 3 parameters: a title, a layout and initialization flags)
-* `Window::with_type` method (with 4 parameters: a title, a layout , initialization flags and a type)
+* `Window::with_type` method (with 5 parameters: a title, a layout, initialization flags, a type and a background)
 * macro `window!`. 
 ```rs
 let w = Window::new("Title", layout!("x:10,y:5,w:15,h:9"),window::Flags::None);
