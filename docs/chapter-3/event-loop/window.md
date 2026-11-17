@@ -4,9 +4,27 @@ A window is the core component of an application. It is the object where all eve
 
 <img src="img/window.png"/>
 
+## Window styles, backgrounds, and flags
+
+The `Type` changes a window's frame, while `Background` communicates the meaning of its content. Initialization flags control interactions such as resizing and closing. The illustration summarizes the available choices; background colors are provided by the active theme.
+
+<img src="img/window-types-and-options.svg" alt="Classic, rounded, and panel window styles; normal, error, warning, and notification backgrounds; and the effects of common window flags." />
+
+For example, a resizable error dialog can combine `Flags::Sizeable` with `Background::Error`:
+
+```rust
+let window = Window::with_type(
+    "Import failed",
+    layout!("a:c,w:40,h:10"),
+    window::Flags::Sizeable,
+    window::Type::Rounded,
+    window::Background::Error,
+);
+```
+
 To create a Window use:
 * `Window::new` method (with 3 parameters: a title, a layout and initialization flags)
-* `Window::with_type` method (with 4 parameters: a title, a layout , initialization flags and a type)
+* `Window::with_type` method (with 5 parameters: a title, a layout, initialization flags, a type and a background)
 * macro `window!`. 
 ```rs
 let w = Window::new("Title", layout!("x:10,y:5,w:15,h:9"),window::Flags::None);
