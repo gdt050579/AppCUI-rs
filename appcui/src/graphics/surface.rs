@@ -3,6 +3,7 @@ use std::path::Path;
 use super::image::Glyph;
 use super::BitTile;
 use super::BitTileRenderMethod;
+use super::Sprite;
 use super::PaletteTile;
 use super::PaletteTileRenderMethod;
 use super::CharAttribute;
@@ -48,8 +49,8 @@ impl From<char> for CharacterType {
     }
 }
 
-const MAX_SURFACE_WIDTH: u32 = 10000;
-const MAX_SURFACE_HEIGHT: u32 = 10000;
+pub(super) const MAX_SURFACE_WIDTH: u32 = 10000;
+pub(super) const MAX_SURFACE_HEIGHT: u32 = 10000;
 
 /// A structure that represents a 2D surface for drawing characters and images.
 /// The surface is defined as a matrix (width x height) of characters, where each character is of type [Character].
@@ -94,6 +95,22 @@ impl Surface {
         };
         s.chars.resize(count, Character::default());
         s
+    }
+
+    pub(super) fn from_parts(chars: Vec<Character>, size: Size) -> Surface {
+        let w = size.width.saturating_sub(1) as i32;
+        let h = size.height.saturating_sub(1) as i32;
+        Self {
+            size,
+            chars,
+            origin: Point::default(),
+            base_origin: Point::default(),
+            clip: ClipArea::new(0, 0, w, h),
+            base_clip: ClipArea::new(0, 0, w, h),
+            cursor: Cursor::new(),
+            right_most: w,
+            bottom_most: h,    
+        }
     }
 
     /// Creates a new surface from a string with the specified size.
@@ -1415,6 +1432,51 @@ impl Surface {
                     self.write_char(x + s_x, y + s_y, ch);
                 }
                 index += 1;
+            }
+        }
+    }
+
+    /// Draws a [`Sprite`] at the specified position.
+    /// The top-left corner of the sprite is placed at `(x, y)`, and its characters are written
+    /// from left to right, then top to bottom.
+    /// Each character is written with [`write_char`](Self::write_char), so the surface origin and clip area apply.
+    /// Cells that fall outside the clip area are skipped. If the clip area is not visible, nothing is drawn.
+    ///
+    /// [`write_char`](Self::write_char) updates a cell through [`Character::set`]:
+    /// a code of `'\0'` does not replace the glyph, and a [`Color::Transparent`] foreground or background
+    /// does not replace that color. Flags are always written.
+    ///
+    /// # Parameters
+    /// - `x`: The x-coordinate of the sprite's top-left corner, relative to the surface origin.
+    /// - `y`: The y-coordinate of the sprite's top-left corner, relative to the surface origin.
+    /// - `sprite`: The sprite to draw.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::{CharFlags, Character, Color, Sprite, Surface};
+    ///
+    /// let mut surface = Surface::new(20, 10);
+    /// let mut sprite = Sprite::new(3, 2);
+    /// sprite.set(0, 0, Character::new('A', Color::Yellow, Color::Black, CharFlags::None));
+    /// sprite.set(1, 0, Character::new('B', Color::Yellow, Color::Black, CharFlags::None));
+    /// surface.draw_sprite(2, 2, &sprite);
+    /// assert_eq!(surface.char(2, 2).unwrap().code, 'A');
+    /// assert_eq!(surface.char(3, 2).unwrap().code, 'B');
+    /// ```
+    pub fn draw_sprite(&mut self, x: i32, y: i32, sprite: &Sprite) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let size = sprite.size();
+        let chars = sprite.chars();
+        let mut y = y;
+        let mut px = 0;
+        for ch in chars {
+            self.write_char(x + px, y, *ch);
+            px += 1;
+            if px >= size.width as i32 {
+                px = 0;
+                y += 1;
             }
         }
     }

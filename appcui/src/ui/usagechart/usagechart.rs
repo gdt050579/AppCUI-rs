@@ -307,12 +307,15 @@ impl UsageChart {
         }
     }
     fn percentage_text<'a>(&self, value: u64, buffer: &'a mut [u8]) -> &'a str {
-        let total = self.total_value();
-        let percent = if total == 0 {
-            0
-        } else {
-            u64::try_from(value as u128 * 10_000 / total).unwrap_or(u64::MAX)
-        };
+        // let total = self.total_value();
+        // let percent = if total == 0 {
+        //     0
+        // } else {
+        //     u64::try_from(value as u128 * 10_000 / total).unwrap_or(u64::MAX)
+        // };
+        let percent = (value as u128 * 10_000)
+            .checked_div(self.total_value())
+            .map_or(0, |p| u64::try_from(p).unwrap_or(u64::MAX));
         PERCENTAGE_FORMAT.write_fraction(percent, 100u64, buffer).unwrap_or("")
     }
     fn update_tooltip(&self) {

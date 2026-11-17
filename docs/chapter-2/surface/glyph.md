@@ -1,6 +1,6 @@
 # Glyphs
 
-Glyphs are F2D character grids designed for drawing text and character-based graphics in AppCUI. Unlike BitTiles which store binary data, or Images which store full color information, Glyphs store individual characters that can be rendered with specific foreground and background colors. They are perfect for text layouts, ASCII art, character-based UI elements, and any graphics that can be represented using Unicode characters.
+Glyphs are F2D character grids designed for drawing text and character-based graphics in AppCUI. Unlike BitTiles which store binary data, or Images which store full color information, Glyphs store individual characters that can be rendered with specific foreground and background colors. They are perfect for text layouts, ASCII art, character-based UI elements, and any graphics that can be represented using Unicode characters. If each cell needs its own colors and flags, use a [Sprite](sprite.md) instead.
 
 To create a Glyph, the following methods can be used:
 
