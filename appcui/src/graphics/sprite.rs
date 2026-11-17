@@ -48,7 +48,7 @@ impl Sprite {
     #[inline(always)]
     pub fn edit(&mut self, f: impl Fn(&mut Surface)) {
         let chars = std::mem::take(&mut self.chars);
-        let mut surface = Surface::from_chars(chars, self.size);
+        let mut surface = Surface::from_parts(chars, self.size);
         f(&mut surface);
         self.size = surface.size();
         std::mem::swap(&mut self.chars, &mut surface.chars);

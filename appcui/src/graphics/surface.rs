@@ -96,7 +96,7 @@ impl Surface {
         s
     }
 
-    pub(super) fn from_chars(chars: Vec<Character>, size: Size) -> Surface {
+    pub(super) fn from_parts(chars: Vec<Character>, size: Size) -> Surface {
         let w = size.width.saturating_sub(1) as i32;
         let h = size.height.saturating_sub(1) as i32;
         Self {
