@@ -53,4 +53,8 @@ impl Sprite {
         self.size = surface.size();
         std::mem::swap(&mut self.chars, &mut surface.chars);
     }
+    #[inline(always)]
+    pub(super) fn chars(&self) -> &[Character] {
+        &self.chars
+    }
 }

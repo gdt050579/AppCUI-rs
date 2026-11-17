@@ -3,6 +3,7 @@ use std::path::Path;
 use super::image::Glyph;
 use super::BitTile;
 use super::BitTileRenderMethod;
+use super::Sprite;
 use super::PaletteTile;
 use super::PaletteTileRenderMethod;
 use super::CharAttribute;
@@ -1431,6 +1432,24 @@ impl Surface {
                     self.write_char(x + s_x, y + s_y, ch);
                 }
                 index += 1;
+            }
+        }
+    }
+
+    pub fn draw_sprite(&mut self, x: i32, y: i32, sprite: &Sprite) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let size = sprite.size();
+        let chars = sprite.chars();
+        let mut y = y;
+        let mut px = 0;
+        for ch in chars {
+            self.write_char(x + px, y, *ch);
+            px += 1;
+            if px >= size.width as i32 {
+                px = 0;
+                y += 1;
             }
         }
     }

@@ -19,6 +19,7 @@ use super::LineCap;
 use super::LineType;
 use super::PolyLineFormat;
 use super::PolyLineFormatBuilder;
+use super::Sprite;
 use super::Surface;
 use super::SurfaceTester;
 use super::TextAlignment;
@@ -3164,4 +3165,275 @@ fn check_text_format_set_char_variant() {
         assert_eq!(format.align, TextAlignment::Center);
         assert!(matches!(format.wrap_type, WrapType::WordWrap(12)));
     }
+}
+
+fn sprite_cell(sprite: &Sprite, x: u32, y: u32) -> Character {
+    sprite.get(x, y).expect("sprite cell in range")
+}
+
+#[test]
+fn check_sprite_new_is_filled_with_defaults() {
+    let sprite = Sprite::new(3, 2);
+    assert_eq!(sprite.size(), Size::new(3, 2));
+    let blank = Character::default();
+    for y in 0..2 {
+        for x in 0..3 {
+            assert_eq!(sprite_cell(&sprite, x, y), blank);
+        }
+    }
+    assert!(sprite.get(3, 0).is_none());
+    assert!(sprite.get(0, 2).is_none());
+    assert!(sprite.get(u32::MAX, u32::MAX).is_none());
+}
+
+#[test]
+fn check_sprite_new_clamps_dimensions() {
+    let max_w = super::surface::MAX_SURFACE_WIDTH;
+    let max_h = super::surface::MAX_SURFACE_HEIGHT;
+
+    assert_eq!(Sprite::new(0, 0).size(), Size::new(1, 1));
+    assert_eq!(Sprite::new(0, 4).size(), Size::new(1, 4));
+    assert_eq!(Sprite::new(4, 0).size(), Size::new(4, 1));
+    assert_eq!(Sprite::new(max_w + 1, 1).size(), Size::new(max_w, 1));
+    assert_eq!(Sprite::new(1, max_h + 1).size(), Size::new(1, max_h));
+    assert_eq!(Sprite::new(u32::MAX, 1).size(), Size::new(max_w, 1));
+}
+
+#[test]
+fn check_sprite_set_get_and_clear() {
+    let mut sprite = Sprite::new(2, 2);
+    let a = Character::new('A', Color::Red, Color::Blue, CharFlags::Bold);
+    let b = Character::new('B', Color::Yellow, Color::Black, CharFlags::Underline);
+    sprite.set(0, 0, a);
+    sprite.set(1, 1, b);
+    sprite.set(2, 0, Character::with_char('X'));
+    sprite.set(0, 5, Character::with_char('Y'));
+
+    assert_eq!(sprite_cell(&sprite, 0, 0), a);
+    assert_eq!(sprite_cell(&sprite, 1, 1), b);
+    assert_eq!(sprite_cell(&sprite, 1, 0), Character::default());
+    assert_eq!(sprite_cell(&sprite, 0, 1), Character::default());
+
+    let fill = Character::new('.', Color::Green, Color::DarkRed, CharFlags::Italic);
+    sprite.clear(fill);
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(sprite_cell(&sprite, x, y), fill);
+        }
+    }
+    assert_eq!(sprite.size(), Size::new(2, 2));
+}
+
+#[test]
+fn check_sprite_resize_fills_and_clamps() {
+    let mut sprite = Sprite::new(3, 2);
+    sprite.set(0, 0, Character::with_char('A'));
+    sprite.set(2, 1, Character::with_char('B'));
+
+    let fill = Character::new('#', Color::Aqua, Color::Black, CharFlags::Bold);
+    sprite.resize(2, 1, fill);
+    assert_eq!(sprite.size(), Size::new(2, 1));
+    assert_eq!(sprite_cell(&sprite, 0, 0), fill);
+    assert_eq!(sprite_cell(&sprite, 1, 0), fill);
+    assert!(sprite.get(0, 1).is_none());
+    assert!(sprite.get(2, 0).is_none());
+
+    sprite.resize(3, 2, Character::with_char('+'));
+    assert_eq!(sprite.size(), Size::new(3, 2));
+    for y in 0..2 {
+        for x in 0..3 {
+            assert_eq!(sprite_cell(&sprite, x, y), Character::with_char('+'));
+        }
+    }
+
+    let max_w = super::surface::MAX_SURFACE_WIDTH;
+    sprite.resize(0, 0, fill);
+    assert_eq!(sprite.size(), Size::new(1, 1));
+    assert_eq!(sprite_cell(&sprite, 0, 0), fill);
+
+    sprite.resize(max_w + 5, 1, fill);
+    assert_eq!(sprite.size(), Size::new(max_w, 1));
+    assert_eq!(sprite_cell(&sprite, 0, 0), fill);
+    assert_eq!(sprite_cell(&sprite, max_w - 1, 0), fill);
+}
+
+#[test]
+fn check_sprite_edit_reads_and_writes_cells() {
+    let mut sprite = Sprite::new(3, 2);
+    let kept = Character::new('Q', Color::White, Color::Blue, CharFlags::Bold);
+    sprite.set(0, 0, kept);
+
+    sprite.edit(|surface| {
+        assert_eq!(surface.size(), Size::new(3, 2));
+        assert_eq!(*surface.char(0, 0).unwrap(), kept);
+        surface.write_char(2, 1, Character::new('W', Color::Red, Color::Black, CharFlags::Underline));
+        surface.write_string(0, 1, "ab", CharAttribute::with_color(Color::Yellow, Color::DarkGreen), false);
+    });
+
+    assert_eq!(sprite.size(), Size::new(3, 2));
+    assert_eq!(sprite_cell(&sprite, 0, 0), kept);
+    assert_eq!(
+        sprite_cell(&sprite, 2, 1),
+        Character::new('W', Color::Red, Color::Black, CharFlags::Underline)
+    );
+    assert_eq!(
+        sprite_cell(&sprite, 0, 1),
+        Character::new('a', Color::Yellow, Color::DarkGreen, CharFlags::None)
+    );
+    assert_eq!(
+        sprite_cell(&sprite, 1, 1),
+        Character::new('b', Color::Yellow, Color::DarkGreen, CharFlags::None)
+    );
+    assert_eq!(sprite_cell(&sprite, 1, 0), Character::default());
+}
+
+#[test]
+fn check_sprite_edit_follows_surface_resize() {
+    let mut sprite = Sprite::new(4, 1);
+    sprite.set(0, 0, Character::with_char('A'));
+
+    sprite.edit(|surface| {
+        surface.resize(Size::new(2, 3));
+        surface.write_char(1, 2, Character::new('Z', Color::Pink, Color::DarkBlue, CharFlags::Bold));
+    });
+
+    assert_eq!(sprite.size(), Size::new(2, 3));
+    assert_eq!(sprite_cell(&sprite, 0, 0), Character::default());
+    assert_eq!(
+        sprite_cell(&sprite, 1, 2),
+        Character::new('Z', Color::Pink, Color::DarkBlue, CharFlags::Bold)
+    );
+    assert!(sprite.get(3, 0).is_none());
+    assert!(sprite.get(0, 3).is_none());
+}
+
+fn paint_sprite(width: u32, height: u32) -> Sprite {
+    let mut sprite = Sprite::new(width, height);
+    for y in 0..height {
+        for x in 0..width {
+            let code = char::from_u32('A' as u32 + x + y * width).unwrap();
+            sprite.set(
+                x,
+                y,
+                Character::new(code, Color::Red, Color::Blue, CharFlags::Bold),
+            );
+        }
+    }
+    sprite
+}
+
+#[test]
+fn check_draw_sprite_places_rows() {
+    let mut s = SurfaceTester::new(8, 5);
+    s.clear(Character::with_char('.'));
+    let sprite = paint_sprite(3, 2);
+
+    s.draw_sprite(2, 1, &sprite);
+
+    assert_eq!(*s.char(2, 1).unwrap(), Character::new('A', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(3, 1).unwrap(), Character::new('B', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(4, 1).unwrap(), Character::new('C', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(2, 2).unwrap(), Character::new('D', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(3, 2).unwrap(), Character::new('E', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(4, 2).unwrap(), Character::new('F', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 5, 1), '.');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+    assert_eq!(cell_code(&s, 2, 3), '.');
+    assert_eq!(sprite_cell(&sprite, 0, 0).code, 'A');
+    assert_eq!(sprite.size(), Size::new(3, 2));
+}
+
+#[test]
+fn check_draw_sprite_clips_edges_and_does_not_wrap() {
+    let mut s = SurfaceTester::new(6, 4);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    let sprite = paint_sprite(3, 2);
+
+    s.draw_sprite(-1, -1, &sprite);
+    assert_eq!(cell_code(&s, 0, 0), 'E');
+    assert_eq!(cell_code(&s, 1, 0), 'F');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+    assert_eq!(cell_code(&s, 0, 1), '.');
+
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.draw_sprite(4, 3, &sprite);
+    assert_eq!(cell_code(&s, 4, 3), 'A');
+    assert_eq!(cell_code(&s, 5, 3), 'B');
+    assert_eq!(cell_code(&s, 0, 0), '.');
+    assert_eq!(cell_code(&s, 3, 3), '.');
+
+    let before = s.compute_hash();
+    s.draw_sprite(6, 0, &sprite);
+    s.draw_sprite(-3, 0, &sprite);
+    s.draw_sprite(0, 4, &sprite);
+    s.draw_sprite(0, -2, &sprite);
+    assert_eq!(s.compute_hash(), before);
+}
+
+#[test]
+fn check_draw_sprite_respects_clip_and_origin() {
+    let mut s = SurfaceTester::new(8, 6);
+    s.clear(Character::with_char('.'));
+    let sprite = paint_sprite(3, 3);
+
+    s.set_clip(2, 2, 3, 3);
+    s.draw_sprite(1, 1, &sprite);
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 2), 'E');
+    assert_eq!(cell_code(&s, 3, 2), 'F');
+    assert_eq!(cell_code(&s, 2, 3), 'H');
+    assert_eq!(cell_code(&s, 3, 3), 'I');
+    assert_eq!(cell_code(&s, 4, 2), '.');
+    assert_eq!(cell_code(&s, 2, 4), '.');
+    assert_eq!(*s.char(2, 2).unwrap(), Character::new('E', Color::Red, Color::Blue, CharFlags::Bold));
+
+    let before = s.compute_hash();
+    s.set_clip(5, 0, 4, 2);
+    s.draw_sprite(0, 0, &sprite);
+    assert_eq!(s.compute_hash(), before);
+
+    s.reset_clip();
+    s.clear(Character::with_char('.'));
+    s.set_origin(2, 1);
+    s.draw_sprite(0, 0, &sprite);
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+    assert_eq!(cell_code(&s, 2, 1), 'A');
+    assert_eq!(cell_code(&s, 4, 1), 'C');
+    assert_eq!(cell_code(&s, 2, 3), 'G');
+    assert_eq!(cell_code(&s, 5, 1), '.');
+}
+
+#[test]
+fn check_draw_sprite_uses_character_merge() {
+    let mut s = SurfaceTester::new(4, 2);
+    s.clear(Character::new('.', Color::Yellow, Color::DarkBlue, CharFlags::Italic));
+    let mut sprite = Sprite::new(2, 1);
+    sprite.set(0, 0, Character::with_char('X'));
+    sprite.set(1, 0, Character::new('Y', Color::Green, Color::Transparent, CharFlags::Bold));
+
+    s.draw_sprite(1, 0, &sprite);
+
+    assert_eq!(
+        *s.char(1, 0).unwrap(),
+        Character::new('X', Color::Yellow, Color::DarkBlue, CharFlags::None)
+    );
+    assert_eq!(
+        *s.char(2, 0).unwrap(),
+        Character::new('Y', Color::Green, Color::DarkBlue, CharFlags::Bold)
+    );
+    assert_eq!(cell_code(&s, 0, 0), '.');
+    assert_eq!(cell_code(&s, 3, 0), '.');
+}
+
+#[test]
+fn check_sprite_rect() {
+    let mut sprite = Sprite::new(4,3);
+    sprite.clear(char!("x,red,yellow"));
+    sprite.edit(|s| s.draw_rect(Rect::new(0,0,3,2), LineType::Double, charattr!("w,dg")));
+    let mut s = SurfaceTester::new(10, 10);
+    s.draw_sprite(2, 1, &sprite);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x2E860C3ED8792281);
 }
