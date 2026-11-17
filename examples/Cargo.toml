@@ -422,6 +422,10 @@ name = "window_type"
 path = "window_type/main.rs"
 
 [[example]]
+name = "window_guide"
+path = "window_guide/main.rs"
+
+[[example]]
 name = "panels_3d"
 path = "panels_3d/main.rs"
 
