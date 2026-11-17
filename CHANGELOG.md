@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## [Unreleased]
+
+### Fixed
+- Error message from #[Window(events = WrongTrait)] now refers to the events attribute
+
 ## [0.5.9] - 2026-11-14
 
 - Termios is the default backend on Linux and on macOS. NCurses is optional (`NCURSES` feature) on Unix. CrossTerm stays optional (`CROSSTERM` feature) and is not a default feature.
