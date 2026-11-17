@@ -119,6 +119,41 @@ where
     pub fn stacks_count(&self) -> usize {
         self.stacks.len()
     }
+    pub fn ensure_visible(&mut self, index: usize) {
+        if index >= self.stacks.len() {
+            return;
+        }
+        self.update_layout();
+        let plot_width = (self.size().width as i32 - self.x_axis_left_margin()).max(0);
+        if plot_width <= 0 {
+            return;
+        }
+        let left = self.stacks[index].pos;
+        let right = left + self.stacks[index].stack.actual_thickness() as i32;
+        let view_left = self.left_scroll;
+        let view_right = view_left + plot_width;
+        let new_scroll = if right - left <= plot_width {
+            if left >= view_left && right <= view_right {
+                return;
+            }
+            if left < view_left {
+                left
+            } else {
+                right - plot_width
+            }
+        } else if right <= view_left {
+            right - plot_width
+        } else if left >= view_right {
+            left
+        } else {
+            return;
+        };
+        let new_scroll = new_scroll.clamp(0, self.max_left_scroll());
+        if new_scroll != self.left_scroll {
+            self.left_scroll = new_scroll;
+            self.repaint_surface();
+        }
+    }
     #[inline(always)]
     pub fn get_stack(&self, index: usize) -> Option<&BarsStack<T>> {
         self.stacks.get(index).map(|entry| &entry.stack)

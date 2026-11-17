@@ -3897,3 +3897,104 @@ fn check_scroll_resize_keeps_scroll_in_range() {
         assert_eq!(chart.surface.size().width, 60);
     });
 }
+
+fn thick_chart(stacks: usize) -> VStackedBarChart<i32> {
+    let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 0);
+    for _ in 0..stacks {
+        chart.add_stack(BarsStackBuilder::new().thickness(40).bars([3]).build());
+    }
+    chart
+}
+
+#[test]
+fn check_ensure_visible_out_of_range_is_ignored() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.ensure_visible(20);
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+#[test]
+fn check_ensure_visible_already_visible_does_not_scroll() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 0);
+        chart.left_scroll = 6;
+        chart.update_scroll_state();
+        chart.ensure_visible(5);
+        assert_eq!(chart.left_scroll, 6);
+    });
+}
+
+#[test]
+fn check_ensure_visible_scrolls_right_to_last_stack() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.ensure_visible(19);
+        let plot_width = chart.size().width as i32 - chart.x_axis_left_margin();
+        let last_right = chart.stacks[19].pos + chart.stacks[19].stack.actual_thickness() as i32;
+        assert_eq!(chart.left_scroll, last_right - plot_width);
+        assert!(chart.left_scroll <= chart.max_left_scroll());
+        assert_eq!(chart.scrollbars.horizontal_index(), chart.left_scroll as u64);
+    });
+}
+
+#[test]
+fn check_ensure_visible_makes_stack_fit_in_view() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.ensure_visible(10);
+        let plot_width = chart.size().width as i32 - chart.x_axis_left_margin();
+        let left = chart.stacks[10].pos - chart.left_scroll;
+        let right = left + chart.stacks[10].stack.actual_thickness() as i32;
+        assert!(left >= 0);
+        assert!(right <= plot_width);
+        assert_eq!(chart.stacks[10].pos + chart.stacks[10].stack.actual_thickness() as i32 - plot_width, chart.left_scroll);
+    });
+}
+
+#[test]
+fn check_ensure_visible_scrolls_back_left() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.ensure_visible(19);
+        chart.ensure_visible(2);
+        assert_eq!(chart.left_scroll, chart.stacks[2].pos);
+        assert_eq!(chart.first_visible_stack, 1);
+    });
+}
+
+#[test]
+fn check_ensure_visible_updates_first_visible_stack() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.ensure_visible(19);
+        assert!(chart.first_visible_stack > 0);
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, chart.stacks[0].pos);
+        assert_eq!(chart.first_visible_stack, 0);
+    });
+}
+
+#[test]
+fn check_ensure_visible_wider_than_view_partially_visible_is_kept() {
+    in_app(|| {
+        let mut chart = thick_chart(3);
+        chart.left_scroll = chart.stacks[1].pos + 5;
+        chart.update_scroll_state();
+        let before = chart.left_scroll;
+        chart.ensure_visible(1);
+        assert_eq!(chart.left_scroll, before);
+    });
+}
+
+#[test]
+fn check_ensure_visible_wider_than_view_scrolls_to_left_edge() {
+    in_app(|| {
+        let mut chart = thick_chart(3);
+        chart.ensure_visible(2);
+        assert_eq!(chart.left_scroll, chart.stacks[2].pos.min(chart.max_left_scroll()));
+    });
+}
