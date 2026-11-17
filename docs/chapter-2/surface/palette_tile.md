@@ -9,6 +9,9 @@ Compared with the other image types:
 | `Image`       | an RGBA color                     | stored in the image                          | any size                            |
 | `BitTile`     | one bit (set or unset)            | two colors, given when drawn                 | small, fixed storage (no heap)      |
 | `PaletteTile` | a palette index, or transparent   | any number, from a palette given when drawn  | any size, resizable                 |
+| `Sprite`      | a full character                  | stored in each cell                          | up to 10000 x 10000                 |
+
+A [Sprite](sprite.md) is not a pixel image: each of its cells is already a character, with its own colors and flags.
 
 A PaletteTile is created with `PaletteTile::new(width, height)`. All pixels are initially transparent. A width or height of `0` is raised to `1`.
 
