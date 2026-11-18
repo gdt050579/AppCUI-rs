@@ -5356,3 +5356,380 @@ fn check_hash_keyboard_selection_scrolls_wide_chart() {
     ";
     run_script(script, Size::new(50, 16), wide_chart);
 }
+
+fn stacks_chart() -> VStackedBarChart<i32> {
+    let mut chart = sel_chart(vstackedbarchart::Flags::None);
+    chart.add_stack([1, 2]);
+    chart.add_stack([3]);
+    chart.add_stack([4, 5, 6]);
+    chart
+}
+
+fn counts(chart: &VStackedBarChart<i32>) -> Vec<usize> {
+    (0..chart.stacks_count()).map(|i| chart.get_stack(i).unwrap().count()).collect()
+}
+
+#[test]
+fn check_update_stacks_view_len_get_and_iter() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.update_stacks(|stacks| {
+            assert_eq!(stacks.len(), 3);
+            assert!(!stacks.is_empty());
+            assert_eq!(stacks.get(2).unwrap().count(), 3);
+            assert!(stacks.get(3).is_none());
+            let all: Vec<usize> = stacks.iter().map(|s| s.count()).collect();
+            assert_eq!(all, vec![2, 1, 3]);
+        });
+    });
+}
+
+#[test]
+fn check_update_stacks_push_adds_at_end() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.update_stacks(|stacks| {
+            stacks.push([7, 8]);
+            stacks.push(BarsStackBuilder::new().label("L").bars([9]).build());
+        });
+        assert_eq!(counts(&chart), vec![2, 1, 3, 2, 1]);
+        assert_eq!(chart.get_stack(4).unwrap().label(), "L");
+        assert_eq!(chart.stacks[4].pos, chart.stacks[3].pos + chart.stacks[3].stack.actual_thickness() as i32 + 1);
+    });
+}
+
+#[test]
+fn check_update_stacks_insert_positions() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.update_stacks(|stacks| {
+            assert!(stacks.insert(0, [10]));
+            assert!(stacks.insert(2, [20, 21]));
+            assert!(stacks.insert(5, [30]));
+            assert!(!stacks.insert(7, [40]));
+        });
+        assert_eq!(counts(&chart), vec![1, 2, 2, 1, 3, 1]);
+        assert_eq!(chart.get_stack(0).unwrap().get(0).unwrap().value(), 10);
+        assert_eq!(chart.get_stack(2).unwrap().get(1).unwrap().value(), 21);
+        assert_eq!(chart.get_stack(4).unwrap().get(2).unwrap().value(), 6);
+        assert_eq!(chart.get_stack(5).unwrap().get(0).unwrap().value(), 30);
+    });
+}
+
+#[test]
+fn check_update_stacks_delete() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.update_stacks(|stacks| {
+            let removed = stacks.delete(1).unwrap();
+            assert_eq!(removed.count(), 1);
+            assert!(stacks.delete(5).is_none());
+        });
+        assert_eq!(counts(&chart), vec![2, 3]);
+    });
+}
+
+#[test]
+fn check_update_stacks_get_mut_edits_are_applied() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.update_stacks(|stacks| {
+            stacks.get_mut(1).unwrap().add_bar(5);
+            stacks.get_mut(0).unwrap().set_label("first");
+            assert!(stacks.get_mut(9).is_none());
+        });
+        assert_eq!(counts(&chart), vec![2, 2, 3]);
+        assert_eq!(chart.get_stack(0).unwrap().label(), "first");
+        assert_eq!(chart.stacks[1].layout.len(), 2);
+        assert_eq!(chart.stacks[1].positive_sum, 8.0);
+    });
+}
+
+#[test]
+fn check_update_stacks_iter_mut() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.update_stacks(|stacks| {
+            for stack in stacks.iter_mut() {
+                stack.set_thickness(2);
+            }
+        });
+        for entry in chart.stacks.iter() {
+            assert_eq!(entry.stack.actual_thickness(), 2);
+        }
+        assert_eq!(chart.stacks[1].pos, chart.stacks[0].pos + 2 + 1);
+    });
+}
+
+#[test]
+fn check_update_stacks_refreshes_thickness_of_edited_stacks() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        assert_eq!(chart.stacks[1].stack.actual_thickness(), 1);
+        chart.update_stacks(|stacks| {
+            let stack = stacks.get_mut(1).unwrap();
+            stack.add_bar(StackBarBuilder::new(2).draw_mode(StackBarDrawMode::FilledRectangle(LineType::Single)).build());
+        });
+        assert_eq!(chart.stacks[1].stack.actual_thickness(), 3);
+        assert_eq!(chart.stacks[0].stack.actual_thickness(), 1);
+        assert_eq!(chart.stacks[2].pos, chart.stacks[1].pos + 3 + 1);
+    });
+}
+
+#[test]
+fn check_update_stacks_pushed_stack_uses_default_thickness() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.set_default_bar_width(4);
+        chart.update_stacks(|stacks| {
+            stacks.push([1]);
+            stacks.insert(0, [2]);
+        });
+        assert_eq!(chart.stacks[0].stack.actual_thickness(), 4);
+        assert_eq!(chart.stacks[4].stack.actual_thickness(), 4);
+    });
+}
+
+#[test]
+fn check_update_stacks_recomputes_range_and_segments() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        chart.add_stack([2]);
+        let before = chart.stacks[0].layout[0].len;
+        chart.update_stacks(|stacks| stacks.push([100]));
+        assert!(chart.stacks[0].layout[0].len < before);
+        assert_eq!(chart.stacks_count(), 2);
+    });
+}
+
+#[test]
+fn check_update_stacks_empty_closure_changes_nothing() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_cell(2, 1);
+        chart.update_stacks(|_| {});
+        assert_eq!(counts(&chart), vec![2, 1, 3]);
+        assert_eq!(chart.selection(), Selection::Cell(2, 1));
+    });
+}
+
+#[test]
+fn check_update_stacks_insert_shifts_selection() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_stack(1);
+        chart.update_stacks(|stacks| {
+            stacks.insert(2, [9]);
+        });
+        assert_eq!(chart.selection(), Selection::Stack(1));
+        chart.update_stacks(|stacks| {
+            stacks.insert(1, [9]);
+        });
+        assert_eq!(chart.selection(), Selection::Stack(2));
+        chart.select_cell(3, 0);
+        chart.update_stacks(|stacks| {
+            stacks.insert(0, [9]);
+        });
+        assert_eq!(chart.selection(), Selection::Cell(4, 0));
+    });
+}
+
+#[test]
+fn check_update_stacks_insert_after_selection_keeps_it() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_cell(0, 1);
+        chart.update_stacks(|stacks| {
+            stacks.insert(3, [9]);
+            stacks.push([9]);
+        });
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_update_stacks_delete_shifts_selection() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_stack(2);
+        chart.update_stacks(|stacks| {
+            stacks.delete(0);
+        });
+        assert_eq!(chart.selection(), Selection::Stack(1));
+        chart.select_cell(1, 2);
+        chart.update_stacks(|stacks| {
+            stacks.delete(0);
+        });
+        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+    });
+}
+
+#[test]
+fn check_update_stacks_delete_selected_clears_selection() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_stack(1);
+        chart.update_stacks(|stacks| {
+            stacks.delete(1);
+        });
+        assert_eq!(chart.selection(), Selection::None);
+        chart.select_cell(1, 0);
+        chart.update_stacks(|stacks| {
+            stacks.delete(1);
+        });
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_update_stacks_delete_after_selection_keeps_it() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_cell(0, 1);
+        chart.update_stacks(|stacks| {
+            stacks.delete(2);
+        });
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_update_stacks_clear_resets_selection() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_stack(1);
+        chart.update_stacks(|stacks| {
+            stacks.clear();
+            assert!(stacks.is_empty());
+        });
+        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.stacks_count(), 0);
+        assert_eq!(chart.stacks_width, 0);
+    });
+}
+
+#[test]
+fn check_update_stacks_clamps_cell_when_bars_shrink() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_cell(2, 2);
+        chart.update_stacks(|stacks| {
+            *stacks.get_mut(2).unwrap() = BarsStack::from([1]);
+        });
+        assert_eq!(chart.selection(), Selection::Stack(2));
+    });
+}
+
+#[test]
+fn check_update_stacks_combined_edits_keep_selection_consistent() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.select_stack(2);
+        chart.update_stacks(|stacks| {
+            stacks.delete(0);
+            stacks.push([5]);
+            stacks.insert(0, [6]);
+            stacks.insert(0, [7]);
+        });
+        assert_eq!(chart.selection(), Selection::Stack(3));
+        assert_eq!(chart.get_stack(3).unwrap().count(), 3);
+    });
+}
+
+#[test]
+fn check_update_stacks_clamps_scroll_when_content_shrinks() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.left_scroll = chart.max_left_scroll();
+        assert!(chart.left_scroll > 0);
+        chart.update_stacks(|stacks| {
+            while stacks.len() > 2 {
+                stacks.delete(stacks.len() - 1);
+            }
+        });
+        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.first_visible_stack, 0);
+        assert_eq!(chart.scrollbars.horizontal_index(), 0);
+    });
+}
+
+#[test]
+fn check_update_stacks_updates_scrollbar_range() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 3);
+        assert_eq!(chart.max_left_scroll(), 0);
+        chart.update_stacks(|stacks| {
+            for _ in 0..30 {
+                stacks.push([2]);
+            }
+        });
+        assert!(chart.max_left_scroll() > 0);
+    });
+}
+
+#[test]
+fn check_update_stacks_clears_hover() {
+    in_app(|| {
+        let mut chart = stacks_chart();
+        chart.set_yaxis_visible(false);
+        let r = chart.cell_rect(0, 0).unwrap();
+        hover(&mut chart, r.left(), r.top());
+        assert!(chart.hovered.is_some());
+        chart.update_stacks(|stacks| stacks.push([1]));
+        assert_eq!(chart.hovered, None);
+    });
+}
+
+#[test]
+fn check_update_stacks_repaints_surface() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_yaxis_visible(false);
+        chart.add_stack([3]);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        assert_eq!(plot_cell(&chart, 3, zero_row).0, ' ');
+        chart.update_stacks(|stacks| stacks.push([3]));
+        assert_ne!(plot_cell(&chart, 3, zero_row).0, ' ');
+    });
+}
+
+#[test]
+fn check_update_stacks_matches_equivalent_add_stack_calls() {
+    in_app(|| {
+        let mut a = sel_chart(vstackedbarchart::Flags::None);
+        a.add_stack([1, 2]);
+        a.add_stack([3]);
+        let mut b = sel_chart(vstackedbarchart::Flags::None);
+        b.update_stacks(|stacks| {
+            stacks.push([1, 2]);
+            stacks.push([3]);
+        });
+        assert_eq!(a.stacks_width, b.stacks_width);
+        for (x, y) in a.stacks.iter().zip(b.stacks.iter()) {
+            assert_eq!(x.pos, y.pos);
+            assert_eq!(x.layout.iter().map(|l| (l.offset, l.len)).collect::<Vec<_>>(), y.layout.iter().map(|l| (l.offset, l.len)).collect::<Vec<_>>());
+        }
+    });
+}
+
+#[test]
+fn check_hash_update_stacks() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xE3DF38F45AF6E483)
+    ";
+    run_script(script, Size::new(50, 16), || {
+        let mut chart = hash_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        add_positive_stacks(&mut chart);
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        chart.select_stack(2);
+        chart.update_stacks(|stacks| {
+            stacks.delete(0);
+            stacks.insert(1, BarsStackBuilder::new().label("N").bars([2, 2]).build());
+            stacks.push(BarsStackBuilder::new().label("E").bars([1, 1, 1]).build());
+        });
+        chart
+    });
+}

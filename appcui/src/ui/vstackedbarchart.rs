@@ -23,4 +23,5 @@ pub use self::stackbar::StackBarDrawMode;
 pub use self::stackbar::StackBarScale;
 pub use self::stackbar::BarsStack;
 pub use self::stackbar::BarsStackBuilder;
+pub use self::stackbar::Stacks;
 pub use self::selection::Selection;
