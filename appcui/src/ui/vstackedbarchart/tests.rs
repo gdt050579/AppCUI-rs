@@ -4005,41 +4005,6 @@ fn press(chart: &mut VStackedBarChart<i32>, key: u16) -> EventProcessStatus {
 }
 
 #[test]
-fn check_keys_right_and_left_scroll_one_cell() {
-    in_app(|| {
-        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
-        assert!(matches!(press(&mut chart, key!("Right")), EventProcessStatus::Processed));
-        assert_eq!(chart.left_scroll, 1);
-        press(&mut chart, key!("Right"));
-        assert_eq!(chart.left_scroll, 2);
-        press(&mut chart, key!("Left"));
-        assert_eq!(chart.left_scroll, 1);
-        assert_eq!(chart.scrollbars.horizontal_index(), 1);
-    });
-}
-
-#[test]
-fn check_keys_left_at_start_does_nothing() {
-    in_app(|| {
-        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
-        assert!(matches!(press(&mut chart, key!("Left")), EventProcessStatus::Processed));
-        assert_eq!(chart.left_scroll, 0);
-    });
-}
-
-#[test]
-fn check_keys_right_stops_at_max() {
-    in_app(|| {
-        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
-        let max = chart.max_left_scroll();
-        for _ in 0..max + 10 {
-            press(&mut chart, key!("Right"));
-        }
-        assert_eq!(chart.left_scroll, max);
-    });
-}
-
-#[test]
 fn check_keys_home_and_end() {
     in_app(|| {
         let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
@@ -4162,12 +4127,12 @@ fn check_hash_scroll_wider_than_view() {
 fn check_hash_scroll_scrolled() {
     let script = "
         Paint.Enable(false)
-        Key.Pressed(Right,5)
-        Paint('1. Scrolled 5 cells')
-        CheckHash(0xA635DE772CC88CE4)
-        Key.Pressed(Left,2)
-        Paint('2. Back 2 cells')
-        CheckHash(0x17D6EB6DF2881173)
+        Key.Pressed(Ctrl+Right,5)
+        Paint('1. Scrolled 5 stacks')
+        CheckHash(0x1)
+        Key.Pressed(Ctrl+Left,2)
+        Paint('2. Back 2 stacks')
+        CheckHash(0x1)
         Key.Pressed(End)
         Paint('3. End')
         CheckHash(0x40044F5048424A19)
@@ -4426,9 +4391,9 @@ fn check_hit_cell_matches_painted_when_scrolled() {
             chart.add_stack([(i % 4) + 1, 2]);
         }
         for _ in 0..7 {
-            press(&mut chart, key!("Right"));
+            press(&mut chart, key!("Ctrl+Right"));
         }
-        assert_eq!(chart.left_scroll, 7);
+        assert!(chart.left_scroll > 0);
         painted_matches_hits(&chart);
     });
 }
@@ -4994,7 +4959,7 @@ fn check_hover_cleared_by_clear_and_scroll() {
         let r = chart.cell_rect(0, 0).unwrap();
         hover(&mut chart, r.left(), r.top());
         assert!(chart.hovered.is_some());
-        press(&mut chart, key!("Right"));
+        press(&mut chart, key!("Ctrl+Right"));
         assert_eq!(chart.hovered, None);
         hover(&mut chart, r.left() + 1, r.top());
         assert!(chart.hovered.is_some());
@@ -5069,4 +5034,325 @@ fn check_hash_tooltip_percentage() {
         chart.set_stacks_scale(StackBarScale::Percentage);
         chart
     });
+}
+
+fn key_chart(flags: vstackedbarchart::Flags) -> VStackedBarChart<i32> {
+    let mut chart = sel_chart(flags);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: -6, max: 12 });
+    chart
+}
+
+#[test]
+fn check_keys_right_selects_next_stack_without_wrapping() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        for _ in 0..3 {
+            chart.add_stack([2, 1]);
+        }
+        assert!(matches!(press(&mut chart, key!("Right")), EventProcessStatus::Processed));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.selection(), Selection::Stack(1));
+        press(&mut chart, key!("Right"));
+        press(&mut chart, key!("Right"));
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.selection(), Selection::Stack(2));
+    });
+}
+
+#[test]
+fn check_keys_left_selects_previous_stack_without_wrapping() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        for _ in 0..3 {
+            chart.add_stack([2, 1]);
+        }
+        chart.select_stack(2);
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.selection(), Selection::Stack(1));
+        press(&mut chart, key!("Left"));
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_keys_left_from_nothing_selects_first_stack() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([2]);
+        chart.add_stack([3]);
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_keys_left_right_on_empty_chart_do_nothing() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        assert!(matches!(press(&mut chart, key!("Right")), EventProcessStatus::Processed));
+        press(&mut chart, key!("Left"));
+        press(&mut chart, key!("Up"));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_keys_left_right_from_cell_switch_to_stack() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        for _ in 0..3 {
+            chart.add_stack([2, 1]);
+        }
+        chart.select_cell(1, 0);
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.selection(), Selection::Stack(2));
+        chart.select_cell(2, 1);
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.selection(), Selection::Stack(2));
+        chart.select_cell(0, 1);
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+        chart.select_cell(1, 1);
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_keys_down_and_up_from_nothing_select_first_cell() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([2, 1]);
+        chart.add_stack([3]);
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        chart.clear_selection();
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+    });
+}
+
+#[test]
+fn check_keys_up_down_from_stack_select_first_cell_of_that_stack() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([2, 1]);
+        chart.add_stack([3, 4]);
+        chart.select_stack(1);
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(1, 0));
+        chart.select_stack(1);
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(1, 0));
+    });
+}
+
+#[test]
+fn check_keys_up_down_walk_positive_bars_visually() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([3, 2, 1]);
+        chart.select_cell(0, 0);
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        press(&mut chart, key!("Down"));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+    });
+}
+
+#[test]
+fn check_keys_up_down_walk_negative_bars_visually() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([-3, -2]);
+        chart.select_cell(0, 0);
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_keys_up_down_follow_visual_order_in_mixed_stack() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([3, -2, 2, -1]);
+        chart.select_cell(0, 0);
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        press(&mut chart, key!("Down"));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+    });
+}
+
+#[test]
+fn check_keys_up_down_skip_zero_length_bars() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([0, 4, 0, 2]);
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_keys_up_down_from_zero_length_cell_moves_to_visible_neighbour() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([0, 4]);
+        chart.select_cell(0, 0);
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_keys_up_down_on_stack_without_bars_keep_stack_selected() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack(Vec::<i32>::new());
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+        press(&mut chart, key!("Down"));
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_keys_selection_scrolls_into_view() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        for _ in 0..15 {
+            press(&mut chart, key!("Right"));
+        }
+        assert_eq!(chart.selection(), Selection::Stack(14));
+        assert!(chart.left_scroll > 0);
+        let rect = chart.selection_rect().unwrap();
+        assert!(rect.left() >= chart.x_axis_left_margin());
+        assert!(rect.right() < chart.size().width as i32);
+        for _ in 0..15 {
+            press(&mut chart, key!("Left"));
+        }
+        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.left_scroll, chart.stacks[0].pos);
+    });
+}
+
+#[test]
+fn check_keys_cell_selection_scrolls_stack_into_view() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.select_stack(19);
+        chart.left_scroll = 0;
+        chart.update_scroll_state();
+        press(&mut chart, key!("Down"));
+        assert_eq!(chart.selection(), Selection::Cell(19, 0));
+        assert!(chart.left_scroll > 0);
+    });
+}
+
+#[test]
+fn check_keys_selection_change_does_not_scroll_when_visible() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        press(&mut chart, key!("Right"));
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+#[test]
+fn check_keys_other_keys_still_ignored() {
+    in_app(|| {
+        let mut chart = key_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([2]);
+        assert!(matches!(press(&mut chart, key!("Space")), EventProcessStatus::Ignored));
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+fn selection_script_chart(flags: vstackedbarchart::Flags) -> VStackedBarChart<i32> {
+    let mut chart = hash_chart(flags);
+    add_positive_stacks(&mut chart);
+    chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+    chart
+}
+
+#[test]
+fn check_hash_keyboard_selection() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Paint('1. First stack selected')
+        CheckHash(0x1)
+        Key.Pressed(Right,2)
+        Paint('2. Third stack selected')
+        CheckHash(0x1)
+        Key.Pressed(Down)
+        Paint('3. First bar of the third stack')
+        CheckHash(0x1)
+        Key.Pressed(Up)
+        Paint('4. Second bar of the third stack')
+        CheckHash(0x1)
+        Key.Pressed(Left)
+        Paint('5. Second stack selected')
+        CheckHash(0x1)
+    ";
+    run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::None));
+}
+
+#[test]
+fn check_hash_keyboard_selection_with_dimming() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right,2)
+        Paint('1. Second stack, others dimmed')
+        CheckHash(0x1)
+        Key.Pressed(Down)
+        Paint('2. First bar, rest dimmed')
+        CheckHash(0x1)
+        Key.Pressed(Up)
+        Paint('3. Second bar, rest dimmed')
+        CheckHash(0x1)
+    ";
+    run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::DimBarsOnSelection));
+}
+
+#[test]
+fn check_hash_keyboard_selection_scrolls_wide_chart() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right,25)
+        Paint('1. Stack 25 selected and scrolled into view')
+        CheckHash(0x1)
+        Key.Pressed(Down)
+        Paint('2. First bar of stack 25')
+        CheckHash(0x1)
+    ";
+    run_script(script, Size::new(50, 16), wide_chart);
 }

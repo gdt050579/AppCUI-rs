@@ -459,6 +459,68 @@ where
             ((top..=bottom).contains(&y)).then_some((stack_index, bar_index))
         })
     }
+    fn change_selection(&mut self, selection: Selection) {
+        if self.set_selection(selection).is_none() {
+            return;
+        }
+        if let Selection::Stack(index) | Selection::Cell(index, _) = selection {
+            self.ensure_visible(index as usize);
+        }
+    }
+    pub(super) fn move_stack_selection(&mut self, delta: i32) {
+        let count = self.stacks.len();
+        if count == 0 {
+            return;
+        }
+        let target = match self.selection {
+            Selection::None => 0,
+            Selection::Stack(index) | Selection::Cell(index, _) => (index as i64 + delta as i64).clamp(0, count as i64 - 1) as u32,
+        };
+        self.change_selection(Selection::Stack(target));
+    }
+    fn first_cell_of(&self, stack_index: usize) -> Option<usize> {
+        let entry = self.stacks.get(stack_index)?;
+        let first = entry.layout.iter().position(|segment| segment.len != 0);
+        first.or(if entry.stack.count() > 0 { Some(0) } else { None })
+    }
+    fn cell_order_key(&self, stack_index: usize, cell_index: usize) -> Option<(i32, usize)> {
+        Some((self.cell_rect(stack_index, cell_index)?.top(), cell_index))
+    }
+    pub(super) fn move_cell_selection(&mut self, up: bool) {
+        let (stack_index, current) = match self.selection {
+            Selection::None if self.stacks.is_empty() => return,
+            Selection::None => (0, None),
+            Selection::Stack(index) => (index as usize, None),
+            Selection::Cell(index, cell) => (index as usize, Some(cell as usize)),
+        };
+        let Some(current) = current else {
+            match self.first_cell_of(stack_index) {
+                Some(cell) => self.change_selection(Selection::Cell(stack_index as u32, cell as u32)),
+                None => self.change_selection(Selection::Stack(stack_index as u32)),
+            }
+            return;
+        };
+        let Some(current_key) = self.cell_order_key(stack_index, current) else {
+            return;
+        };
+        let Some(entry) = self.stacks.get(stack_index) else {
+            return;
+        };
+        let keys = entry
+            .layout
+            .iter()
+            .enumerate()
+            .filter(|(_, segment)| segment.len != 0)
+            .filter_map(|(cell, _)| self.cell_order_key(stack_index, cell));
+        let target = if up {
+            keys.filter(|key| *key < current_key).max()
+        } else {
+            keys.filter(|key| *key > current_key).min()
+        };
+        if let Some((_, cell)) = target {
+            self.change_selection(Selection::Cell(stack_index as u32, cell as u32));
+        }
+    }
     pub(super) fn max_left_scroll(&self) -> i32 {
         let content_width = self.stacks_width as i32 + self.x_axis_left_margin() + 1;
         (content_width - self.size().width as i32).max(0)
@@ -896,17 +958,19 @@ where
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") => {
-                if self.left_scroll > 0 {
-                    self.left_scroll -= 1;
-                    self.after_horizontal_scroll();
-                }
+                self.move_stack_selection(-1);
                 EventProcessStatus::Processed
             }
             key!("Right") => {
-                if self.left_scroll < self.max_left_scroll() {
-                    self.left_scroll += 1;
-                    self.after_horizontal_scroll();
-                }
+                self.move_stack_selection(1);
+                EventProcessStatus::Processed
+            }
+            key!("Up") => {
+                self.move_cell_selection(true);
+                EventProcessStatus::Processed
+            }
+            key!("Down") => {
+                self.move_cell_selection(false);
                 EventProcessStatus::Processed
             }
             key!("Home") => {
