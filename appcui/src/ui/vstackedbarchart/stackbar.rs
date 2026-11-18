@@ -358,6 +358,16 @@ where
     }
 }
 
+pub(super) fn segment_rows(y: i32, len: i16) -> Option<(i32, i32)> {
+    if len > 0 {
+        Some((y - len as i32 + 1, y))
+    } else if len < 0 {
+        Some((y + 1, y + len.unsigned_abs() as i32))
+    } else {
+        None
+    }
+}
+
 #[derive(Copy, Clone, Default)]
 pub(crate) struct SegmentLayout {
     pub(crate) offset: i16,

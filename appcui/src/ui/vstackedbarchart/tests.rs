@@ -3,7 +3,7 @@ use std::ops::DerefMut;
 use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
-use super::stackbar::{paint_segment, resolve_attr};
+use super::stackbar::{paint_segment, resolve_attr, segment_rows};
 use crate::ui::components::BarFillType;
 
 fn in_app(f: impl FnOnce() + 'static) {
@@ -4195,4 +4195,254 @@ fn check_hash_scroll_resized() {
         CheckHash(0x78095E1AF82D5AF9)
     ";
     run_script(script, Size::new(50, 16), wide_chart);
+}
+
+fn hit_chart(yaxis: bool) -> VStackedBarChart<i32> {
+    let mut chart = VStackedBarChart::<i32>::new(layout!("x:0,y:0,w:30,h:14"), vstackedbarchart::Flags::None);
+    chart.deref_mut().layout.update(60, 20);
+    chart.on_resize(Size::new(30, 14), Size::new(30, 14));
+    chart.set_yaxis_visible(yaxis);
+    chart.set_yaxis_show_grid(false);
+    chart.set_default_bar_drawmode(fill());
+    chart
+}
+
+fn painted_matches_hits(chart: &VStackedBarChart<i32>) {
+    let width = chart.size().width as i32;
+    let plot_bottom = chart.visible_height() as i32;
+    let left = chart.x_axis_left_margin();
+    for y in 0..plot_bottom {
+        for x in left..width {
+            let painted = plot_cell(chart, x, y).0 != ' ';
+            assert_eq!(chart.cell_index_at(x, y).is_some(), painted, "x={x} y={y}");
+        }
+    }
+}
+
+#[test]
+fn check_hit_stack_index_at_columns() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.add_stack([3]);
+        chart.add_stack([4]);
+        chart.add_stack([5]);
+        assert_eq!(chart.stack_index_at(0, 5), None);
+        assert_eq!(chart.stack_index_at(1, 5), Some(0));
+        assert_eq!(chart.stack_index_at(2, 5), None);
+        assert_eq!(chart.stack_index_at(3, 5), Some(1));
+        assert_eq!(chart.stack_index_at(4, 5), None);
+        assert_eq!(chart.stack_index_at(5, 5), Some(2));
+        assert_eq!(chart.stack_index_at(6, 5), None);
+    });
+}
+
+#[test]
+fn check_hit_stack_index_at_wide_stacks() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_default_bar_width(3);
+        chart.add_stack([3]);
+        chart.add_stack([4]);
+        assert_eq!(chart.stack_index_at(1, 5), Some(0));
+        assert_eq!(chart.stack_index_at(3, 5), Some(0));
+        assert_eq!(chart.stack_index_at(4, 5), None);
+        assert_eq!(chart.stack_index_at(5, 5), Some(1));
+        assert_eq!(chart.stack_index_at(7, 5), Some(1));
+        assert_eq!(chart.stack_index_at(8, 5), None);
+    });
+}
+
+#[test]
+fn check_hit_stack_index_at_respects_left_margin() {
+    in_app(|| {
+        let mut chart = hit_chart(true);
+        chart.add_stack([3]);
+        let margin = chart.x_axis_left_margin();
+        assert!(margin > 0);
+        assert_eq!(chart.stack_index_at(margin - 1, 5), None);
+        assert_eq!(chart.stack_index_at(margin, 5), None);
+        assert_eq!(chart.stack_index_at(margin + 1, 5), Some(0));
+    });
+}
+
+#[test]
+fn check_hit_stack_index_at_outside_plot_rows() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.add_stack([3]);
+        let plot_bottom = chart.visible_height() as i32;
+        assert_eq!(chart.stack_index_at(1, -1), None);
+        assert_eq!(chart.stack_index_at(1, 0), Some(0));
+        assert_eq!(chart.stack_index_at(1, plot_bottom), Some(0));
+        assert_eq!(chart.stack_index_at(1, plot_bottom + 1), None);
+        assert_eq!(chart.stack_index_at(30, 0), None);
+    });
+}
+
+#[test]
+fn check_hit_stack_index_at_empty_chart() {
+    in_app(|| {
+        let chart = hit_chart(false);
+        assert_eq!(chart.stack_index_at(1, 1), None);
+        assert_eq!(chart.cell_index_at(1, 1), None);
+    });
+}
+
+#[test]
+fn check_hit_stack_index_at_follows_left_scroll() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        for _ in 0..30 {
+            chart.add_stack([2]);
+        }
+        chart.left_scroll = 10;
+        chart.update_scroll_state();
+        let scroll = chart.left_scroll;
+        for x in 0..30 {
+            let expected = chart.stacks.iter().position(|s| s.pos == x + scroll);
+            assert_eq!(chart.stack_index_at(x, 3), expected, "x={x}");
+        }
+    });
+}
+
+#[test]
+fn check_hit_cell_positive_stack_rows() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+        chart.add_stack([2, 3, 1]);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let seg = chart.stacks[0].layout.clone();
+        for (bar, s) in seg.iter().enumerate() {
+            for y in (zero_row - s.offset as i32 - s.len as i32 + 1)..=(zero_row - s.offset as i32) {
+                assert_eq!(chart.cell_index_at(1, y), Some((0, bar)), "bar={bar} y={y}");
+            }
+        }
+        let top = zero_row - (seg[2].offset as i32 + seg[2].len as i32);
+        assert_eq!(chart.cell_index_at(1, top), None);
+        assert_eq!(chart.cell_index_at(1, zero_row + 1), None);
+    });
+}
+
+#[test]
+fn check_hit_cell_negative_stack_rows() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -12, max: 0 });
+        chart.add_stack([-2, -3, -1]);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let seg = chart.stacks[0].layout.clone();
+        for (bar, s) in seg.iter().enumerate() {
+            let y0 = zero_row - s.offset as i32;
+            for y in (y0 + 1)..=(y0 + s.len.unsigned_abs() as i32) {
+                assert_eq!(chart.cell_index_at(1, y), Some((0, bar)), "bar={bar} y={y}");
+            }
+        }
+        assert_eq!(chart.cell_index_at(1, zero_row), None);
+    });
+}
+
+#[test]
+fn check_hit_cell_mixed_stack_has_both_directions() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -6, max: 6 });
+        chart.add_stack([3, -2, 2, -1]);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let seg = chart.stacks[0].layout.clone();
+        for (bar, s) in seg.iter().enumerate() {
+            let (top, bottom) = segment_rows(zero_row - s.offset as i32, s.len).unwrap();
+            assert_eq!(top <= zero_row, s.len > 0, "bar={bar}");
+            for y in top..=bottom {
+                assert_eq!(chart.cell_index_at(1, y), Some((0, bar)), "bar={bar} y={y}");
+            }
+        }
+    });
+}
+
+#[test]
+fn check_hit_cell_skips_segments_with_zero_length() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 10 });
+        chart.add_stack([0, 5, 0, 3]);
+        let hits: Vec<usize> = (0..14).filter_map(|y| chart.cell_index_at(1, y)).map(|(_, b)| b).collect();
+        assert!(hits.iter().all(|&b| b == 1 || b == 3));
+        assert!(hits.contains(&1) && hits.contains(&3));
+    });
+}
+
+#[test]
+fn check_hit_cell_tiny_segment_that_vanishes_is_not_hit() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 1000 });
+        chart.add_stack([1, 500]);
+        let hits: Vec<usize> = (0..14).filter_map(|y| chart.cell_index_at(1, y)).map(|(_, b)| b).collect();
+        assert!(!hits.contains(&0));
+        assert!(hits.contains(&1));
+    });
+}
+
+#[test]
+fn check_hit_cell_matches_painted_positive() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.add_stack([3, 2]);
+        chart.add_stack([5, 1]);
+        chart.add_stack([4, 4, 2]);
+        painted_matches_hits(&chart);
+    });
+}
+
+#[test]
+fn check_hit_cell_matches_painted_negative_and_mixed() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.add_stack([-3, -2]);
+        chart.add_stack([5, -1, 2]);
+        chart.add_stack([4, -4, 2, -2]);
+        painted_matches_hits(&chart);
+    });
+}
+
+#[test]
+fn check_hit_cell_matches_painted_percentage() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([1, 2, 3]);
+        chart.add_stack([5, 5]);
+        painted_matches_hits(&chart);
+    });
+}
+
+#[test]
+fn check_hit_cell_matches_painted_when_scrolled() {
+    in_app(|| {
+        let mut chart = hit_chart(false);
+        for i in 0..30 {
+            chart.add_stack([(i % 4) + 1, 2]);
+        }
+        for _ in 0..7 {
+            press(&mut chart, key!("Right"));
+        }
+        assert_eq!(chart.left_scroll, 7);
+        painted_matches_hits(&chart);
+    });
+}
+
+#[test]
+fn check_hit_cell_with_axes_visible() {
+    in_app(|| {
+        let mut chart = hit_chart(true);
+        chart.set_xaxis_label_mode(XAxisLabelMode::Index(0));
+        chart.add_stack([3, 2]);
+        let margin = chart.x_axis_left_margin();
+        let plot_bottom = chart.visible_height() as i32;
+        let zero_row = plot_bottom - chart.yaxis.zero;
+        assert_eq!(chart.cell_index_at(margin + 1, zero_row), Some((0, 0)));
+        assert_eq!(chart.cell_index_at(margin + 1, plot_bottom + 1), None);
+        assert_eq!(chart.cell_index_at(margin - 1, zero_row), None);
+    });
 }

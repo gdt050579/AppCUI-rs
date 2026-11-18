@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use super::mapping::ValueMapping;
-use super::stackbar::{paint_segment, resolve_attr, StackWithLayout};
+use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout};
 use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
@@ -270,6 +270,29 @@ where
         } else {
             0
         }
+    }
+    pub(super) fn stack_index_at(&self, x: i32, y: i32) -> Option<usize> {
+        let left_margin = self.x_axis_left_margin();
+        let plot_bottom = self.visible_height() as i32;
+        if x < left_margin || x >= self.size().width as i32 || y < 0 || y > plot_bottom {
+            return None;
+        }
+        let content_x = x + self.left_scroll - left_margin;
+        let index = self.stacks.partition_point(|s| s.pos <= content_x).checked_sub(1)?;
+        let entry = &self.stacks[index];
+        if content_x >= entry.pos + entry.stack.actual_thickness() as i32 {
+            return None;
+        }
+        Some(index)
+    }
+    pub(super) fn cell_index_at(&self, x: i32, y: i32) -> Option<(usize, usize)> {
+        let stack_index = self.stack_index_at(x, y)?;
+        let zero_row = self.visible_height() as i32 - self.yaxis.zero;
+        let entry = &self.stacks[stack_index];
+        entry.layout.iter().enumerate().find_map(|(bar_index, segment)| {
+            let (top, bottom) = segment_rows(zero_row - segment.offset as i32, segment.len)?;
+            ((top..=bottom).contains(&y)).then_some((stack_index, bar_index))
+        })
     }
     pub(super) fn max_left_scroll(&self) -> i32 {
         let content_width = self.stacks_width as i32 + self.x_axis_left_margin() + 1;
