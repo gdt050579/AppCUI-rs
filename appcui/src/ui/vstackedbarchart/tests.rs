@@ -4796,3 +4796,249 @@ fn check_selection_paint_is_skipped_when_disabled() {
         assert_ne!(surface.char(rect.left() - 1, rect.top() - 1).unwrap().foreground, border.foreground);
     });
 }
+
+fn tip_chart() -> VStackedBarChart<i32> {
+    let mut chart = VStackedBarChart::<i32>::new(layout!("x:0,y:0,w:30,h:14"), vstackedbarchart::Flags::None);
+    chart.deref_mut().layout.update(60, 20);
+    chart.on_resize(Size::new(30, 14), Size::new(30, 14));
+    chart
+}
+
+fn hover(chart: &mut VStackedBarChart<i32>, x: i32, y: i32) -> bool {
+    matches!(chart.on_mouse_event(&MouseEvent::Over(Point::new(x, y))), EventProcessStatus::Processed)
+}
+
+#[test]
+fn check_tooltip_text_without_labels() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.add_stack([20, 30, 50]);
+        assert_eq!(chart.tooltip_for(0, 0).unwrap(), "Stack: 100\nValue: 20");
+        assert_eq!(chart.tooltip_for(0, 2).unwrap(), "Stack: 100\nValue: 50");
+    });
+}
+
+#[test]
+fn check_tooltip_text_with_labels() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        let mut stack = BarsStackBuilder::new().label("Q1").build();
+        stack.add_bar(StackBarBuilder::new(20).label("Sales").build());
+        stack.add_bar(30);
+        chart.add_stack(stack);
+        assert_eq!(chart.tooltip_for(0, 0).unwrap(), "Q1\nStack: 50\nSales\nValue: 20");
+        assert_eq!(chart.tooltip_for(0, 1).unwrap(), "Q1\nStack: 50\nValue: 30");
+    });
+}
+
+#[test]
+fn check_tooltip_text_mixed_signs_uses_net_total() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.add_stack([30, -10]);
+        assert_eq!(chart.tooltip_for(0, 1).unwrap(), "Stack: 20\nValue: -10");
+    });
+}
+
+#[test]
+fn check_tooltip_text_in_percentage_mode() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([25, 75]);
+        assert_eq!(chart.tooltip_for(0, 0).unwrap(), "Stack: 100\nValue: 25 (25%)");
+        assert_eq!(chart.tooltip_for(0, 1).unwrap(), "Stack: 100\nValue: 75 (75%)");
+    });
+}
+
+#[test]
+fn check_tooltip_text_percentage_with_negative_value() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([30, -10]);
+        assert_eq!(chart.tooltip_for(0, 1).unwrap(), "Stack: 20\nValue: -10 (25%)");
+    });
+}
+
+#[test]
+fn check_tooltip_text_percentage_of_zero_total_has_no_percentage() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([0, 0]);
+        assert_eq!(chart.tooltip_for(0, 0).unwrap(), "Stack: 0\nValue: 0");
+    });
+}
+
+#[test]
+fn check_tooltip_text_uses_number_format() {
+    in_app(|| {
+        let mut chart = VStackedBarChart::<f64>::new(layout!("x:0,y:0,w:30,h:14"), vstackedbarchart::Flags::None);
+        chart.set_number_format(FormatNumber::new(10).decimals(2));
+        chart.add_stack([1.5, 2.25]);
+        assert_eq!(chart.tooltip_for(0, 1).unwrap(), "Stack: 3.75\nValue: 2.25");
+    });
+}
+
+#[test]
+fn check_tooltip_text_out_of_range_is_none() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.add_stack([1, 2]);
+        assert!(chart.tooltip_for(1, 0).is_none());
+        assert!(chart.tooltip_for(0, 2).is_none());
+    });
+}
+
+#[test]
+fn check_hover_tracks_cell_under_mouse() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_yaxis_visible(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+        chart.add_stack([3, 2]);
+        let r0 = chart.cell_rect(0, 0).unwrap();
+        let r1 = chart.cell_rect(0, 1).unwrap();
+        assert!(hover(&mut chart, r0.left(), r0.top()));
+        assert_eq!(chart.hovered, Some((0, 0)));
+        assert!(chart.tooltip_text.contains("Value: 3"));
+        assert!(hover(&mut chart, r1.left(), r1.top()));
+        assert_eq!(chart.hovered, Some((0, 1)));
+        assert!(chart.tooltip_text.contains("Value: 2"));
+    });
+}
+
+#[test]
+fn check_hover_same_cell_is_ignored() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_yaxis_visible(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+        chart.add_stack([6]);
+        let r = chart.cell_rect(0, 0).unwrap();
+        assert!(hover(&mut chart, r.left(), r.top()));
+        assert!(!hover(&mut chart, r.left(), r.top() + 1));
+        assert_eq!(chart.hovered, Some((0, 0)));
+    });
+}
+
+#[test]
+fn check_hover_leaving_cell_clears_state() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_yaxis_visible(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+        chart.add_stack([3]);
+        let r = chart.cell_rect(0, 0).unwrap();
+        hover(&mut chart, r.left(), r.top());
+        assert!(hover(&mut chart, 20, 5));
+        assert_eq!(chart.hovered, None);
+        assert!(!hover(&mut chart, 21, 5));
+    });
+}
+
+#[test]
+fn check_hover_mouse_leave_clears_state() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_yaxis_visible(false);
+        chart.add_stack([3]);
+        let r = chart.cell_rect(0, 0).unwrap();
+        hover(&mut chart, r.left(), r.top());
+        assert!(chart.hovered.is_some());
+        chart.on_mouse_event(&MouseEvent::Leave);
+        assert_eq!(chart.hovered, None);
+        hover(&mut chart, r.left(), r.top());
+        chart.on_mouse_event(&MouseEvent::Enter);
+        assert_eq!(chart.hovered, None);
+    });
+}
+
+#[test]
+fn check_hover_cleared_by_clear_and_scroll() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.set_yaxis_visible(false);
+        for _ in 0..30 {
+            chart.add_stack([3]);
+        }
+        let r = chart.cell_rect(0, 0).unwrap();
+        hover(&mut chart, r.left(), r.top());
+        assert!(chart.hovered.is_some());
+        press(&mut chart, key!("Right"));
+        assert_eq!(chart.hovered, None);
+        hover(&mut chart, r.left() + 1, r.top());
+        assert!(chart.hovered.is_some());
+        chart.clear();
+        assert_eq!(chart.hovered, None);
+    });
+}
+
+#[test]
+fn check_hover_other_mouse_events_are_ignored() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.add_stack([3]);
+        assert!(matches!(chart.on_mouse_event(&MouseEvent::Wheel(MouseWheelDirection::Up)), EventProcessStatus::Ignored));
+    });
+}
+
+#[test]
+fn check_cell_and_stack_rect_agree_with_selection_rect() {
+    in_app(|| {
+        let mut chart = tip_chart();
+        chart.add_stack([3, 2]);
+        chart.select_cell(0, 1);
+        assert_eq!(chart.selection_rect(), chart.cell_rect(0, 1));
+        chart.select_stack(0);
+        assert_eq!(chart.selection_rect(), chart.stack_rect(0));
+        assert!(chart.cell_rect(1, 0).is_none());
+        assert!(chart.cell_rect(0, 2).is_none());
+        assert!(chart.stack_rect(1).is_none());
+    });
+}
+
+fn tooltip_script_chart() -> VStackedBarChart<i32> {
+    let mut chart = hash_chart(vstackedbarchart::Flags::None);
+    add_positive_stacks(&mut chart);
+    chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+    chart
+}
+
+#[test]
+fn check_hash_tooltip_hover_cells() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x1)
+        Mouse.Move(10,11)
+        Paint('2. Hover A, first bar')
+        CheckHash(0x1)
+        Mouse.Move(10,8)
+        Paint('3. Hover A, second bar')
+        CheckHash(0x1)
+        Mouse.Move(14,6)
+        Paint('4. Hover C, third bar')
+        CheckHash(0x1)
+        Mouse.Move(20,11)
+        Paint('5. Hover empty area')
+        CheckHash(0x1)
+    ";
+    run_script(script, Size::new(50, 16), tooltip_script_chart);
+}
+
+#[test]
+fn check_hash_tooltip_percentage() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Move(10,11)
+        Paint('1. Hover A, first bar (percentage)')
+        CheckHash(0x1)
+    ";
+    run_script(script, Size::new(50, 16), || {
+        let mut chart = tooltip_script_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart
+    });
+}

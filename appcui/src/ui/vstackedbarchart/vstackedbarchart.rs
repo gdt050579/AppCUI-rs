@@ -30,7 +30,7 @@ pub(super) struct XAxis {
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-#[CustomControl(overwrite = OnPaint + OnResize + OnKeyPressed, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnKeyPressed + OnMouseEvent, internal = true)]
 pub struct VStackedBarChart<T>
 where
     T: Number + 'static,
@@ -41,6 +41,8 @@ where
     pub(super) left_scroll: i32,
     pub(super) first_visible_stack: u32,
     pub(super) selection: Selection,
+    pub(super) hovered: Option<(u32, u32)>,
+    pub(super) tooltip_text: String,
     pub(super) scrollbars: ScrollBars,
     pub(super) surface: Surface,
     pub(super) defaults: Defaults,
@@ -69,6 +71,8 @@ where
             left_scroll: 0,
             first_visible_stack: 0,
             selection: Selection::None,
+            hovered: None,
+            tooltip_text: String::new(),
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             surface: Surface::new(1, 1),
             defaults: Defaults {
@@ -169,12 +173,14 @@ where
             f(&mut entry.stack);
             entry.stack.update_actual_thickness(defaults.thickness, defaults.draw_mode);
             self.clamp_selection();
+            self.clear_hovered();
             self.repaint_surface();
         }
     }
     pub fn clear(&mut self) {
         self.stacks.clear();
         self.selection = Selection::None;
+        self.clear_hovered();
         self.repaint_surface();
     }
     pub fn set_stacks_scale(&mut self, scale: StackBarScale<T>) {
@@ -318,27 +324,93 @@ where
             },
         };
     }
-    pub(super) fn selection_rect(&self) -> Option<Rect> {
-        let (stack_index, cell) = match self.selection {
-            Selection::None => return None,
-            Selection::Stack(i) => (i as usize, None),
-            Selection::Cell(i, j) => (i as usize, Some(j as usize)),
-        };
-        let entry = self.stacks.get(stack_index)?;
-        let zero_row = self.visible_height() as i32 - self.yaxis.zero;
-        let rows = |segment: &super::stackbar::SegmentLayout| segment_rows(zero_row - segment.offset as i32, segment.len);
-        let (top, bottom) = match cell {
-            Some(j) => rows(entry.layout.get(j)?).unwrap_or((zero_row, zero_row)),
-            None => entry
-                .layout
-                .iter()
-                .filter_map(rows)
-                .fold(None, |acc: Option<(i32, i32)>, (t, b)| Some(acc.map_or((t, b), |(at, ab)| (at.min(t), ab.max(b)))))
-                .unwrap_or((zero_row, zero_row)),
-        };
+    fn zero_row(&self) -> i32 {
+        self.visible_height() as i32 - self.yaxis.zero
+    }
+    fn stack_column(&self, entry: &StackWithLayout<T>) -> (i32, i32) {
         let x = entry.pos - self.left_scroll + self.x_axis_left_margin();
-        let thickness = entry.stack.actual_thickness().max(1) as i32;
-        Some(Rect::new(x, top, x + thickness - 1, bottom))
+        (x, x + entry.stack.actual_thickness().max(1) as i32 - 1)
+    }
+    pub(super) fn cell_rect(&self, stack_index: usize, cell_index: usize) -> Option<Rect> {
+        let entry = self.stacks.get(stack_index)?;
+        let zero_row = self.zero_row();
+        let segment = entry.layout.get(cell_index)?;
+        let (top, bottom) = segment_rows(zero_row - segment.offset as i32, segment.len).unwrap_or((zero_row, zero_row));
+        let (left, right) = self.stack_column(entry);
+        Some(Rect::new(left, top, right, bottom))
+    }
+    pub(super) fn stack_rect(&self, stack_index: usize) -> Option<Rect> {
+        let entry = self.stacks.get(stack_index)?;
+        let zero_row = self.zero_row();
+        let (top, bottom) = entry
+            .layout
+            .iter()
+            .filter_map(|segment| segment_rows(zero_row - segment.offset as i32, segment.len))
+            .fold(None, |acc: Option<(i32, i32)>, (t, b)| Some(acc.map_or((t, b), |(at, ab)| (at.min(t), ab.max(b)))))
+            .unwrap_or((zero_row, zero_row));
+        let (left, right) = self.stack_column(entry);
+        Some(Rect::new(left, top, right, bottom))
+    }
+    pub(super) fn selection_rect(&self) -> Option<Rect> {
+        match self.selection {
+            Selection::None => None,
+            Selection::Stack(i) => self.stack_rect(i as usize),
+            Selection::Cell(i, j) => self.cell_rect(i as usize, j as usize),
+        }
+    }
+    fn format_value(format: &FormatNumber, value: f64) -> String {
+        let mut buffer = [0u8; 64];
+        format.write_float(value, &mut buffer).unwrap_or("").to_string()
+    }
+    pub(super) fn tooltip_for(&self, stack_index: usize, cell_index: usize) -> Option<String> {
+        let entry = self.stacks.get(stack_index)?;
+        let bar = entry.stack.get(cell_index)?;
+        let mut text = String::new();
+        if !entry.stack.label().is_empty() {
+            text.push_str(entry.stack.label());
+            text.push('\n');
+        }
+        text.push_str("Stack: ");
+        text.push_str(&Self::format_value(&self.number_format, entry.positive_sum + entry.negative_sum));
+        text.push('\n');
+        if !bar.label().is_empty() {
+            text.push_str(bar.label());
+            text.push('\n');
+        }
+        let value = bar.value().to_f64();
+        text.push_str("Value: ");
+        text.push_str(&Self::format_value(&self.number_format, value));
+        if matches!(self.scale, StackBarScale::Percentage) {
+            let total = entry.abs_total();
+            if total > 0.0 {
+                text.push_str(" (");
+                text.push_str(&Self::format_value(&self.percentage_format, value.abs() / total * 100.0));
+                text.push(')');
+            }
+        }
+        Some(text)
+    }
+    pub(super) fn clear_hovered(&mut self) {
+        if self.hovered.take().is_some() {
+            self.hide_tooltip();
+        }
+    }
+    pub(super) fn update_hovered(&mut self, x: i32, y: i32) -> bool {
+        let hit = self.cell_index_at(x, y).map(|(stack, cell)| (stack as u32, cell as u32));
+        if hit == self.hovered {
+            return false;
+        }
+        match hit {
+            Some((stack, cell)) => {
+                self.hovered = hit;
+                if let (Some(text), Some(rect)) = (self.tooltip_for(stack as usize, cell as usize), self.cell_rect(stack as usize, cell as usize)) {
+                    self.tooltip_text = text;
+                    self.show_tooltip_on_rect(&self.tooltip_text, &rect);
+                }
+            }
+            None => self.clear_hovered(),
+        }
+        true
     }
     pub(super) fn paint_selection(&self, surface: &mut Surface, theme: &Theme) {
         let Some(rect) = self.selection_rect() else {
@@ -406,9 +478,11 @@ where
         self.sync_scrollbars();
     }
     pub(super) fn after_horizontal_scroll(&mut self) {
+        self.clear_hovered();
         self.repaint_surface();
     }
     pub(super) fn scroll_to_next_stack(&mut self) {
+        self.clear_hovered();
         let left_scroll = self.left_scroll;
         let index = self.stacks.partition_point(|s| s.pos <= left_scroll);
         if let Some(entry) = self.stacks.get(index) {
@@ -417,6 +491,7 @@ where
         }
     }
     pub(super) fn scroll_to_previous_stack(&mut self) {
+        self.clear_hovered();
         let left_scroll = self.left_scroll;
         let count = self.stacks.partition_point(|s| s.pos < left_scroll);
         if count > 0 {
@@ -850,6 +925,33 @@ where
             key!("Ctrl+Right") => {
                 self.scroll_to_next_stack();
                 EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+}
+
+impl<T> OnMouseEvent for VStackedBarChart<T>
+where
+    T: Number + 'static,
+{
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.scrollbars.process_mouse_event(event) {
+            self.clear_hovered();
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.clear_hovered();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(pos) => {
+                if self.update_hovered(pos.x, pos.y) {
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
             }
             _ => EventProcessStatus::Ignored,
         }
