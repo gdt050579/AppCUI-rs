@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::ops::DerefMut;
-use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
+use crate::ui::vstackedbarchart::{Selection, BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
 use super::stackbar::{paint_segment, resolve_attr, segment_rows};
@@ -4444,5 +4444,355 @@ fn check_hit_cell_with_axes_visible() {
         assert_eq!(chart.cell_index_at(margin + 1, zero_row), Some((0, 0)));
         assert_eq!(chart.cell_index_at(margin + 1, plot_bottom + 1), None);
         assert_eq!(chart.cell_index_at(margin - 1, zero_row), None);
+    });
+}
+
+fn sel_chart(flags: vstackedbarchart::Flags) -> VStackedBarChart<i32> {
+    let mut chart = VStackedBarChart::<i32>::new(layout!("x:0,y:0,w:30,h:14"), flags);
+    chart.deref_mut().layout.update(60, 20);
+    chart.on_resize(Size::new(30, 14), Size::new(30, 14));
+    chart.set_yaxis_visible(false);
+    chart.set_yaxis_show_grid(false);
+    chart.set_default_bar_drawmode(fill());
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+    chart
+}
+
+fn overlay_surface(chart: &VStackedBarChart<i32>) -> Surface {
+    let mut surface = Surface::new(30, 14);
+    surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let theme = chart.theme();
+    chart.on_paint(&mut surface, &theme);
+    surface
+}
+
+#[test]
+fn check_selection_default_is_none() {
+    in_app(|| {
+        let chart = sel_chart(vstackedbarchart::Flags::None);
+        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(Selection::default(), Selection::None);
+    });
+}
+
+#[test]
+fn check_selection_select_stack_and_cell() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2, 3]);
+        chart.add_stack([4]);
+        chart.select_stack(1);
+        assert_eq!(chart.selection(), Selection::Stack(1));
+        chart.select_cell(0, 2);
+        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        chart.select_stack(0);
+        assert_eq!(chart.selection(), Selection::Stack(0));
+        chart.clear_selection();
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_selection_out_of_range_is_ignored() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2]);
+        chart.select_stack(1);
+        assert_eq!(chart.selection(), Selection::None);
+        chart.select_cell(1, 0);
+        assert_eq!(chart.selection(), Selection::None);
+        chart.select_cell(0, 2);
+        assert_eq!(chart.selection(), Selection::None);
+        chart.select_cell(0, 1);
+        chart.select_cell(0, 5);
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_selection_set_selection_reports_changes() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2]);
+        assert!(!chart.set_selection(Selection::None));
+        assert!(chart.set_selection(Selection::Stack(0)));
+        assert!(!chart.set_selection(Selection::Stack(0)));
+        assert!(chart.set_selection(Selection::Cell(0, 1)));
+        assert!(!chart.set_selection(Selection::Cell(0, 1)));
+        assert!(chart.set_selection(Selection::Cell(0, 0)));
+        assert!(chart.set_selection(Selection::None));
+    });
+}
+
+#[test]
+fn check_selection_clear_resets_selection() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2]);
+        chart.select_cell(0, 1);
+        chart.clear();
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_selection_update_stack_clamps_cell_to_stack() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2, 3]);
+        chart.select_cell(0, 2);
+        chart.update_stack(0, |s| *s = BarsStack::from([5]));
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_selection_update_stack_keeps_valid_cell() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2, 3]);
+        chart.select_cell(0, 1);
+        chart.update_stack(0, |s| {
+            s.add_bars([9]);
+        });
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+    });
+}
+
+#[test]
+fn check_selection_clamp_drops_missing_stack() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1]);
+        chart.selection = Selection::Stack(3);
+        chart.clamp_selection();
+        assert_eq!(chart.selection(), Selection::None);
+        chart.selection = Selection::Cell(3, 0);
+        chart.clamp_selection();
+        assert_eq!(chart.selection(), Selection::None);
+        chart.selection = Selection::Cell(0, 4);
+        chart.clamp_selection();
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_selection_rect_none_without_selection() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([1]);
+        assert!(chart.selection_rect().is_none());
+    });
+}
+
+#[test]
+fn check_selection_rect_of_stack_covers_all_segments() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([3, 2, 1]);
+        chart.select_stack(0);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let seg = chart.stacks[0].layout.clone();
+        let total: i32 = seg.iter().map(|s| s.len as i32).sum();
+        let rect = chart.selection_rect().unwrap();
+        assert_eq!(rect.left(), 1);
+        assert_eq!(rect.right(), 1);
+        assert_eq!(rect.bottom(), zero_row);
+        assert_eq!(rect.top(), zero_row - total + 1);
+    });
+}
+
+#[test]
+fn check_selection_rect_of_cell_matches_its_rows() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([3, 2, 1]);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        for bar in 0..3 {
+            chart.select_cell(0, bar);
+            let s = chart.stacks[0].layout[bar];
+            let (top, bottom) = segment_rows(zero_row - s.offset as i32, s.len).unwrap();
+            let rect = chart.selection_rect().unwrap();
+            assert_eq!((rect.top(), rect.bottom()), (top, bottom), "bar={bar}");
+        }
+    });
+}
+
+#[test]
+fn check_selection_rect_of_mixed_stack_spans_both_sides() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -6, max: 6 });
+        chart.add_stack([3, -2]);
+        chart.select_stack(0);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let rect = chart.selection_rect().unwrap();
+        assert!(rect.top() < zero_row);
+        assert!(rect.bottom() > zero_row);
+    });
+}
+
+#[test]
+fn check_selection_rect_of_zero_length_cell_is_on_zero_row() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([0, 4]);
+        chart.select_cell(0, 0);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let rect = chart.selection_rect().unwrap();
+        assert_eq!((rect.top(), rect.bottom()), (zero_row, zero_row));
+    });
+}
+
+#[test]
+fn check_selection_rect_of_empty_stack_is_on_zero_row() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack(Vec::<i32>::new());
+        chart.select_stack(0);
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let rect = chart.selection_rect().unwrap();
+        assert_eq!((rect.top(), rect.bottom()), (zero_row, zero_row));
+    });
+}
+
+#[test]
+fn check_selection_rect_follows_scroll_and_margin() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_yaxis_visible(true);
+        for _ in 0..30 {
+            chart.add_stack([2]);
+        }
+        chart.select_stack(10);
+        let margin = chart.x_axis_left_margin();
+        assert_eq!(chart.selection_rect().unwrap().left(), chart.stacks[10].pos + margin);
+        chart.left_scroll = 6;
+        assert_eq!(chart.selection_rect().unwrap().left(), chart.stacks[10].pos - 6 + margin);
+    });
+}
+
+#[test]
+fn check_selection_rect_uses_stack_thickness() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_default_bar_width(4);
+        chart.add_stack([3]);
+        chart.select_stack(0);
+        let rect = chart.selection_rect().unwrap();
+        assert_eq!(rect.right() - rect.left() + 1, 4);
+    });
+}
+
+#[test]
+fn check_selection_paint_without_selection_changes_nothing() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.add_stack([3]);
+        chart.add_stack([5]);
+        let before = overlay_surface(&chart);
+        chart.select_stack(0);
+        chart.clear_selection();
+        let after = overlay_surface(&chart);
+        for y in 0..14 {
+            for x in 0..30 {
+                assert_eq!(before.char(x, y).unwrap().code, after.char(x, y).unwrap().code);
+                assert_eq!(before.char(x, y).unwrap().foreground, after.char(x, y).unwrap().foreground);
+            }
+        }
+    });
+}
+
+#[test]
+fn check_selection_paint_draws_border_around_stack() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -4, max: 12 });
+        chart.add_stack([3]);
+        chart.add_stack([5]);
+        chart.select_stack(0);
+        let rect = chart.selection_rect().unwrap();
+        let border = chart.theme().chart.selection_border;
+        let surface = overlay_surface(&chart);
+        for x in (rect.left() - 1)..=(rect.right() + 1) {
+            assert_eq!(surface.char(x, rect.top() - 1).unwrap().foreground, border.foreground, "top x={x}");
+            assert_eq!(surface.char(x, rect.bottom() + 1).unwrap().foreground, border.foreground, "bottom x={x}");
+        }
+        for y in (rect.top() - 1)..=(rect.bottom() + 1) {
+            assert_eq!(surface.char(rect.left() - 1, y).unwrap().foreground, border.foreground, "left y={y}");
+            assert_eq!(surface.char(rect.right() + 1, y).unwrap().foreground, border.foreground, "right y={y}");
+        }
+    });
+}
+
+#[test]
+fn check_selection_paint_without_dim_keeps_other_stacks() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.add_stack([3]);
+        chart.add_stack([5]);
+        let before = overlay_surface(&chart);
+        chart.select_stack(0);
+        let after = overlay_surface(&chart);
+        let x = chart.stacks[1].pos;
+        let y = chart.visible_height() as i32 - chart.yaxis.zero;
+        assert_eq!(before.char(x, y).unwrap().foreground, after.char(x, y).unwrap().foreground);
+    });
+}
+
+#[test]
+fn check_selection_paint_dims_other_stacks() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.add_stack([3]);
+        chart.add_stack([5]);
+        let before = overlay_surface(&chart);
+        chart.select_stack(0);
+        let after = overlay_surface(&chart);
+        let inactive = chart.theme().chart.inactive;
+        let y = chart.visible_height() as i32 - chart.yaxis.zero;
+        let selected_x = chart.stacks[0].pos;
+        let other_x = chart.stacks[1].pos;
+        assert_eq!(after.char(selected_x, y).unwrap().foreground, before.char(selected_x, y).unwrap().foreground);
+        assert_eq!(after.char(other_x, y).unwrap().foreground, inactive.foreground);
+        assert_ne!(before.char(other_x, y).unwrap().foreground, inactive.foreground);
+    });
+}
+
+#[test]
+fn check_selection_paint_dims_everything_except_selected_cell() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.add_stack([3, 2]);
+        let before = overlay_surface(&chart);
+        chart.select_cell(0, 0);
+        let after = overlay_surface(&chart);
+        let inactive = chart.theme().chart.inactive;
+        let zero_row = chart.visible_height() as i32 - chart.yaxis.zero;
+        let x = chart.stacks[0].pos;
+        let first = chart.stacks[0].layout[0];
+        let second = chart.stacks[0].layout[1];
+        let (t0, b0) = segment_rows(zero_row - first.offset as i32, first.len).unwrap();
+        let (t1, b1) = segment_rows(zero_row - second.offset as i32, second.len).unwrap();
+        for y in t0..=b0 {
+            assert_eq!(after.char(x, y).unwrap().foreground, before.char(x, y).unwrap().foreground, "selected y={y}");
+        }
+        for y in t1..=b1 {
+            assert_eq!(after.char(x, y).unwrap().foreground, inactive.foreground, "other bar y={y}");
+        }
+    });
+}
+
+#[test]
+fn check_selection_paint_is_skipped_when_disabled() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.add_stack([3]);
+        chart.select_stack(0);
+        chart.set_enabled(false);
+        let border = chart.theme().chart.selection_border;
+        let surface = overlay_surface(&chart);
+        let rect = chart.selection_rect().unwrap();
+        assert_ne!(surface.char(rect.left() - 1, rect.top() - 1).unwrap().foreground, border.foreground);
     });
 }

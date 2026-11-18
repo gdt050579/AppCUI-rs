@@ -7,6 +7,7 @@ mod vstackedbarchart;
 mod initialization_flags;
 mod stackbar;
 mod mapping;
+mod selection;
 #[cfg(test)]
 mod tests;
 
@@ -21,3 +22,4 @@ pub use self::stackbar::StackBarDrawMode;
 pub use self::stackbar::StackBarScale;
 pub use self::stackbar::BarsStack;
 pub use self::stackbar::BarsStackBuilder;
+pub use self::selection::Selection;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use super::mapping::ValueMapping;
 use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout};
-use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
+use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
 
@@ -40,6 +40,7 @@ where
     pub(super) stacks_width: u32,
     pub(super) left_scroll: i32,
     pub(super) first_visible_stack: u32,
+    pub(super) selection: Selection,
     pub(super) scrollbars: ScrollBars,
     pub(super) surface: Surface,
     pub(super) defaults: Defaults,
@@ -67,6 +68,7 @@ where
             stacks_width: 0,
             left_scroll: 0,
             first_visible_stack: 0,
+            selection: Selection::None,
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             surface: Surface::new(1, 1),
             defaults: Defaults {
@@ -166,11 +168,13 @@ where
         if let Some(entry) = self.stacks.get_mut(index) {
             f(&mut entry.stack);
             entry.stack.update_actual_thickness(defaults.thickness, defaults.draw_mode);
+            self.clamp_selection();
             self.repaint_surface();
         }
     }
     pub fn clear(&mut self) {
         self.stacks.clear();
+        self.selection = Selection::None;
         self.repaint_surface();
     }
     pub fn set_stacks_scale(&mut self, scale: StackBarScale<T>) {
@@ -269,6 +273,94 @@ where
             self.yaxis.width as i32 + 2
         } else {
             0
+        }
+    }
+    #[inline(always)]
+    pub fn selection(&self) -> Selection {
+        self.selection
+    }
+    pub fn select_stack(&mut self, index: usize) {
+        if index < self.stacks.len() {
+            self.set_selection(Selection::Stack(index as u32));
+        }
+    }
+    pub fn select_cell(&mut self, stack_index: usize, cell_index: usize) {
+        if let Some(entry) = self.stacks.get(stack_index) {
+            if cell_index < entry.stack.count() {
+                self.set_selection(Selection::Cell(stack_index as u32, cell_index as u32));
+            }
+        }
+    }
+    pub fn clear_selection(&mut self) {
+        self.set_selection(Selection::None);
+    }
+    pub(super) fn set_selection(&mut self, selection: Selection) -> bool {
+        if self.selection == selection {
+            return false;
+        }
+        self.selection = selection;
+        true
+    }
+    pub(super) fn clamp_selection(&mut self) {
+        self.selection = match self.selection {
+            Selection::None => Selection::None,
+            Selection::Stack(i) => {
+                if (i as usize) < self.stacks.len() {
+                    Selection::Stack(i)
+                } else {
+                    Selection::None
+                }
+            }
+            Selection::Cell(i, j) => match self.stacks.get(i as usize) {
+                None => Selection::None,
+                Some(entry) if (j as usize) < entry.stack.count() => Selection::Cell(i, j),
+                Some(_) => Selection::Stack(i),
+            },
+        };
+    }
+    pub(super) fn selection_rect(&self) -> Option<Rect> {
+        let (stack_index, cell) = match self.selection {
+            Selection::None => return None,
+            Selection::Stack(i) => (i as usize, None),
+            Selection::Cell(i, j) => (i as usize, Some(j as usize)),
+        };
+        let entry = self.stacks.get(stack_index)?;
+        let zero_row = self.visible_height() as i32 - self.yaxis.zero;
+        let rows = |segment: &super::stackbar::SegmentLayout| segment_rows(zero_row - segment.offset as i32, segment.len);
+        let (top, bottom) = match cell {
+            Some(j) => rows(entry.layout.get(j)?).unwrap_or((zero_row, zero_row)),
+            None => entry
+                .layout
+                .iter()
+                .filter_map(rows)
+                .fold(None, |acc: Option<(i32, i32)>, (t, b)| Some(acc.map_or((t, b), |(at, ab)| (at.min(t), ab.max(b)))))
+                .unwrap_or((zero_row, zero_row)),
+        };
+        let x = entry.pos - self.left_scroll + self.x_axis_left_margin();
+        let thickness = entry.stack.actual_thickness().max(1) as i32;
+        Some(Rect::new(x, top, x + thickness - 1, bottom))
+    }
+    pub(super) fn paint_selection(&self, surface: &mut Surface, theme: &Theme) {
+        let Some(rect) = self.selection_rect() else {
+            return;
+        };
+        let margin = self.x_axis_left_margin();
+        let left = if margin > 0 { margin - 1 } else { 0 };
+        let right = self.size().width.saturating_sub(1) as i32;
+        let bottom = self.visible_height() as i32;
+        surface.set_relative_clip(left, 0, right, bottom);
+        let mut border = rect;
+        border.inflate_width(1, 1, 1, 1);
+        surface.draw_rect(border, LineType::Single, theme.chart.selection_border);
+        if self.flags.contains(Flags::DimBarsOnSelection) {
+            let attr = theme.chart.inactive;
+            surface.transform_rect(Rect::new(left, 0, right, bottom), |ch, p| {
+                if rect.contains(p) {
+                    None
+                } else {
+                    Some(Character::with_attributes(ch.code, attr))
+                }
+            });
         }
     }
     pub(super) fn stack_index_at(&self, x: i32, y: i32) -> Option<usize> {
@@ -706,6 +798,7 @@ where
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
         } else {
             surface.draw_surface(0, 0, &self.surface);
+            self.paint_selection(surface, theme);
         }
     }
 }
