@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use super::mapping::ValueMapping;
 use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout};
+use super::events::EventType;
 use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
@@ -300,12 +301,12 @@ where
     pub fn clear_selection(&mut self) {
         self.set_selection(Selection::None);
     }
-    pub(super) fn set_selection(&mut self, selection: Selection) -> bool {
+    pub(super) fn set_selection(&mut self, selection: Selection) -> Option<EventType> {
         if self.selection == selection {
-            return false;
+            return None;
         }
         self.selection = selection;
-        true
+        Some(EventType::from(selection))
     }
     pub(super) fn clamp_selection(&mut self) {
         self.selection = match self.selection {

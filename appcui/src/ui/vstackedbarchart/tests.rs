@@ -3,6 +3,7 @@ use std::ops::DerefMut;
 use crate::ui::vstackedbarchart::{Selection, BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
+use super::events::{EventType, GenericVStackedBarChartEvents};
 use super::stackbar::{paint_segment, resolve_attr, segment_rows};
 use crate::ui::components::BarFillType;
 
@@ -4514,14 +4515,41 @@ fn check_selection_set_selection_reports_changes() {
     in_app(|| {
         let mut chart = sel_chart(vstackedbarchart::Flags::None);
         chart.add_stack([1, 2]);
-        assert!(!chart.set_selection(Selection::None));
-        assert!(chart.set_selection(Selection::Stack(0)));
-        assert!(!chart.set_selection(Selection::Stack(0)));
-        assert!(chart.set_selection(Selection::Cell(0, 1)));
-        assert!(!chart.set_selection(Selection::Cell(0, 1)));
-        assert!(chart.set_selection(Selection::Cell(0, 0)));
-        assert!(chart.set_selection(Selection::None));
+        assert_eq!(chart.set_selection(Selection::None), None);
+        assert_eq!(chart.set_selection(Selection::Stack(0)), Some(EventType::StackSelected(0)));
+        assert_eq!(chart.set_selection(Selection::Stack(0)), None);
+        assert_eq!(
+            chart.set_selection(Selection::Cell(0, 1)),
+            Some(EventType::CellSelected { stack_index: 0, cell_index: 1 })
+        );
+        assert_eq!(chart.set_selection(Selection::Cell(0, 1)), None);
+        assert_eq!(
+            chart.set_selection(Selection::Cell(0, 0)),
+            Some(EventType::CellSelected { stack_index: 0, cell_index: 0 })
+        );
+        assert_eq!(chart.set_selection(Selection::None), Some(EventType::ClearSelection));
     });
+}
+
+#[test]
+fn check_events_type_from_selection() {
+    assert_eq!(EventType::from(Selection::None), EventType::ClearSelection);
+    assert_eq!(EventType::from(Selection::Stack(3)), EventType::StackSelected(3));
+    assert_eq!(
+        EventType::from(Selection::Cell(2, 5)),
+        EventType::CellSelected { stack_index: 2, cell_index: 5 }
+    );
+}
+
+#[test]
+fn check_events_default_trait_methods_ignore() {
+    struct Receiver;
+    impl GenericVStackedBarChartEvents for Receiver {}
+    let mut receiver = Receiver;
+    let type_id = std::any::TypeId::of::<i32>();
+    assert!(matches!(receiver.on_clear_selection(Handle::None, type_id), EventProcessStatus::Ignored));
+    assert!(matches!(receiver.on_stack_selected(Handle::None, type_id, 1), EventProcessStatus::Ignored));
+    assert!(matches!(receiver.on_cell_selected(Handle::None, type_id, 1, 2), EventProcessStatus::Ignored));
 }
 
 #[test]
@@ -5011,19 +5039,19 @@ fn check_hash_tooltip_hover_cells() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x1)
+        CheckHash(0xCBEB9255D81E7ACA)
         Mouse.Move(10,11)
         Paint('2. Hover A, first bar')
-        CheckHash(0x1)
+        CheckHash(0xB06C631F480EC70F)
         Mouse.Move(10,8)
         Paint('3. Hover A, second bar')
-        CheckHash(0x1)
+        CheckHash(0xF8A4D51AF407C6E6)
         Mouse.Move(14,6)
         Paint('4. Hover C, third bar')
-        CheckHash(0x1)
+        CheckHash(0x9DCE891E24D3DC7E)
         Mouse.Move(20,11)
         Paint('5. Hover empty area')
-        CheckHash(0x1)
+        CheckHash(0xCBEB9255D81E7ACA)
     ";
     run_script(script, Size::new(50, 16), tooltip_script_chart);
 }
@@ -5034,7 +5062,7 @@ fn check_hash_tooltip_percentage() {
         Paint.Enable(false)
         Mouse.Move(10,11)
         Paint('1. Hover A, first bar (percentage)')
-        CheckHash(0x1)
+        CheckHash(0xBAB62C13BC01F155)
     ";
     run_script(script, Size::new(50, 16), || {
         let mut chart = tooltip_script_chart();

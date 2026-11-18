@@ -8,6 +8,7 @@ mod initialization_flags;
 mod stackbar;
 mod mapping;
 mod selection;
+pub mod events;
 #[cfg(test)]
 mod tests;
 
