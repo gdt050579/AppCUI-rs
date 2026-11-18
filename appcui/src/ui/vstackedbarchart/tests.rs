@@ -4129,10 +4129,10 @@ fn check_hash_scroll_scrolled() {
         Paint.Enable(false)
         Key.Pressed(Ctrl+Right,5)
         Paint('1. Scrolled 5 stacks')
-        CheckHash(0x1)
+        CheckHash(0x7A91BC42C086F7A9)
         Key.Pressed(Ctrl+Left,2)
         Paint('2. Back 2 stacks')
-        CheckHash(0x1)
+        CheckHash(0xA635DE772CC88CE4)
         Key.Pressed(End)
         Paint('3. End')
         CheckHash(0x40044F5048424A19)
@@ -5309,19 +5309,19 @@ fn check_hash_keyboard_selection() {
         Paint.Enable(false)
         Key.Pressed(Right)
         Paint('1. First stack selected')
-        CheckHash(0x1)
+        CheckHash(0xE4B80133C54813D0)
         Key.Pressed(Right,2)
         Paint('2. Third stack selected')
-        CheckHash(0x1)
+        CheckHash(0xC3D97104A99021EC)
         Key.Pressed(Down)
         Paint('3. First bar of the third stack')
-        CheckHash(0x1)
+        CheckHash(0x52AE47CCB9C665EE)
         Key.Pressed(Up)
         Paint('4. Second bar of the third stack')
-        CheckHash(0x1)
+        CheckHash(0x2112905E9ED0F50A)
         Key.Pressed(Left)
         Paint('5. Second stack selected')
-        CheckHash(0x1)
+        CheckHash(0x2642B541C6EA76BC)
     ";
     run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::None));
 }
@@ -5332,13 +5332,13 @@ fn check_hash_keyboard_selection_with_dimming() {
         Paint.Enable(false)
         Key.Pressed(Right,2)
         Paint('1. Second stack, others dimmed')
-        CheckHash(0x1)
+        CheckHash(0x8887BBD5F6863DA9)
         Key.Pressed(Down)
         Paint('2. First bar, rest dimmed')
-        CheckHash(0x1)
+        CheckHash(0x216E321B7EDCC714)
         Key.Pressed(Up)
         Paint('3. Second bar, rest dimmed')
-        CheckHash(0x1)
+        CheckHash(0xB171A8A62370D3B5)
     ";
     run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::DimBarsOnSelection));
 }
@@ -5349,10 +5349,10 @@ fn check_hash_keyboard_selection_scrolls_wide_chart() {
         Paint.Enable(false)
         Key.Pressed(Right,25)
         Paint('1. Stack 25 selected and scrolled into view')
-        CheckHash(0x1)
+        CheckHash(0x4274E4D9F94C19E4)
         Key.Pressed(Down)
         Paint('2. First bar of stack 25')
-        CheckHash(0x1)
+        CheckHash(0x1DB7AD9511D65624)
     ";
     run_script(script, Size::new(50, 16), wide_chart);
 }
