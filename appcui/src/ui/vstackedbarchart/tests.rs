@@ -6091,3 +6091,80 @@ fn check_selection_events_from_mouse_clicks() {
     );
     assert_eq!(events, vec!["cell:0:1", "cell:1:0", "cell:2:2", "clear"]);
 }
+
+fn double_click(chart: &mut VStackedBarChart<i32>, x: i32, y: i32, button: MouseButton) -> EventProcessStatus {
+    chart.on_mouse_event(&MouseEvent::DoubleClick(MouseEventData {
+        x,
+        y,
+        button,
+        modifier: KeyModifier::None,
+    }))
+}
+
+#[test]
+fn check_double_click_selects_stack() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(2, 1).unwrap();
+        assert!(matches!(double_click(&mut chart, r.left(), r.top(), MouseButton::Left), EventProcessStatus::Processed));
+        assert_eq!(chart.selection(), Selection::Stack(2));
+    });
+}
+
+#[test]
+fn check_double_click_after_click_turns_cell_into_stack() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(0, 1).unwrap();
+        click(&mut chart, r.left(), r.top());
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        double_click(&mut chart, r.left(), r.top(), MouseButton::Left);
+        assert_eq!(chart.selection(), Selection::Stack(0));
+    });
+}
+
+#[test]
+fn check_double_click_above_bars_selects_stack() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(1, 0).unwrap();
+        assert_eq!(chart.cell_index_at(r.left(), 0), None);
+        double_click(&mut chart, r.left(), 0, MouseButton::Left);
+        assert_eq!(chart.selection(), Selection::Stack(1));
+    });
+}
+
+#[test]
+fn check_double_click_on_empty_area_is_ignored() {
+    in_app(|| {
+        let mut chart = click_chart();
+        chart.select_cell(0, 0);
+        assert!(matches!(double_click(&mut chart, 20, 5, MouseButton::Left), EventProcessStatus::Ignored));
+        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+    });
+}
+
+#[test]
+fn check_double_click_with_other_buttons_is_ignored() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(0, 0).unwrap();
+        assert!(matches!(double_click(&mut chart, r.left(), r.top(), MouseButton::Right), EventProcessStatus::Ignored));
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_selection_events_from_double_click() {
+    let events = run_events(
+        "
+        Paint.Enable(false)
+        Mouse.DoubleClick(4,12,left)
+        Mouse.DoubleClick(4,12,left)
+        Mouse.DoubleClick(2,12,left)
+        Mouse.DoubleClick(21,6,left)
+    ",
+        false,
+    );
+    assert_eq!(events, vec!["stack:1", "stack:0"]);
+}

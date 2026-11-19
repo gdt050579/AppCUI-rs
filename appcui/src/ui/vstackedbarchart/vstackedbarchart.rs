@@ -1057,6 +1057,14 @@ where
                 self.change_selection(selection);
                 EventProcessStatus::Processed
             }
+            MouseEvent::DoubleClick(data) if data.button == MouseButton::Left => {
+                let Some(stack) = self.stack_index_at(data.x, data.y) else {
+                    return EventProcessStatus::Ignored;
+                };
+                self.clear_hovered();
+                self.change_selection(Selection::Stack(stack as u32));
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
