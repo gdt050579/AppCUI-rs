@@ -4,19 +4,21 @@ fn main() -> Result<(), appcui::system::Error> {
     App::new()
         .window(|| {
             let mut win = window!("'Stacked bars',a:c,w:70,h:16");
-            let mut chart = VStackedBarChart::<i32>::new(
-                layout!("d:f"),
-                vstackedbarchart::Flags::ScrollBars | vstackedbarchart::Flags::ShowZeroLineOnYAxis,
-            );
-            chart.set_default_bar_width(3);
-            chart.set_default_bar_spacing(2);
-            chart.set_xaxis_label_mode(vstackedbarchart::XAxisLabelMode::StackLabels);
-            chart.add_stack(vstackedbarchart::BarsStackBuilder::new().label("Jan").bar(12).bar(5).bar(-3).build());
-            chart.add_stack(vstackedbarchart::BarsStackBuilder::new().label("Feb").bar(25).bar(-8).build());
-            chart.add_stack(vstackedbarchart::BarsStackBuilder::new().label("Mar").bar(8).bar(4).bar(6).build());
-            chart.add_stack(vstackedbarchart::BarsStackBuilder::new().label("Apr").bar(-10).bar(-4).bar(30).build());
-            chart.add_stack(vstackedbarchart::BarsStackBuilder::new().label("May").bar(18).bar(2).build());
-            win.add(chart);
+            win.add(vstackedbarchart!(
+                "i32, 
+                 d:f, 
+                 flags: ScrollBars+ShowZeroLineOnYAxis+DimBarsOnSelection, 
+                 dbw: 3, 
+                 dbs: 2, 
+                 xlabels: StackLabels,
+                 stacks: [
+                    {Jan, bars: [{12, attr: red}, {5, attr: green}, {3, attr: aqua}, {4, attr: yellow}]},
+                    {Feb, bars: [{25, attr: red}, {8, attr: green}, {6, attr: aqua}, {3, attr: yellow}]},
+                    {Mar, bars: [{8, attr: red}, {4, attr: green}, {6, attr: aqua}, {2, attr: yellow}]},
+                    {Apr, bars: [{10, attr: red}, {4, attr: green}, {30, attr: aqua}, {5, attr: yellow}]},
+                    {May, bars: [{18, attr: red}, {2, attr: green}, {9, attr: aqua}, {4, attr: yellow}]}
+                ]"
+            ));
             win
         })
         .run()
