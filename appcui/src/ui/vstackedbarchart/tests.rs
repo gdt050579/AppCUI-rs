@@ -4443,6 +4443,8 @@ fn check_selection_default_is_none() {
     in_app(|| {
         let chart = sel_chart(vstackedbarchart::Flags::None);
         assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         assert_eq!(Selection::default(), Selection::None);
     });
 }
@@ -4455,12 +4457,20 @@ fn check_selection_select_stack_and_cell() {
         chart.add_stack([4]);
         chart.select_stack(1);
         assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(0, 2);
         assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(2));
         chart.select_stack(0);
         assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
         chart.clear_selection();
         assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 

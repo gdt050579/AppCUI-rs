@@ -306,8 +306,22 @@ where
         }
     }
     #[inline(always)]
-    pub fn selection(&self) -> Selection {
+    pub(super) fn selection(&self) -> Selection {
         self.selection
+    }
+    #[inline(always)]
+    pub fn selected_stack(&self) -> Option<u32> {
+        match self.selection {
+            Selection::None => None,
+            Selection::Stack(index) | Selection::Cell(index, _) => Some(index),
+        }
+    }
+    #[inline(always)]
+    pub fn selected_cell(&self) -> Option<u32> {
+        match self.selection {
+            Selection::Cell(_, index) => Some(index),
+            Selection::None | Selection::Stack(_) => None,
+        }
     }
     pub fn select_stack(&mut self, index: usize) {
         if index < self.stacks.len() {

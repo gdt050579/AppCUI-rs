@@ -508,10 +508,10 @@ impl StackedBarChartEditor {
         win
     }
 
-    fn current_selection(&self) -> vstackedbarchart::Selection {
+    fn selected_stack_and_cell(&self) -> (Option<u32>, Option<u32>) {
         self.control(self.chart)
-            .map(|chart| chart.selection())
-            .unwrap_or(vstackedbarchart::Selection::None)
+            .map(|chart| (chart.selected_stack(), chart.selected_cell()))
+            .unwrap_or((None, None))
     }
 
     fn scale_limit(&self, handle: Handle<NumericSelector<i32>>) -> i32 {
@@ -764,13 +764,12 @@ impl StackedBarChartEditor {
     where
         F: FnOnce(&mut vstackedbarchart::BarsStack<i32>),
     {
-        let index = match self.current_selection() {
-            vstackedbarchart::Selection::Stack(index) | vstackedbarchart::Selection::Cell(index, _) => index as usize,
-            vstackedbarchart::Selection::None => return,
+        let Some(index) = self.selected_stack_and_cell().0 else {
+            return;
         };
         let chart = self.chart;
         if let Some(ctrl) = self.control_mut(chart) {
-            ctrl.update_stack(index, f);
+            ctrl.update_stack(index as usize, f);
         }
     }
 
@@ -778,20 +777,23 @@ impl StackedBarChartEditor {
     where
         F: FnMut(&mut vstackedbarchart::StackBar<i32>),
     {
-        let selection = self.current_selection();
+        let (stack_index, cell_index) = self.selected_stack_and_cell();
+        let Some(stack_index) = stack_index else {
+            return;
+        };
         let chart = self.chart;
         let Some(ctrl) = self.control_mut(chart) else {
             return;
         };
-        match selection {
-            vstackedbarchart::Selection::Cell(stack_index, cell_index) => {
+        match cell_index {
+            Some(cell_index) => {
                 ctrl.update_stack(stack_index as usize, |stack| {
                     if let Some(bar) = stack.get_mut(cell_index as usize) {
                         f(bar);
                     }
                 });
             }
-            vstackedbarchart::Selection::Stack(stack_index) => {
+            None => {
                 ctrl.update_stack(stack_index as usize, |stack| {
                     let count = stack.count();
                     for index in 0..count {
@@ -801,7 +803,6 @@ impl StackedBarChartEditor {
                     }
                 });
             }
-            vstackedbarchart::Selection::None => {}
         }
     }
 
