@@ -45,6 +45,7 @@ pub(crate) mod toolbaritem;
 pub(crate) mod treeview;
 pub(crate) mod usagechart;
 pub(crate) mod vbarchart;
+pub(crate) mod vstackedbarchart;
 pub(crate) mod vline;
 pub(crate) mod vsplitter;
 pub(crate) mod window;

@@ -3007,6 +3007,11 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
     crate::controls::vbarchart::create(input)
 }
 
+#[proc_macro]
+pub fn vstackedbarchart(input: TokenStream) -> TokenStream {
+    crate::controls::vstackedbarchart::create(input)
+}
+
 /// Creates a new horizontal bar chart for a numeric series.
 /// The format is `hbarchart!("attributes")` where the attributes are pairs of key-value, separated by comma.
 ///

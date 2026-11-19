@@ -37,7 +37,7 @@ pub struct VStackedBarChart<T>
 where
     T: Number + 'static,
 {
-    flags: Flags,
+    pub(super) flags: Flags,
     pub(super) stacks: Vec<StackWithLayout<T>>,
     pub(super) stacks_width: u32,
     pub(super) left_scroll: i32,
