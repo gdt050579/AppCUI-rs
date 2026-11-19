@@ -4442,7 +4442,6 @@ fn overlay_surface(chart: &VStackedBarChart<i32>) -> Surface {
 fn check_selection_default_is_none() {
     in_app(|| {
         let chart = sel_chart(vstackedbarchart::Flags::None);
-        assert_eq!(chart.selection(), Selection::None);
         assert_eq!(chart.selected_stack(), None);
         assert_eq!(chart.selected_cell(), None);
         assert_eq!(Selection::default(), Selection::None);
@@ -4456,19 +4455,15 @@ fn check_selection_select_stack_and_cell() {
         chart.add_stack([1, 2, 3]);
         chart.add_stack([4]);
         chart.select_stack(1);
-        assert_eq!(chart.selection(), Selection::Stack(1));
         assert_eq!(chart.selected_stack(), Some(1));
         assert_eq!(chart.selected_cell(), None);
         chart.select_cell(0, 2);
-        assert_eq!(chart.selection(), Selection::Cell(0, 2));
         assert_eq!(chart.selected_stack(), Some(0));
         assert_eq!(chart.selected_cell(), Some(2));
         chart.select_stack(0);
-        assert_eq!(chart.selection(), Selection::Stack(0));
         assert_eq!(chart.selected_stack(), Some(0));
         assert_eq!(chart.selected_cell(), None);
         chart.clear_selection();
-        assert_eq!(chart.selection(), Selection::None);
         assert_eq!(chart.selected_stack(), None);
         assert_eq!(chart.selected_cell(), None);
     });
@@ -4480,14 +4475,18 @@ fn check_selection_out_of_range_is_ignored() {
         let mut chart = sel_chart(vstackedbarchart::Flags::None);
         chart.add_stack([1, 2]);
         chart.select_stack(1);
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(1, 0);
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(0, 2);
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(0, 1);
         chart.select_cell(0, 5);
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -4530,7 +4529,6 @@ fn check_selection_clear_resets_selection() {
         chart.add_stack([1, 2]);
         chart.select_cell(0, 1);
         chart.clear();
-        assert_eq!(chart.selection(), Selection::None);
     });
 }
 
@@ -4541,7 +4539,8 @@ fn check_selection_update_stack_clamps_cell_to_stack() {
         chart.add_stack([1, 2, 3]);
         chart.select_cell(0, 2);
         chart.update_stack(0, |s| *s = BarsStack::from([5]));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -4554,7 +4553,8 @@ fn check_selection_update_stack_keeps_valid_cell() {
         chart.update_stack(0, |s| {
             s.add_bars([9]);
         });
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -4565,13 +4565,16 @@ fn check_selection_clamp_drops_missing_stack() {
         chart.add_stack([1]);
         chart.selection = Selection::Stack(3);
         chart.clamp_selection();
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         chart.selection = Selection::Cell(3, 0);
         chart.clamp_selection();
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         chart.selection = Selection::Cell(0, 4);
         chart.clamp_selection();
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5067,13 +5070,16 @@ fn check_keys_right_selects_next_stack_without_wrapping() {
             chart.add_stack([2, 1]);
         }
         assert!(matches!(press(&mut chart, key!("Right")), EventProcessStatus::Processed));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
         press(&mut chart, key!("Right"));
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
         press(&mut chart, key!("Right"));
         press(&mut chart, key!("Right"));
         press(&mut chart, key!("Right"));
-        assert_eq!(chart.selection(), Selection::Stack(2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5086,10 +5092,12 @@ fn check_keys_left_selects_previous_stack_without_wrapping() {
         }
         chart.select_stack(2);
         press(&mut chart, key!("Left"));
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
         press(&mut chart, key!("Left"));
         press(&mut chart, key!("Left"));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5100,7 +5108,8 @@ fn check_keys_left_from_nothing_selects_first_stack() {
         chart.add_stack([2]);
         chart.add_stack([3]);
         press(&mut chart, key!("Left"));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5112,7 +5121,8 @@ fn check_keys_left_right_on_empty_chart_do_nothing() {
         press(&mut chart, key!("Left"));
         press(&mut chart, key!("Up"));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5125,16 +5135,20 @@ fn check_keys_left_right_from_cell_switch_to_stack() {
         }
         chart.select_cell(1, 0);
         press(&mut chart, key!("Right"));
-        assert_eq!(chart.selection(), Selection::Stack(2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(2, 1);
         press(&mut chart, key!("Right"));
-        assert_eq!(chart.selection(), Selection::Stack(2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(0, 1);
         press(&mut chart, key!("Left"));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(1, 1);
         press(&mut chart, key!("Left"));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5145,10 +5159,12 @@ fn check_keys_down_and_up_from_nothing_select_first_cell() {
         chart.add_stack([2, 1]);
         chart.add_stack([3]);
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(0));
         chart.clear_selection();
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(0));
     });
 }
 
@@ -5160,10 +5176,12 @@ fn check_keys_up_down_from_stack_select_first_cell_of_that_stack() {
         chart.add_stack([3, 4]);
         chart.select_stack(1);
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(1, 0));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), Some(0));
         chart.select_stack(1);
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(1, 0));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), Some(0));
     });
 }
 
@@ -5174,16 +5192,21 @@ fn check_keys_up_down_walk_positive_bars_visually() {
         chart.add_stack([3, 2, 1]);
         chart.select_cell(0, 0);
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(2));
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(2));
         press(&mut chart, key!("Down"));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(0));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(0));
     });
 }
 
@@ -5194,11 +5217,14 @@ fn check_keys_up_down_walk_negative_bars_visually() {
         chart.add_stack([-3, -2]);
         chart.select_cell(0, 0);
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(0));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -5209,14 +5235,18 @@ fn check_keys_up_down_follow_visual_order_in_mixed_stack() {
         chart.add_stack([3, -2, 2, -1]);
         chart.select_cell(0, 0);
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(2));
         press(&mut chart, key!("Down"));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(3));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(3));
     });
 }
 
@@ -5226,13 +5256,17 @@ fn check_keys_up_down_skip_zero_length_bars() {
         let mut chart = key_chart(vstackedbarchart::Flags::None);
         chart.add_stack([0, 4, 0, 2]);
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(3));
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 3));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(3));
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -5243,7 +5277,8 @@ fn check_keys_up_down_from_zero_length_cell_moves_to_visible_neighbour() {
         chart.add_stack([0, 4]);
         chart.select_cell(0, 0);
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -5253,10 +5288,12 @@ fn check_keys_up_down_on_stack_without_bars_keep_stack_selected() {
         let mut chart = key_chart(vstackedbarchart::Flags::None);
         chart.add_stack(Vec::<i32>::new());
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
         press(&mut chart, key!("Down"));
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5267,7 +5304,8 @@ fn check_keys_selection_scrolls_into_view() {
         for _ in 0..15 {
             press(&mut chart, key!("Right"));
         }
-        assert_eq!(chart.selection(), Selection::Stack(14));
+        assert_eq!(chart.selected_stack(), Some(14));
+        assert_eq!(chart.selected_cell(), None);
         assert!(chart.left_scroll > 0);
         let rect = chart.selection_rect().unwrap();
         assert!(rect.left() >= chart.x_axis_left_margin());
@@ -5275,7 +5313,8 @@ fn check_keys_selection_scrolls_into_view() {
         for _ in 0..15 {
             press(&mut chart, key!("Left"));
         }
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
         assert_eq!(chart.left_scroll, chart.stacks[0].pos);
     });
 }
@@ -5288,7 +5327,8 @@ fn check_keys_cell_selection_scrolls_stack_into_view() {
         chart.left_scroll = 0;
         chart.update_scroll_state();
         press(&mut chart, key!("Down"));
-        assert_eq!(chart.selection(), Selection::Cell(19, 0));
+        assert_eq!(chart.selected_stack(), Some(19));
+        assert_eq!(chart.selected_cell(), Some(0));
         assert!(chart.left_scroll > 0);
     });
 }
@@ -5309,7 +5349,8 @@ fn check_keys_other_keys_still_ignored() {
         let mut chart = key_chart(vstackedbarchart::Flags::None);
         chart.add_stack([2]);
         assert!(matches!(press(&mut chart, key!("Space")), EventProcessStatus::Ignored));
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5527,7 +5568,8 @@ fn check_update_stacks_empty_closure_changes_nothing() {
         chart.select_cell(2, 1);
         chart.update_stacks(|_| {});
         assert_eq!(counts(&chart), vec![2, 1, 3]);
-        assert_eq!(chart.selection(), Selection::Cell(2, 1));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -5539,16 +5581,19 @@ fn check_update_stacks_insert_shifts_selection() {
         chart.update_stacks(|stacks| {
             stacks.insert(2, [9]);
         });
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
         chart.update_stacks(|stacks| {
             stacks.insert(1, [9]);
         });
-        assert_eq!(chart.selection(), Selection::Stack(2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(3, 0);
         chart.update_stacks(|stacks| {
             stacks.insert(0, [9]);
         });
-        assert_eq!(chart.selection(), Selection::Cell(4, 0));
+        assert_eq!(chart.selected_stack(), Some(4));
+        assert_eq!(chart.selected_cell(), Some(0));
     });
 }
 
@@ -5561,7 +5606,8 @@ fn check_update_stacks_insert_after_selection_keeps_it() {
             stacks.insert(3, [9]);
             stacks.push([9]);
         });
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -5573,12 +5619,14 @@ fn check_update_stacks_delete_shifts_selection() {
         chart.update_stacks(|stacks| {
             stacks.delete(0);
         });
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(1, 2);
         chart.update_stacks(|stacks| {
             stacks.delete(0);
         });
-        assert_eq!(chart.selection(), Selection::Cell(0, 2));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(2));
     });
 }
 
@@ -5590,12 +5638,14 @@ fn check_update_stacks_delete_selected_clears_selection() {
         chart.update_stacks(|stacks| {
             stacks.delete(1);
         });
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         chart.select_cell(1, 0);
         chart.update_stacks(|stacks| {
             stacks.delete(1);
         });
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5607,7 +5657,8 @@ fn check_update_stacks_delete_after_selection_keeps_it() {
         chart.update_stacks(|stacks| {
             stacks.delete(2);
         });
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
     });
 }
 
@@ -5620,7 +5671,8 @@ fn check_update_stacks_clear_resets_selection() {
             stacks.clear();
             assert!(stacks.is_empty());
         });
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
         assert_eq!(chart.stacks_count(), 0);
         assert_eq!(chart.stacks_width, 0);
     });
@@ -5634,7 +5686,8 @@ fn check_update_stacks_clamps_cell_when_bars_shrink() {
         chart.update_stacks(|stacks| {
             *stacks.get_mut(2).unwrap() = BarsStack::from([1]);
         });
-        assert_eq!(chart.selection(), Selection::Stack(2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -5649,7 +5702,8 @@ fn check_update_stacks_combined_edits_keep_selection_consistent() {
             stacks.insert(0, [6]);
             stacks.insert(0, [7]);
         });
-        assert_eq!(chart.selection(), Selection::Stack(3));
+        assert_eq!(chart.selected_stack(), Some(3));
+        assert_eq!(chart.selected_cell(), None);
         assert_eq!(chart.get_stack(3).unwrap().count(), 3);
     });
 }
@@ -5860,7 +5914,8 @@ fn check_macro_plain_stacks() {
         let chart = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, stacks: [[1,2],[3],[4,5,6]]");
         assert_eq!(counts(&chart), vec![2, 1, 3]);
         assert_eq!(chart.get_stack(2).unwrap().get(2).unwrap().value(), 6);
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6043,10 +6098,12 @@ fn check_click_selects_cell() {
         let mut chart = click_chart();
         let r = chart.cell_rect(0, 1).unwrap();
         assert!(click(&mut chart, r.left(), r.top()));
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
         let r = chart.cell_rect(2, 2).unwrap();
         assert!(click(&mut chart, r.left(), r.bottom()));
-        assert_eq!(chart.selection(), Selection::Cell(2, 2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), Some(2));
     });
 }
 
@@ -6056,9 +6113,11 @@ fn check_click_on_empty_area_clears_selection() {
         let mut chart = click_chart();
         let r = chart.cell_rect(1, 0).unwrap();
         click(&mut chart, r.left(), r.top());
-        assert_eq!(chart.selection(), Selection::Cell(1, 0));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), Some(0));
         click(&mut chart, 20, 5);
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6069,7 +6128,8 @@ fn check_click_with_other_buttons_is_ignored() {
         let r = chart.cell_rect(0, 0).unwrap();
         let status = chart.on_mouse_event(&click_event(r.left(), r.top(), MouseButton::Right));
         assert!(matches!(status, EventProcessStatus::Ignored));
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6092,9 +6152,11 @@ fn check_click_then_keyboard_continues_from_clicked_cell() {
         let r = chart.cell_rect(2, 0).unwrap();
         click(&mut chart, r.left(), r.top());
         press(&mut chart, key!("Up"));
-        assert_eq!(chart.selection(), Selection::Cell(2, 1));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), Some(1));
         press(&mut chart, key!("Left"));
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6132,7 +6194,8 @@ fn check_double_click_selects_stack() {
         let mut chart = click_chart();
         let r = chart.cell_rect(2, 1).unwrap();
         assert!(matches!(double_click(&mut chart, r.left(), r.top(), MouseButton::Left), EventProcessStatus::Processed));
-        assert_eq!(chart.selection(), Selection::Stack(2));
+        assert_eq!(chart.selected_stack(), Some(2));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6142,9 +6205,11 @@ fn check_double_click_after_click_turns_cell_into_stack() {
         let mut chart = click_chart();
         let r = chart.cell_rect(0, 1).unwrap();
         click(&mut chart, r.left(), r.top());
-        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(1));
         double_click(&mut chart, r.left(), r.top(), MouseButton::Left);
-        assert_eq!(chart.selection(), Selection::Stack(0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6155,7 +6220,8 @@ fn check_double_click_above_bars_selects_stack() {
         let r = chart.cell_rect(1, 0).unwrap();
         assert_eq!(chart.cell_index_at(r.left(), 0), None);
         double_click(&mut chart, r.left(), 0, MouseButton::Left);
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6165,7 +6231,8 @@ fn check_double_click_on_empty_area_is_ignored() {
         let mut chart = click_chart();
         chart.select_cell(0, 0);
         assert!(matches!(double_click(&mut chart, 20, 5, MouseButton::Left), EventProcessStatus::Ignored));
-        assert_eq!(chart.selection(), Selection::Cell(0, 0));
+        assert_eq!(chart.selected_stack(), Some(0));
+        assert_eq!(chart.selected_cell(), Some(0));
     });
 }
 
@@ -6175,7 +6242,8 @@ fn check_double_click_with_other_buttons_is_ignored() {
         let mut chart = click_chart();
         let r = chart.cell_rect(0, 0).unwrap();
         assert!(matches!(double_click(&mut chart, r.left(), r.top(), MouseButton::Right), EventProcessStatus::Ignored));
-        assert_eq!(chart.selection(), Selection::None);
+        assert_eq!(chart.selected_stack(), None);
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 
@@ -6410,7 +6478,8 @@ fn check_wheel_keeps_the_selection() {
         let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
         chart.select_stack(1);
         wheel(&mut chart, MouseWheelDirection::Right);
-        assert_eq!(chart.selection(), Selection::Stack(1));
+        assert_eq!(chart.selected_stack(), Some(1));
+        assert_eq!(chart.selected_cell(), None);
     });
 }
 

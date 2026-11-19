@@ -306,10 +306,6 @@ where
         }
     }
     #[inline(always)]
-    pub(super) fn selection(&self) -> Selection {
-        self.selection
-    }
-    #[inline(always)]
     pub fn selected_stack(&self) -> Option<u32> {
         match self.selection {
             Selection::None => None,
