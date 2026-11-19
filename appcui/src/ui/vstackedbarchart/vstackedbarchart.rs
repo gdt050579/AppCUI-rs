@@ -1,6 +1,5 @@
 use super::events::{EventData, EventType};
-use super::mapping::ValueMapping;
-use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout};
+use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout, ValueMapping};
 use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, Stacks, XAxisLabelFormat, XAxisLabelMode};
 use crate::prelude::*;
 use crate::ui::components::BarSpan;

@@ -6,7 +6,6 @@
 mod vstackedbarchart;
 mod initialization_flags;
 mod stackbar;
-mod mapping;
 pub mod events;
 #[cfg(test)]
 mod tests;
