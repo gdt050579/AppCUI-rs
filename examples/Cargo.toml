@@ -382,6 +382,10 @@ name = "vbarchart_editor"
 path = "vbarchart_editor/main.rs"
 
 [[example]]
+name = "vstackbarchart_editor"
+path = "vstackbarchart_editor/main.rs"
+
+[[example]]
 name = "hbarchart_editor"
 path = "hbarchart_editor/main.rs"
 
