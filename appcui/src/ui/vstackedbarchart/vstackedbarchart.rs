@@ -42,6 +42,8 @@ where
     pub(super) stacks_width: u32,
     pub(super) left_scroll: i32,
     pub(super) first_visible_stack: u32,
+    pub(super) scroll_anchor: u32,
+    keep_scroll_anchor: bool,
     pub(super) selection: Selection,
     pub(super) hovered: Option<(u32, u32)>,
     pub(super) tooltip_text: String,
@@ -72,6 +74,8 @@ where
             stacks_width: 0,
             left_scroll: 0,
             first_visible_stack: 0,
+            scroll_anchor: 0,
+            keep_scroll_anchor: false,
             selection: Selection::None,
             hovered: None,
             tooltip_text: String::new(),
@@ -567,29 +571,43 @@ where
         self.scrollbars.set_indexes(self.left_scroll as u64, 0);
     }
     pub(super) fn update_scroll_state(&mut self) {
-        self.left_scroll = self.left_scroll.clamp(0, self.max_left_scroll());
+        let max_scroll = self.max_left_scroll();
+        let upper_bound = if max_scroll > 0 { max_scroll.max(self.stacks.last().map_or(0, |s| s.pos)) } else { 0 };
+        self.left_scroll = self.left_scroll.clamp(0, upper_bound);
         self.update_first_visible_stack();
+        if self.keep_scroll_anchor {
+            self.keep_scroll_anchor = false;
+        } else {
+            self.scroll_anchor = self.first_visible_stack;
+        }
         self.sync_scrollbars();
     }
     pub(super) fn after_horizontal_scroll(&mut self) {
         self.clear_hovered();
         self.repaint_surface();
     }
+    pub(super) fn scroll_by_columns(&mut self, delta: i32) {
+        if (delta < 0 && self.left_scroll > 0) || (delta > 0 && self.left_scroll < self.max_left_scroll()) {
+            self.left_scroll += delta;
+            self.after_horizontal_scroll();
+        }
+    }
     pub(super) fn scroll_to_next_stack(&mut self) {
         self.clear_hovered();
-        let left_scroll = self.left_scroll;
-        let index = self.stacks.partition_point(|s| s.pos <= left_scroll);
-        if let Some(entry) = self.stacks.get(index) {
-            self.left_scroll = entry.pos.min(self.max_left_scroll());
+        let next = self.scroll_anchor as usize + 1;
+        if let Some(entry) = self.stacks.get(next) {
+            self.scroll_anchor = next as u32;
+            self.keep_scroll_anchor = true;
+            self.left_scroll = entry.pos;
             self.repaint_surface();
         }
     }
     pub(super) fn scroll_to_previous_stack(&mut self) {
         self.clear_hovered();
-        let left_scroll = self.left_scroll;
-        let count = self.stacks.partition_point(|s| s.pos < left_scroll);
-        if count > 0 {
-            self.left_scroll = self.stacks[count - 1].pos;
+        if self.scroll_anchor > 0 {
+            self.scroll_anchor -= 1;
+            self.keep_scroll_anchor = true;
+            self.left_scroll = self.stacks[self.scroll_anchor as usize].pos;
             self.repaint_surface();
         }
     }
@@ -1056,6 +1074,13 @@ where
                 };
                 self.clear_hovered();
                 self.change_selection(selection);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(direction) => {
+                match direction {
+                    MouseWheelDirection::Left | MouseWheelDirection::Up => self.scroll_by_columns(-1),
+                    MouseWheelDirection::Right | MouseWheelDirection::Down => self.scroll_by_columns(1),
+                }
                 EventProcessStatus::Processed
             }
             MouseEvent::DoubleClick(data) if data.button == MouseButton::Left => {

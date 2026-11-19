@@ -3827,10 +3827,10 @@ fn check_scroll_max_left_scroll_when_content_is_wider() {
 fn check_scroll_left_scroll_is_clamped_after_repaint() {
     in_app(|| {
         let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
-        let max = chart.max_left_scroll();
-        chart.left_scroll = max + 50;
+        let last = chart.stacks[19].pos;
+        chart.left_scroll = last + 50;
         chart.update_scroll_state();
-        assert_eq!(chart.left_scroll, max);
+        assert_eq!(chart.left_scroll, last);
         chart.left_scroll = -5;
         chart.update_scroll_state();
         assert_eq!(chart.left_scroll, 0);
@@ -4023,11 +4023,11 @@ fn check_keys_ctrl_right_aligns_to_next_stack() {
         let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
         assert_eq!(chart.left_scroll, 0);
         press(&mut chart, key!("Ctrl+Right"));
-        assert_eq!(chart.left_scroll, chart.stacks[0].pos);
-        press(&mut chart, key!("Ctrl+Right"));
         assert_eq!(chart.left_scroll, chart.stacks[1].pos);
         press(&mut chart, key!("Ctrl+Right"));
         assert_eq!(chart.left_scroll, chart.stacks[2].pos);
+        press(&mut chart, key!("Ctrl+Right"));
+        assert_eq!(chart.left_scroll, chart.stacks[3].pos);
         assert_eq!(chart.scrollbars.horizontal_index(), chart.left_scroll as u64);
     });
 }
@@ -4044,13 +4044,16 @@ fn check_keys_ctrl_right_from_between_stacks() {
 }
 
 #[test]
-fn check_keys_ctrl_right_stops_at_max_scroll() {
+fn check_keys_ctrl_right_stops_at_last_stack() {
     in_app(|| {
         let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
         for _ in 0..40 {
             press(&mut chart, key!("Ctrl+Right"));
         }
-        assert_eq!(chart.left_scroll, chart.max_left_scroll());
+        assert_eq!(chart.left_scroll, chart.stacks[19].pos);
+        assert!(chart.left_scroll > chart.max_left_scroll());
+        press(&mut chart, key!("Ctrl+Left"));
+        assert_eq!(chart.left_scroll, chart.stacks[18].pos);
     });
 }
 
@@ -4058,14 +4061,13 @@ fn check_keys_ctrl_right_stops_at_max_scroll() {
 fn check_keys_ctrl_left_aligns_to_previous_stack() {
     in_app(|| {
         let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
-        chart.left_scroll = chart.stacks[5].pos;
+        chart.left_scroll = chart.stacks[5].pos + 1;
         chart.update_scroll_state();
+        assert_eq!(chart.scroll_anchor, 5);
         press(&mut chart, key!("Ctrl+Left"));
         assert_eq!(chart.left_scroll, chart.stacks[4].pos);
-        chart.left_scroll += 1;
-        chart.update_scroll_state();
         press(&mut chart, key!("Ctrl+Left"));
-        assert_eq!(chart.left_scroll, chart.stacks[4].pos);
+        assert_eq!(chart.left_scroll, chart.stacks[3].pos);
         chart.left_scroll = chart.stacks[0].pos;
         chart.update_scroll_state();
         press(&mut chart, key!("Ctrl+Left"));
@@ -4129,10 +4131,10 @@ fn check_hash_scroll_scrolled() {
         Paint.Enable(false)
         Key.Pressed(Ctrl+Right,5)
         Paint('1. Scrolled 5 stacks')
-        CheckHash(0x7A91BC42C086F7A9)
+        CheckHash(0x602AA940002643A7)
         Key.Pressed(Ctrl+Left,2)
         Paint('2. Back 2 stacks')
-        CheckHash(0xA635DE772CC88CE4)
+        CheckHash(0x458EFEB6F2EDC22E)
         Key.Pressed(End)
         Paint('3. End')
         CheckHash(0x40044F5048424A19)
@@ -4141,7 +4143,7 @@ fn check_hash_scroll_scrolled() {
         CheckHash(0xC7699FA889F036D0)
         Key.Pressed(Ctrl+Right,3)
         Paint('5. Aligned to stack 3')
-        CheckHash(0xA635DE772CC88CE4)
+        CheckHash(0x458EFEB6F2EDC22E)
     ";
     run_script(script, Size::new(50, 16), wide_chart);
 }
@@ -4978,7 +4980,13 @@ fn check_hover_other_mouse_events_are_ignored() {
     in_app(|| {
         let mut chart = tip_chart();
         chart.add_stack([3]);
-        assert!(matches!(chart.on_mouse_event(&MouseEvent::Wheel(MouseWheelDirection::Up)), EventProcessStatus::Ignored));
+        let data = MouseEventData {
+            x: 1,
+            y: 1,
+            button: MouseButton::Left,
+            modifier: KeyModifier::None,
+        };
+        assert!(matches!(chart.on_mouse_event(&MouseEvent::Released(data)), EventProcessStatus::Ignored));
     });
 }
 
@@ -6307,5 +6315,153 @@ fn check_selection_border_without_xaxis_stays_inside_the_control() {
         let last = chart.size().height as i32 - 1;
         assert_eq!(rect.bottom(), last);
         assert_ne!(surface.char(rect.left(), last).unwrap().code, '─');
+    });
+}
+
+fn wheel(chart: &mut VStackedBarChart<i32>, direction: MouseWheelDirection) -> bool {
+    matches!(chart.on_mouse_event(&MouseEvent::Wheel(direction)), EventProcessStatus::Processed)
+}
+
+#[test]
+fn check_wheel_right_and_left_scroll_one_column() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        assert_eq!(chart.left_scroll, 0);
+        assert!(wheel(&mut chart, MouseWheelDirection::Right));
+        assert_eq!(chart.left_scroll, 1);
+        wheel(&mut chart, MouseWheelDirection::Right);
+        wheel(&mut chart, MouseWheelDirection::Right);
+        assert_eq!(chart.left_scroll, 3);
+        wheel(&mut chart, MouseWheelDirection::Left);
+        assert_eq!(chart.left_scroll, 2);
+    });
+}
+
+#[test]
+fn check_wheel_up_and_down_follow_left_and_right() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        wheel(&mut chart, MouseWheelDirection::Down);
+        wheel(&mut chart, MouseWheelDirection::Down);
+        assert_eq!(chart.left_scroll, 2);
+        wheel(&mut chart, MouseWheelDirection::Up);
+        assert_eq!(chart.left_scroll, 1);
+    });
+}
+
+#[test]
+fn check_wheel_is_clamped_at_both_ends() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        wheel(&mut chart, MouseWheelDirection::Left);
+        assert_eq!(chart.left_scroll, 0);
+        let max = chart.max_left_scroll();
+        assert!(max > 0);
+        for _ in 0..max + 5 {
+            wheel(&mut chart, MouseWheelDirection::Right);
+        }
+        assert_eq!(chart.left_scroll, max);
+        wheel(&mut chart, MouseWheelDirection::Right);
+        assert_eq!(chart.left_scroll, max);
+    });
+}
+
+#[test]
+fn check_wheel_does_nothing_when_content_fits() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 3);
+        wheel(&mut chart, MouseWheelDirection::Right);
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+#[test]
+fn check_wheel_updates_first_visible_stack_and_clears_hover() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        let r = chart.cell_rect(0, 0).unwrap();
+        hover(&mut chart, r.left(), r.top());
+        assert!(chart.hovered.is_some());
+        for _ in 0..6 {
+            wheel(&mut chart, MouseWheelDirection::Right);
+        }
+        assert_eq!(chart.hovered, None);
+        assert!(chart.first_visible_stack > 0);
+    });
+}
+
+#[test]
+fn check_wheel_keeps_the_selection() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        chart.select_stack(1);
+        wheel(&mut chart, MouseWheelDirection::Right);
+        assert_eq!(chart.selection(), Selection::Stack(1));
+    });
+}
+
+#[test]
+fn check_hash_wheel_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Wheel(20,5,right,6)
+        Paint('1. Scrolled 6 columns right')
+        CheckHash(0xF83982E663488AFE)
+        Mouse.Wheel(20,5,left,2)
+        Paint('2. Back 2 columns')
+        CheckHash(0x3A32375D47137823)
+        Mouse.Wheel(20,5,down,100)
+        Paint('3. Scrolled to the end')
+        CheckHash(0x40044F5048424A19)
+        Mouse.Wheel(20,5,up,100)
+        Paint('4. Scrolled to the start')
+        CheckHash(0xC7699FA889F036D0)
+    ";
+    run_script(script, Size::new(50, 16), wide_chart);
+}
+
+#[test]
+fn check_scroll_sequence_matches_vbarchart() {
+    in_app(|| {
+        let mut chart = scroll_chart(vstackedbarchart::Flags::ScrollBars, 20);
+        // (operation, left_scroll, anchor) - the same sequence gives the same values in VBarChart with 20 bars
+        let steps: [(&str, i32, u32); 12] = [
+            ("wheel right", 1, 0),
+            ("wheel right", 2, 0),
+            ("wheel right", 3, 0),
+            ("wheel left", 2, 0),
+            ("ctrl+right", 3, 1),
+            ("ctrl+right", 5, 2),
+            ("ctrl+left", 3, 1),
+            ("wheel right", 4, 1),
+            ("ctrl+left", 1, 0),
+            ("end", 20, 9),
+            ("ctrl+left", 17, 8),
+            ("ctrl+right", 19, 9),
+        ];
+        for (op, left_scroll, anchor) in steps {
+            match op {
+                "wheel right" => {
+                    chart.on_mouse_event(&MouseEvent::Wheel(MouseWheelDirection::Right));
+                }
+                "wheel left" => {
+                    chart.on_mouse_event(&MouseEvent::Wheel(MouseWheelDirection::Left));
+                }
+                "end" => {
+                    press(&mut chart, key!("End"));
+                }
+                "ctrl+right" => {
+                    press(&mut chart, key!("Ctrl+Right"));
+                }
+                _ => {
+                    press(&mut chart, key!("Ctrl+Left"));
+                }
+            }
+            assert_eq!((chart.left_scroll, chart.scroll_anchor), (left_scroll, anchor), "after {op}");
+        }
+        press(&mut chart, key!("Home"));
+        assert_eq!((chart.left_scroll, chart.scroll_anchor), (0, 0));
+        press(&mut chart, key!("Ctrl+Right"));
+        assert_eq!((chart.left_scroll, chart.scroll_anchor), (3, 1));
     });
 }
