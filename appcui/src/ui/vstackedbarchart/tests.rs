@@ -5314,19 +5314,19 @@ fn check_hash_keyboard_selection() {
         Paint.Enable(false)
         Key.Pressed(Right)
         Paint('1. First stack selected')
-        CheckHash(0xE4B80133C54813D0)
+        CheckHash(0x1057D336A0EC7AB5)
         Key.Pressed(Right,2)
         Paint('2. Third stack selected')
-        CheckHash(0xC3D97104A99021EC)
+        CheckHash(0x1AF2FC5639D1019)
         Key.Pressed(Down)
         Paint('3. First bar of the third stack')
-        CheckHash(0x52AE47CCB9C665EE)
+        CheckHash(0xAD75DEBF3671AF63)
         Key.Pressed(Up)
         Paint('4. Second bar of the third stack')
         CheckHash(0x2112905E9ED0F50A)
         Key.Pressed(Left)
         Paint('5. Second stack selected')
-        CheckHash(0x2642B541C6EA76BC)
+        CheckHash(0xD85C4C78FA6D8EC1)
     ";
     run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::None));
 }
@@ -5337,13 +5337,13 @@ fn check_hash_keyboard_selection_with_dimming() {
         Paint.Enable(false)
         Key.Pressed(Right,2)
         Paint('1. Second stack, others dimmed')
-        CheckHash(0x47F09DB47353E3E3)
+        CheckHash(0x36D264F649381EFE)
         Key.Pressed(Down)
         Paint('2. First bar, rest dimmed')
-        CheckHash(0x43F6B51CD8B64F92)
+        CheckHash(0x2A0F00E7775BAACF)
         Key.Pressed(Up)
         Paint('3. Second bar, rest dimmed')
-        CheckHash(0x245AEF423B49A291)
+        CheckHash(0xFB369E84B3C4F0FE)
     ";
     run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::DimBarsOnSelection));
 }
@@ -5354,10 +5354,10 @@ fn check_hash_keyboard_selection_scrolls_wide_chart() {
         Paint.Enable(false)
         Key.Pressed(Right,25)
         Paint('1. Stack 25 selected and scrolled into view')
-        CheckHash(0x4274E4D9F94C19E4)
+        CheckHash(0x10E8572EEC52C22B)
         Key.Pressed(Down)
         Paint('2. First bar of stack 25')
-        CheckHash(0x1DB7AD9511D65624)
+        CheckHash(0x92DC9763001FC6B)
     ";
     run_script(script, Size::new(50, 16), wide_chart);
 }
@@ -5723,7 +5723,7 @@ fn check_hash_update_stacks() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xA5FC55269463B809)
+        CheckHash(0xD63E824D420B6B1C)
     ";
     run_script(script, Size::new(50, 16), || {
         let mut chart = hash_chart(vstackedbarchart::Flags::DimBarsOnSelection);
@@ -6231,5 +6231,81 @@ fn check_selection_rectangle_keeps_theme_color_when_dimming() {
                 assert_eq!((ch.foreground, ch.background), (custom.foreground, custom.background));
             }
         }
+    });
+}
+
+#[test]
+fn check_selection_border_reaches_axis_row() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        chart.add_stack(BarsStackBuilder::new().label("A").bars([5, 3]).build());
+        chart.select_cell(0, 0);
+        let surface = overlay_surface(&chart);
+        let rect = chart.selection_rect().unwrap();
+        let row = chart.visible_height() as i32 + 1;
+        assert_eq!(rect.bottom() + 1, row);
+        let border = chart.theme().chart.selection_border;
+        for (x, code) in [(rect.left() - 1, '└'), (rect.left(), '─'), (rect.right() + 1, '┘')] {
+            let ch = surface.char(x, row).unwrap();
+            assert_eq!(ch.code, code, "x={x}");
+            assert_eq!(ch.foreground, border.foreground, "x={x}");
+        }
+    });
+}
+
+#[test]
+fn check_dimming_grays_out_the_axis_row() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        chart.add_stack(BarsStackBuilder::new().label("A").bars([5, 3]).build());
+        chart.add_stack(BarsStackBuilder::new().label("B").bars([4]).build());
+        let before = overlay_surface(&chart);
+        let row = chart.visible_height() as i32 + 1;
+        let x = chart.stacks[1].pos + chart.x_axis_left_margin();
+        assert_eq!(before.char(x, row).unwrap().foreground, chart.theme().chart.axis.foreground);
+        chart.select_cell(0, 0);
+        let after = overlay_surface(&chart);
+        let inactive = chart.theme().chart.inactive;
+        let ch = after.char(x, row).unwrap();
+        assert_eq!(ch.code, before.char(x, row).unwrap().code);
+        assert_eq!(ch.foreground, inactive.foreground);
+        let rect = chart.selection_rect().unwrap();
+        let border = chart.theme().chart.selection_border;
+        assert_eq!(after.char(rect.left(), row).unwrap().foreground, border.foreground);
+    });
+}
+
+#[test]
+fn check_stack_selection_grays_out_the_axis_row() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        chart.add_stack(BarsStackBuilder::new().label("A").bars([5, 3]).build());
+        chart.add_stack(BarsStackBuilder::new().label("B").bars([4]).build());
+        chart.select_stack(0);
+        let after = overlay_surface(&chart);
+        let row = chart.visible_height() as i32 + 1;
+        let x = chart.stacks[1].pos + chart.x_axis_left_margin();
+        assert_eq!(after.char(x, row).unwrap().foreground, chart.theme().chart.inactive.foreground);
+    });
+}
+
+#[test]
+fn check_selection_border_without_xaxis_stays_inside_the_control() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        chart.add_stack([5, 3]);
+        chart.select_cell(0, 0);
+        let surface = overlay_surface(&chart);
+        let rect = chart.selection_rect().unwrap();
+        let last = chart.size().height as i32 - 1;
+        assert_eq!(rect.bottom(), last);
+        assert_ne!(surface.char(rect.left(), last).unwrap().code, '─');
     });
 }

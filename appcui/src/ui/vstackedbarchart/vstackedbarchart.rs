@@ -440,13 +440,14 @@ where
         let left = if margin > 0 { margin - 1 } else { 0 };
         let right = self.size().width.saturating_sub(1) as i32;
         let bottom = self.visible_height() as i32;
-        surface.set_relative_clip(left, 0, right, bottom);
+        let border_bottom = (bottom + 1).min(self.size().height as i32 - 1);
+        surface.set_relative_clip(left, 0, right, border_bottom);
         let mut border = rect;
         border.inflate_width(1, 1, 1, 1);
         surface.draw_rect(border, LineType::Single, theme.chart.selection_border);
         if self.flags.contains(Flags::DimBarsOnSelection) {
             let attr = theme.chart.inactive;
-            surface.transform_rect(Rect::new(left, 0, right, bottom), |ch, p| {
+            surface.transform_rect(Rect::new(left, 0, right, border_bottom), |ch, p| {
                 if border.contains(p) {
                     None
                 } else {
