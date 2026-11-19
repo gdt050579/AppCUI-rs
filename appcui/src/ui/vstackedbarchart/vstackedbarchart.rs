@@ -447,7 +447,7 @@ where
         if self.flags.contains(Flags::DimBarsOnSelection) {
             let attr = theme.chart.inactive;
             surface.transform_rect(Rect::new(left, 0, right, bottom), |ch, p| {
-                if rect.contains(p) {
+                if border.contains(p) {
                     None
                 } else {
                     Some(Character::with_attributes(ch.code, attr))
