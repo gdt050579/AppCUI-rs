@@ -7,6 +7,9 @@ screenshots and the full notes.
 
 ## [Unreleased]
 
+### Added
+- new example: `progressbar` (closes #263)
+
 ### Fixed
 - Error message from #[Window(events = WrongTrait)] now refers to the events attribute
 

@@ -489,6 +489,10 @@ path = "numericselector/main.rs"
 name = "booking_form"
 path = "booking_form/main.rs"
 
+[[example]]
+name = "progressbar"
+path = "progressbar/main.rs"
+
 
 [lints]
 workspace = true
