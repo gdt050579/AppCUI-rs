@@ -1,10 +1,11 @@
 use crate::prelude::*;
 use super::mapping::ValueMapping;
 use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout};
-use super::events::EventType;
+use super::events::{EventData, EventType};
 use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, Stacks, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
+use std::any::TypeId;
 
 #[derive(Copy, Clone)]
 pub(super) struct Defaults {
@@ -477,10 +478,21 @@ where
             ((top..=bottom).contains(&y)).then_some((stack_index, bar_index))
         })
     }
+    fn raise_selection_event(&self, event_type: EventType) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::VStackedBarChart(EventData {
+                type_id: TypeId::of::<T>(),
+                event_type,
+            }),
+        });
+    }
     fn change_selection(&mut self, selection: Selection) {
-        if self.set_selection(selection).is_none() {
+        let Some(event_type) = self.set_selection(selection) else {
             return;
-        }
+        };
+        self.raise_selection_event(event_type);
         if let Selection::Stack(index) | Selection::Cell(index, _) = selection {
             self.ensure_visible(index as usize);
         }
