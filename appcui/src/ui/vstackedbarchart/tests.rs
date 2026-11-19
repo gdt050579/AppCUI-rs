@@ -4770,9 +4770,14 @@ fn check_selection_paint_dims_everything_except_selected_cell() {
         for y in t0..=b0 {
             assert_eq!(after.char(x, y).unwrap().foreground, before.char(x, y).unwrap().foreground, "selected y={y}");
         }
+        let mut border = chart.selection_rect().unwrap();
+        border.inflate_width(1, 1, 1, 1);
+        let border_color = chart.theme().chart.selection_border.foreground;
         for y in t1..=b1 {
-            assert_eq!(after.char(x, y).unwrap().foreground, inactive.foreground, "other bar y={y}");
+            let expected = if border.contains(Point::new(x, y)) { border_color } else { inactive.foreground };
+            assert_eq!(after.char(x, y).unwrap().foreground, expected, "other bar y={y}");
         }
+        assert!((t1..=b1).any(|y| !border.contains(Point::new(x, y))), "the test must also cover dimmed rows");
     });
 }
 
@@ -5332,13 +5337,13 @@ fn check_hash_keyboard_selection_with_dimming() {
         Paint.Enable(false)
         Key.Pressed(Right,2)
         Paint('1. Second stack, others dimmed')
-        CheckHash(0x8887BBD5F6863DA9)
+        CheckHash(0x47F09DB47353E3E3)
         Key.Pressed(Down)
         Paint('2. First bar, rest dimmed')
-        CheckHash(0x216E321B7EDCC714)
+        CheckHash(0x43F6B51CD8B64F92)
         Key.Pressed(Up)
         Paint('3. Second bar, rest dimmed')
-        CheckHash(0xB171A8A62370D3B5)
+        CheckHash(0x245AEF423B49A291)
     ";
     run_script(script, Size::new(50, 16), || selection_script_chart(vstackedbarchart::Flags::DimBarsOnSelection));
 }
@@ -5718,7 +5723,7 @@ fn check_hash_update_stacks() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xE3DF38F45AF6E483)
+        CheckHash(0xA5FC55269463B809)
     ";
     run_script(script, Size::new(50, 16), || {
         let mut chart = hash_chart(vstackedbarchart::Flags::DimBarsOnSelection);
@@ -6167,4 +6172,64 @@ fn check_selection_events_from_double_click() {
         false,
     );
     assert_eq!(events, vec!["stack:1", "stack:0"]);
+}
+
+#[test]
+fn check_selection_rectangle_uses_theme_selection_border() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::None);
+        chart.set_yaxis_visible(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+        chart.add_stack([3, 2]);
+        chart.select_cell(0, 1);
+        let mut theme = Theme::new(Themes::Default);
+        let custom = charattr!("magenta,yellow");
+        assert_ne!(theme.chart.selection_border, custom);
+        theme.chart.selection_border = custom;
+        let mut surface = Surface::new(30, 14);
+        surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+        chart.on_paint(&mut surface, &theme);
+        let mut border = chart.selection_rect().unwrap();
+        border.inflate_width(1, 1, 1, 1);
+        for x in border.left()..=border.right() {
+            let ch = surface.char(x, border.top()).unwrap();
+            assert_eq!((ch.foreground, ch.background), (custom.foreground, custom.background));
+        }
+        for y in border.top()..border.bottom() {
+            for x in [border.left(), border.right()] {
+                let ch = surface.char(x, y).unwrap();
+                assert_eq!((ch.foreground, ch.background), (custom.foreground, custom.background));
+            }
+        }
+    });
+}
+
+#[test]
+fn check_selection_rectangle_keeps_theme_color_when_dimming() {
+    in_app(|| {
+        let mut chart = sel_chart(vstackedbarchart::Flags::DimBarsOnSelection);
+        chart.set_yaxis_visible(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+        chart.add_stack([3, 2]);
+        chart.select_cell(0, 1);
+        let mut theme = Theme::new(Themes::Default);
+        let custom = charattr!("magenta,yellow");
+        assert_ne!(theme.chart.selection_border, custom);
+        theme.chart.selection_border = custom;
+        let mut surface = Surface::new(30, 14);
+        surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+        chart.on_paint(&mut surface, &theme);
+        let mut border = chart.selection_rect().unwrap();
+        border.inflate_width(1, 1, 1, 1);
+        for x in border.left()..=border.right() {
+            let ch = surface.char(x, border.top()).unwrap();
+            assert_eq!((ch.foreground, ch.background), (custom.foreground, custom.background));
+        }
+        for y in border.top()..border.bottom() {
+            for x in [border.left(), border.right()] {
+                let ch = surface.char(x, y).unwrap();
+                assert_eq!((ch.foreground, ch.background), (custom.foreground, custom.background));
+            }
+        }
+    });
 }
