@@ -5733,3 +5733,96 @@ fn check_hash_update_stacks() {
         chart
     });
 }
+
+static STACKED_EVENTS: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+
+#[Window(events = VStackedBarChartEvents<i32>, internal: true)]
+struct EventsProbe {}
+impl EventsProbe {
+    fn new(preselect: bool) -> Self {
+        let mut win = Self { base: window!("Test,d:f") };
+        let mut chart = VStackedBarChart::<i32>::new(layout!("x:0,y:0,w:30,h:14"), vstackedbarchart::Flags::None);
+        chart.add_stack([1, 2]);
+        chart.add_stack([3]);
+        chart.add_stack([4, 5, 6]);
+        if preselect {
+            chart.select_stack(1);
+        }
+        win.add(chart);
+        win
+    }
+}
+impl VStackedBarChartEvents<i32> for EventsProbe {
+    fn on_clear_selection(&mut self, _: Handle<VStackedBarChart<i32>>) -> EventProcessStatus {
+        STACKED_EVENTS.lock().unwrap().push("clear".to_string());
+        EventProcessStatus::Processed
+    }
+    fn on_stack_selected(&mut self, _: Handle<VStackedBarChart<i32>>, index: u32) -> EventProcessStatus {
+        STACKED_EVENTS.lock().unwrap().push(format!("stack:{index}"));
+        EventProcessStatus::Processed
+    }
+    fn on_cell_selected(&mut self, _: Handle<VStackedBarChart<i32>>, stack_index: u32, cell_index: u32) -> EventProcessStatus {
+        STACKED_EVENTS.lock().unwrap().push(format!("cell:{stack_index}:{cell_index}"));
+        EventProcessStatus::Processed
+    }
+}
+
+fn run_events(script: &str, preselect: bool) -> Vec<String> {
+    STACKED_EVENTS.lock().unwrap().clear();
+    App::new()
+        .size(Size::new(40, 16))
+        .debug_script(script)
+        .window(move || EventsProbe::new(preselect))
+        .run()
+        .unwrap();
+    STACKED_EVENTS.lock().unwrap().clone()
+}
+
+#[test]
+fn check_selection_events_from_keys() {
+    let events = run_events(
+        "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Key.Pressed(Right)
+        Key.Pressed(Down)
+        Key.Pressed(Down)
+        Key.Pressed(Left)
+        Key.Pressed(Left)
+        Key.Pressed(Left)
+    ",
+        false,
+    );
+    assert_eq!(events, vec!["stack:0", "stack:1", "cell:1:0", "stack:0"]);
+}
+
+#[test]
+fn check_no_event_when_selection_unchanged() {
+    let events = run_events(
+        "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Key.Pressed(Right)
+        Key.Pressed(Right)
+        Key.Pressed(Right)
+        Key.Pressed(Up)
+        Key.Pressed(Up)
+        Key.Pressed(Up)
+        Key.Pressed(Up)
+    ",
+        false,
+    );
+    assert_eq!(events, vec!["stack:0", "stack:1", "stack:2", "cell:2:0", "cell:2:1", "cell:2:2"]);
+}
+
+#[test]
+fn check_programmatic_selection_raises_no_event() {
+    let events = run_events(
+        "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+    ",
+        true,
+    );
+    assert_eq!(events, vec!["stack:2"]);
+}
