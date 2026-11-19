@@ -78,3 +78,5 @@ fn main() -> Result<(), appcui::system::Error> {
     App::frame_app(HelloWorld {}).run()
 }
 ```
+
+The first snippet builds the window with `Window::new` and `Label::new`. The second writes the same window with `window!` and `label!`. Those macros are optional. [Macros](macros.md) pairs each one with the constructor it stands for, and shows how to read an error when a macro is what the compiler complains about.
