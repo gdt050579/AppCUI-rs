@@ -11,6 +11,7 @@ fn in_app(f: impl FnOnce() + 'static) {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
+        CheckHash(0xC887F274FA2B5C69)
     ";
     App::new()
         .size(Size::new(30, 10))
@@ -2586,14 +2587,17 @@ fn check_mapping_bottom_value_and_value_per_cell() {
     assert_close(m.value_per_cell(), 0.0);
 }
 
-fn paint_in_app(width: u32, height: u32, build: impl FnOnce() -> VStackedBarChart<i32> + 'static) {
-    let script = "
+fn paint_in_app(width: u32, height: u32, hash: u64, build: impl FnOnce() -> VStackedBarChart<i32> + 'static) {
+    let script = format!(
+        "
         Paint.Enable(false)
         Paint('1. Initial state')
-    ";
+        CheckHash(0x{hash:X})
+    "
+    );
     App::new()
         .size(Size::new(width, height))
-        .debug_script(script)
+        .debug_script(&script)
         .window(move || {
             let chart = build();
             let mut w = window!("Test,d:f");
@@ -2614,17 +2618,17 @@ fn painted_chart() -> VStackedBarChart<i32> {
 
 #[test]
 fn check_paint_empty_chart() {
-    paint_in_app(30, 10, || VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None));
+    paint_in_app(30, 10, 0x84DAE3176CE21369, || VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None));
 }
 
 #[test]
 fn check_paint_axes_with_data() {
-    paint_in_app(30, 10, painted_chart);
+    paint_in_app(30, 10, 0x791DB9AEEF1C93B0, painted_chart);
 }
 
 #[test]
 fn check_paint_scale_from_zero_min_range() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x49DFA1AA96ADAF7E, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -20, max: 20 });
         chart
@@ -2633,7 +2637,7 @@ fn check_paint_scale_from_zero_min_range() {
 
 #[test]
 fn check_paint_scale_fit_data() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x791DB9AEEF1C93B0, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::FitData);
         chart
@@ -2642,7 +2646,7 @@ fn check_paint_scale_fit_data() {
 
 #[test]
 fn check_paint_scale_fixed() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x785B9F7AE7D9F8A5, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::Fixed { min: -4, max: 4 });
         chart
@@ -2651,7 +2655,7 @@ fn check_paint_scale_fixed() {
 
 #[test]
 fn check_paint_scale_percentage() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x3A60C7F7E195F928, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::Percentage);
         chart
@@ -2660,7 +2664,7 @@ fn check_paint_scale_percentage() {
 
 #[test]
 fn check_paint_xaxis_index() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0xFDC8F4F8DFB32CF6, || {
         let mut chart = painted_chart();
         chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
         chart
@@ -2669,7 +2673,7 @@ fn check_paint_xaxis_index() {
 
 #[test]
 fn check_paint_xaxis_stack_labels() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0xCF3EEC65E86D7CC6, || {
         let mut chart = painted_chart();
         chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
         chart
@@ -2678,7 +2682,7 @@ fn check_paint_xaxis_stack_labels() {
 
 #[test]
 fn check_paint_xaxis_custom() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x71A7108431518C19, || {
         let mut chart = painted_chart();
         let spans = [BarSpan::new(0, 2, "First"), BarSpan::new(2, 5, "Second")];
         chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
@@ -2688,7 +2692,7 @@ fn check_paint_xaxis_custom() {
 
 #[test]
 fn check_paint_yaxis_hidden() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x8B77C1F14854CCBA, || {
         let mut chart = painted_chart();
         chart.set_yaxis_visible(false);
         chart
@@ -2697,7 +2701,7 @@ fn check_paint_yaxis_hidden() {
 
 #[test]
 fn check_paint_yaxis_no_grid() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0xA34582D921EAE732, || {
         let mut chart = painted_chart();
         chart.set_yaxis_show_grid(false);
         chart
@@ -2706,7 +2710,7 @@ fn check_paint_yaxis_no_grid() {
 
 #[test]
 fn check_paint_yaxis_narrow_small_step() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x74E5F8A86EA82836, || {
         let mut chart = painted_chart();
         chart.set_yaxis_width(3);
         chart.set_yaxis_step(1);
@@ -2716,12 +2720,12 @@ fn check_paint_yaxis_narrow_small_step() {
 
 #[test]
 fn check_paint_tiny_surface() {
-    paint_in_app(12, 3, painted_chart);
+    paint_in_app(12, 3, 0x365224425A53C76D, painted_chart);
 }
 
 #[test]
 fn check_paint_tiny_surface_with_xaxis() {
-    paint_in_app(12, 3, || {
+    paint_in_app(12, 3, 0xA9526F70AD9F20DE, || {
         let mut chart = painted_chart();
         chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
         chart
@@ -2730,7 +2734,7 @@ fn check_paint_tiny_surface_with_xaxis() {
 
 #[test]
 fn check_paint_data_changes_after_attach() {
-    paint_in_app(30, 10, || {
+    paint_in_app(30, 10, 0x8F8E47B0D8083136, || {
         let mut chart = painted_chart();
         chart.add_stack([1, 2, 3]);
         chart.update_stack(0, |stack| {
@@ -5805,6 +5809,8 @@ fn check_selection_events_from_keys() {
         Key.Pressed(Left)
         Key.Pressed(Left)
         Key.Pressed(Left)
+        Paint('1. After key navigation')
+        CheckHash(0xD91359DBFBE02DB4)
     ",
         false,
     );
@@ -5824,6 +5830,8 @@ fn check_no_event_when_selection_unchanged() {
         Key.Pressed(Up)
         Key.Pressed(Up)
         Key.Pressed(Up)
+        Paint('1. Last cell selected')
+        CheckHash(0xD11F87D42E770A58)
     ",
         false,
     );
@@ -5836,6 +5844,8 @@ fn check_programmatic_selection_raises_no_event() {
         "
         Paint.Enable(false)
         Key.Pressed(Right)
+        Paint('1. Next stack selected')
+        CheckHash(0xA30DE9E446D95278)
     ",
         true,
     );
@@ -6099,6 +6109,8 @@ fn check_selection_events_from_mouse_clicks() {
         Mouse.Click(6,2,left)
         Mouse.Click(21,6,left)
         Mouse.Click(21,6,left)
+        Paint('1. Selection cleared')
+        CheckHash(0x585CAC80FFEEC466)
     ",
         false,
     );
@@ -6176,6 +6188,8 @@ fn check_selection_events_from_double_click() {
         Mouse.DoubleClick(4,12,left)
         Mouse.DoubleClick(2,12,left)
         Mouse.DoubleClick(21,6,left)
+        Paint('1. Stack selected')
+        CheckHash(0xD91359DBFBE02DB4)
     ",
         false,
     );
