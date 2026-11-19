@@ -6,6 +6,7 @@ mod tests;
 mod default;
 mod dark_gray;
 mod light;
+mod high_contrast;
 
 
 pub use structures::Theme;

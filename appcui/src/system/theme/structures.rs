@@ -8,6 +8,8 @@ pub enum Themes {
     DarkGray,
     /// A light palette.
     Light,
+    /// A high-contrast palette (black surfaces, white text, yellow and aqua accents).
+    HighContrast,
 }
 
 /// Colors used to fill the desktop background.
@@ -375,6 +377,7 @@ impl Theme {
             Themes::Default => super::default::new(),
             Themes::DarkGray => super::dark_gray::new(),
             Themes::Light => super::light::new(),
+            Themes::HighContrast => super::high_contrast::new(),
         }
     }
 }

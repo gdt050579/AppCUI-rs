@@ -7,6 +7,9 @@ screenshots and the full notes.
 
 ## [Unreleased]
 
+### Added
+- `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and aqua accents)
+
 ### Fixed
 - Error message from #[Window(events = WrongTrait)] now refers to the events attribute
 
