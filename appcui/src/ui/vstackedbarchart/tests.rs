@@ -5826,3 +5826,165 @@ fn check_programmatic_selection_raises_no_event() {
     );
     assert_eq!(events, vec!["stack:2"]);
 }
+
+// ---- macro ----
+
+#[test]
+fn check_macro_plain_stacks() {
+    in_app(|| {
+        let chart = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, stacks: [[1,2],[3],[4,5,6]]");
+        assert_eq!(counts(&chart), vec![2, 1, 3]);
+        assert_eq!(chart.get_stack(2).unwrap().get(2).unwrap().value(), 6);
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_macro_aliases_and_type_parameter() {
+    in_app(|| {
+        let a = vstackedbarchart!("type: i64, x:0,y:0,w:30,h:14, data: [[1],[2]]");
+        let b = vstackedbarchart!("class: u8, x:0,y:0,w:30,h:14, values: [[1],[2],[3]]");
+        assert_eq!(a.stacks_count(), 2);
+        assert_eq!(b.stacks_count(), 3);
+    });
+}
+
+#[test]
+fn check_macro_stack_dictionary() {
+    in_app(|| {
+        let chart = vstackedbarchart!(
+            "i32, x:0,y:0,w:30,h:14,
+            stacks: [
+                {label: Q1, width: 5, space: 2, bars: [1, {2, label: two}, {value: 3, attr: red, dm: Rectangle}]},
+                {Q2, bars: [4]},
+                [7, {8, label: eight}]
+            ]"
+        );
+        assert_eq!(counts(&chart), vec![3, 1, 2]);
+        let q1 = chart.get_stack(0).unwrap();
+        assert_eq!(q1.label(), "Q1");
+        assert_eq!(q1.thickness(), Some(5));
+        assert_eq!(q1.spacing(), Some(2));
+        assert_eq!(q1.get(0).unwrap().label(), "");
+        assert_eq!(q1.get(1).unwrap().label(), "two");
+        assert_eq!(q1.get(2).unwrap().value(), 3);
+        assert!(q1.get(2).unwrap().attr().is_some());
+        assert_eq!(q1.get(2).unwrap().draw_mode(), Some(StackBarDrawMode::Rectangle(LineType::Single)));
+        let q2 = chart.get_stack(1).unwrap();
+        assert_eq!(q2.label(), "Q2");
+        assert_eq!(q2.thickness(), None);
+        assert_eq!(chart.get_stack(2).unwrap().get(1).unwrap().label(), "eight");
+    });
+}
+
+#[test]
+fn check_macro_scale_modes() {
+    in_app(|| {
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, scale: FitData");
+        assert_eq!(c.scale, StackBarScale::FitData);
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, ss: Fixed(-5, 20)");
+        assert_eq!(c.scale, StackBarScale::Fixed { min: -5, max: 20 });
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, stacks-scale: FromZeroMinRange(0, 10)");
+        assert_eq!(c.scale, StackBarScale::FromZeroMinRange { min: 0, max: 10 });
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, scale: percentage");
+        assert_eq!(c.scale, StackBarScale::Percentage);
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, scale: zero");
+        assert_eq!(c.scale, StackBarScale::FromZero);
+    });
+}
+
+#[test]
+fn check_macro_defaults_and_axes() {
+    in_app(|| {
+        let c = vstackedbarchart!(
+            "i32, x:0,y:0,w:30,h:14, dbw: 4, dbs: 2, dm: FilledRectangle(Double), bar-attr: red,
+            yw: 6, ystep: 3, yaxis: false, grid: true, xlabels: Index(5)"
+        );
+        assert_eq!(c.defaults.thickness, 4);
+        assert_eq!(c.defaults.spacing, 2);
+        assert_eq!(c.defaults.draw_mode, StackBarDrawMode::FilledRectangle(LineType::Double));
+        assert!(c.defaults.attr.is_some());
+        assert_eq!(c.yaxis.width, 6);
+        assert_eq!(c.yaxis.step, 3);
+        assert!(!c.yaxis.visible);
+        assert!(c.yaxis.show_grid);
+        assert!(c.xaxis.label_format == XAxisLabelFormat::Index(5));
+    });
+}
+
+#[test]
+fn check_macro_xlabels_modes() {
+    in_app(|| {
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, xlabels: none");
+        assert!(c.xaxis.label_format == XAxisLabelFormat::None);
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, xlabels: StackLabels");
+        assert!(c.xaxis.label_format == XAxisLabelFormat::StackLabels);
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, xlabels: [{0, 2, 'Q1'}, {2, 2, 'Q2'}]");
+        assert!(c.xaxis.label_format == XAxisLabelFormat::Custom);
+        assert_eq!(c.xaxis.spans.len(), 2);
+    });
+}
+
+#[test]
+fn check_macro_fill_draw_modes() {
+    in_app(|| {
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, dm: Fill(Shade50)");
+        assert_eq!(c.defaults.draw_mode, StackBarDrawMode::Fill(BarFillType::Shade50));
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, dm: fill");
+        assert_eq!(c.defaults.draw_mode, StackBarDrawMode::Fill(BarFillType::Solid));
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, dm: Rect(Single)");
+        assert_eq!(c.defaults.draw_mode, StackBarDrawMode::Rectangle(LineType::Single));
+    });
+}
+
+#[test]
+fn check_macro_formats_and_flags() {
+    in_app(|| {
+        let c = vstackedbarchart!("i32, x:0,y:0,w:30,h:14, flags: ScrollBars+DimBarsOnSelection+ShowZeroLineOnYAxis, nf: hex, pf: {dec, decimals: 1}, lsm: 2");
+        assert!(c.flags.contains(vstackedbarchart::Flags::ScrollBars));
+        assert!(c.flags.contains(vstackedbarchart::Flags::DimBarsOnSelection));
+        assert!(c.flags.contains(vstackedbarchart::Flags::ShowZeroLineOnYAxis));
+    });
+}
+
+#[test]
+fn check_macro_base_control_parameters() {
+    in_app(|| {
+        let c = vstackedbarchart!("i32, x:1,y:2,w:20,h:10, enabled: false, visible: false");
+        assert!(!c.is_enabled());
+        assert!(!c.is_visible());
+    });
+}
+
+#[test]
+fn check_macro_matches_api_render() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2AA4A8CB3162D420)
+    ";
+    run_script(script, Size::new(40, 16), || {
+        vstackedbarchart!(
+            "i32, d:f, dbw: 3, dbs: 1, xlabels: StackLabels, scale: Fixed(0, 20),
+            stacks: [{A, bars: [3, 2]}, {B, bars: [5, 1]}, {C, bars: [4, 4, 2]}, {D, bars: [6]}]"
+        )
+    });
+}
+
+#[test]
+fn check_api_twin_of_macro_render() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2AA4A8CB3162D420)
+    ";
+    run_script(script, Size::new(40, 16), || {
+        let mut c = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+        c.set_default_bar_width(3);
+        c.set_default_bar_spacing(1);
+        c.set_xaxis_label_mode(vstackedbarchart::XAxisLabelMode::StackLabels);
+        c.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 20 });
+        add_positive_stacks(&mut c);
+        c
+    });
+}
