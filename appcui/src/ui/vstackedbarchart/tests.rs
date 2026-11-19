@@ -5742,6 +5742,8 @@ impl EventsProbe {
     fn new(preselect: bool) -> Self {
         let mut win = Self { base: window!("Test,d:f") };
         let mut chart = VStackedBarChart::<i32>::new(layout!("x:0,y:0,w:30,h:14"), vstackedbarchart::Flags::None);
+        chart.set_yaxis_visible(false);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
         chart.add_stack([1, 2]);
         chart.add_stack([3]);
         chart.add_stack([4, 5, 6]);
@@ -5987,4 +5989,105 @@ fn check_api_twin_of_macro_render() {
         add_positive_stacks(&mut c);
         c
     });
+}
+
+fn click_event(x: i32, y: i32, button: MouseButton) -> MouseEvent {
+    MouseEvent::Pressed(MouseEventData {
+        x,
+        y,
+        button,
+        modifier: KeyModifier::None,
+    })
+}
+
+fn click_chart() -> VStackedBarChart<i32> {
+    let mut chart = tip_chart();
+    chart.set_yaxis_visible(false);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 12 });
+    chart.add_stack([1, 2]);
+    chart.add_stack([3]);
+    chart.add_stack([4, 5, 6]);
+    chart
+}
+
+fn click(chart: &mut VStackedBarChart<i32>, x: i32, y: i32) -> bool {
+    matches!(chart.on_mouse_event(&click_event(x, y, MouseButton::Left)), EventProcessStatus::Processed)
+}
+
+#[test]
+fn check_click_selects_cell() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(0, 1).unwrap();
+        assert!(click(&mut chart, r.left(), r.top()));
+        assert_eq!(chart.selection(), Selection::Cell(0, 1));
+        let r = chart.cell_rect(2, 2).unwrap();
+        assert!(click(&mut chart, r.left(), r.bottom()));
+        assert_eq!(chart.selection(), Selection::Cell(2, 2));
+    });
+}
+
+#[test]
+fn check_click_on_empty_area_clears_selection() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(1, 0).unwrap();
+        click(&mut chart, r.left(), r.top());
+        assert_eq!(chart.selection(), Selection::Cell(1, 0));
+        click(&mut chart, 20, 5);
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_click_with_other_buttons_is_ignored() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(0, 0).unwrap();
+        let status = chart.on_mouse_event(&click_event(r.left(), r.top(), MouseButton::Right));
+        assert!(matches!(status, EventProcessStatus::Ignored));
+        assert_eq!(chart.selection(), Selection::None);
+    });
+}
+
+#[test]
+fn check_click_clears_hover() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(0, 0).unwrap();
+        hover(&mut chart, r.left(), r.top());
+        assert!(chart.hovered.is_some());
+        click(&mut chart, r.left(), r.top());
+        assert_eq!(chart.hovered, None);
+    });
+}
+
+#[test]
+fn check_click_then_keyboard_continues_from_clicked_cell() {
+    in_app(|| {
+        let mut chart = click_chart();
+        let r = chart.cell_rect(2, 0).unwrap();
+        click(&mut chart, r.left(), r.top());
+        press(&mut chart, key!("Up"));
+        assert_eq!(chart.selection(), Selection::Cell(2, 1));
+        press(&mut chart, key!("Left"));
+        assert_eq!(chart.selection(), Selection::Stack(1));
+    });
+}
+
+#[test]
+fn check_selection_events_from_mouse_clicks() {
+    let events = run_events(
+        "
+        Paint.Enable(false)
+        Mouse.Click(2,12,left)
+        Mouse.Click(4,12,left)
+        Mouse.Click(4,12,left)
+        Mouse.Click(6,2,left)
+        Mouse.Click(21,6,left)
+        Mouse.Click(21,6,left)
+    ",
+        false,
+    );
+    assert_eq!(events, vec!["cell:0:1", "cell:1:0", "cell:2:2", "clear"]);
 }

@@ -1048,6 +1048,15 @@ where
                     EventProcessStatus::Ignored
                 }
             }
+            MouseEvent::Pressed(data) if data.button == MouseButton::Left => {
+                let selection = match self.cell_index_at(data.x, data.y) {
+                    Some((stack, bar)) => Selection::Cell(stack as u32, bar as u32),
+                    None => Selection::None,
+                };
+                self.clear_hovered();
+                self.change_selection(selection);
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
