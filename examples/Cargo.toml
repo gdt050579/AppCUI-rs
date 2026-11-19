@@ -350,6 +350,10 @@ name = "minesweeper"
 path = "minesweeper/main.rs"
 
 [[example]]
+name = "file_navigator"
+path = "file_navigator/main.rs"
+
+[[example]]
 name = "flappy"
 path = "flappy/main.rs"
 
