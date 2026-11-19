@@ -1,8 +1,8 @@
-use crate::prelude::*;
+use super::events::{EventData, EventType};
 use super::mapping::ValueMapping;
 use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout};
-use super::events::{EventData, EventType};
 use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, Stacks, XAxisLabelFormat, XAxisLabelMode};
+use crate::prelude::*;
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
 use std::any::TypeId;
@@ -329,7 +329,11 @@ where
             return None;
         }
         self.selection = selection;
-        Some(EventType::from(selection))
+        match self.selection {
+            Selection::None => Some(EventType::ClearSelection),
+            Selection::Stack(index) => Some(EventType::StackSelected(index)),
+            Selection::Cell(stack_index, cell_index) => Some(EventType::CellSelected { stack_index, cell_index }),
+        }
     }
     pub(super) fn clamp_selection(&mut self) {
         self.selection = match self.selection {
@@ -370,7 +374,9 @@ where
             .layout
             .iter()
             .filter_map(|segment| segment_rows(zero_row - segment.offset as i32, segment.len))
-            .fold(None, |acc: Option<(i32, i32)>, (t, b)| Some(acc.map_or((t, b), |(at, ab)| (at.min(t), ab.max(b)))))
+            .fold(None, |acc: Option<(i32, i32)>, (t, b)| {
+                Some(acc.map_or((t, b), |(at, ab)| (at.min(t), ab.max(b))))
+            })
             .unwrap_or((zero_row, zero_row));
         let (left, right) = self.stack_column(entry);
         Some(Rect::new(left, top, right, bottom))
@@ -427,7 +433,10 @@ where
         match hit {
             Some((stack, cell)) => {
                 self.hovered = hit;
-                if let (Some(text), Some(rect)) = (self.tooltip_for(stack as usize, cell as usize), self.cell_rect(stack as usize, cell as usize)) {
+                if let (Some(text), Some(rect)) = (
+                    self.tooltip_for(stack as usize, cell as usize),
+                    self.cell_rect(stack as usize, cell as usize),
+                ) {
                     self.tooltip_text = text;
                     self.show_tooltip_on_rect(&self.tooltip_text, &rect);
                 }
@@ -572,7 +581,11 @@ where
     }
     pub(super) fn update_scroll_state(&mut self) {
         let max_scroll = self.max_left_scroll();
-        let upper_bound = if max_scroll > 0 { max_scroll.max(self.stacks.last().map_or(0, |s| s.pos)) } else { 0 };
+        let upper_bound = if max_scroll > 0 {
+            max_scroll.max(self.stacks.last().map_or(0, |s| s.pos))
+        } else {
+            0
+        };
         self.left_scroll = self.left_scroll.clamp(0, upper_bound);
         self.update_first_visible_stack();
         if self.keep_scroll_anchor {

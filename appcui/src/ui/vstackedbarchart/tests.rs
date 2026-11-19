@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::ops::DerefMut;
-use crate::ui::vstackedbarchart::{Selection, BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
+use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode, Selection};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
 use super::events::{EventType, GenericVStackedBarChartEvents};
@@ -4500,16 +4500,6 @@ fn check_selection_set_selection_reports_changes() {
         );
         assert_eq!(chart.set_selection(Selection::None), Some(EventType::ClearSelection));
     });
-}
-
-#[test]
-fn check_events_type_from_selection() {
-    assert_eq!(EventType::from(Selection::None), EventType::ClearSelection);
-    assert_eq!(EventType::from(Selection::Stack(3)), EventType::StackSelected(3));
-    assert_eq!(
-        EventType::from(Selection::Cell(2, 5)),
-        EventType::CellSelected { stack_index: 2, cell_index: 5 }
-    );
 }
 
 #[test]

@@ -2,7 +2,6 @@ use crate::graphics::{CharAttribute, Character, LineType, Rect, SpecialChar, Sur
 use crate::ui::common::Number;
 use crate::ui::components::BarFillType;
 use super::mapping::ValueMapping;
-use super::Selection;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum StackBarDrawMode {
@@ -494,6 +493,14 @@ fn paint_rectangle(surface: &mut Surface, rect: Rect, line_type: LineType, attr:
 
 pub(super) fn resolve_attr(bar: Option<CharAttribute>, default: Option<CharAttribute>, theme: CharAttribute) -> CharAttribute {
     bar.or(default).unwrap_or(theme)
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
+pub enum Selection {
+    #[default]
+    None,
+    Stack(u32),
+    Cell(u32, u32),
 }
 
 pub struct Stacks<'a, T>

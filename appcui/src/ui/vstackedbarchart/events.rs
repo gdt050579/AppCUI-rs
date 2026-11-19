@@ -1,6 +1,5 @@
 use std::any::TypeId;
 
-use super::Selection;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 pub trait GenericVStackedBarChartEvents {
@@ -28,12 +27,3 @@ pub(crate) struct EventData {
     pub(crate) event_type: EventType,
 }
 
-impl From<Selection> for EventType {
-    fn from(selection: Selection) -> Self {
-        match selection {
-            Selection::None => EventType::ClearSelection,
-            Selection::Stack(index) => EventType::StackSelected(index),
-            Selection::Cell(stack_index, cell_index) => EventType::CellSelected { stack_index, cell_index },
-        }
-    }
-}
