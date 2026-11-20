@@ -1,7 +1,8 @@
-//! A vertical stacked bar chart UI control for displaying numeric series.
+//! A vertical stacked bar chart UI control.
 //!
-//! `VStackedBarChart` is generic over any [`Number`](crate::ui::common::Number) type.
-//! This is currently only a skeleton: it has no data, painting or events yet.
+//! `VStackedBarChart` draws one column per [`BarsStack`] of type `T`
+//! (any [`Number`](crate::ui::common::Number)). Positive segments stack upward from zero
+//! and negative segments stack downward.
 
 mod vstackedbarchart;
 mod initialization_flags;

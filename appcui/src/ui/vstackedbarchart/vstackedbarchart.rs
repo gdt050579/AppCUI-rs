@@ -40,6 +40,22 @@ pub(super) enum Selection {
 }
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnKeyPressed + OnMouseEvent, internal = true)]
+/// A vertical stacked bar chart for columns of numeric segments of type `T`.
+///
+/// Each column is a [`BarsStack`]. Positive segments stack upward from zero and negative
+/// segments stack downward. Scale, axis labels, the default segment appearance, and number
+/// formatting are set through the methods on this type. Optional behavior, such as scroll bars,
+/// a zero line, and dimming unselected stacks, is controlled by [`Flags`].
+///
+/// Clicking a segment selects it and raises a cell-selected event. Clicking outside any segment
+/// clears the selection. Double-clicking a stack selects the whole column and raises a
+/// stack-selected event. Hovering a segment shows a tooltip with the stack total and the segment
+/// value, plus their labels when those labels are set. In percentage scale the tooltip also shows
+/// the segment's share of its stack.
+///
+/// When the chart has focus, Left and Right select the previous or next stack, and Up and Down
+/// move between segments of the current stack. Home and End scroll to the ends of the chart.
+/// Ctrl+Left and Ctrl+Right scroll by one stack. The mouse wheel scrolls horizontally.
 pub struct VStackedBarChart<T>
 where
     T: Number + 'static,
@@ -68,6 +84,26 @@ impl<T> VStackedBarChart<T>
 where
     T: Number + 'static,
 {
+    /// Creates an empty vertical stacked bar chart.
+    ///
+    /// `layout` places the control. `flags` selects optional behavior; see [`Flags`].
+    ///
+    /// A new chart scales stacks with [`StackBarScale::FromZero`], shows the Y axis and its
+    /// grid, and formats labels with two decimals when `T` is a floating-point type or with
+    /// thousands separators when `T` is an integer. Percentage labels use a `%` suffix.
+    /// Segments use the theme bar colors, a thickness of 1, and a spacing of 1 until a default
+    /// is changed. Theme colors cycle by segment index, so the first segment of every stack
+    /// shares a color.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let chart = VStackedBarChart::<i32>::new(
+    ///     layout!("d:f"),
+    ///     vstackedbarchart::Flags::ScrollBars | vstackedbarchart::Flags::ShowZeroLineOnYAxis,
+    /// );
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let extra = if flags.contains(Flags::ScrollBars) {
             StatusFlags::IncreaseBottomMarginOnFocus
@@ -116,6 +152,19 @@ where
             },
         }
     }
+    /// Appends one stack and repaints the chart.
+    ///
+    /// `stack` may be a [`BarsStack`] or any type that converts into one, such as an array
+    /// of values or the result of [`BarsStackBuilder::build`](BarsStackBuilder::build).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.add_stack([10, 20, 5]);
+    /// chart.add_stack(BarsStackBuilder::new().label("Q1").bars([4, -2]).build());
+    /// ```
     pub fn add_stack<S>(&mut self, stack: S)
     where
         S: Into<BarsStack<T>>,
@@ -124,6 +173,17 @@ where
         self.stacks.push(entry);
         self.repaint_surface();
     }
+    /// Appends several stacks and repaints the chart once.
+    ///
+    /// Each item may be a [`BarsStack`] or any type that converts into one.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.add_stacks([[1, 2, 3], [4, 5, 6]]);
+    /// ```
     pub fn add_stacks<S>(&mut self, stacks: impl IntoIterator<Item = S>)
     where
         S: Into<BarsStack<T>>,
@@ -134,10 +194,26 @@ where
         }
         self.repaint_surface();
     }
+    /// Returns the number of stacks in the chart.
     #[inline(always)]
     pub fn stacks_count(&self) -> usize {
         self.stacks.len()
     }
+    /// Scrolls the chart horizontally so the stack at `index` is visible.
+    ///
+    /// When the stack fits in the plot area, the chart scrolls the minimum amount needed to show
+    /// it entirely. A stack that is already fully visible leaves the scroll position unchanged.
+    /// A stack wider than the plot area is scrolled until part of it is on screen.
+    /// Does nothing if `index` is out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+    /// chart.ensure_visible(2);
+    /// ```
     pub fn ensure_visible(&mut self, index: usize) {
         if index >= self.stacks.len() {
             return;
@@ -173,10 +249,37 @@ where
             self.repaint_surface();
         }
     }
+    /// Returns an immutable reference to the stack at `index`, or `None` if out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.add_stack([3, 4]);
+    /// if let Some(stack) = chart.get_stack(0) {
+    ///     assert_eq!(stack.count(), 2);
+    /// }
+    /// ```
     #[inline(always)]
     pub fn get_stack(&self, index: usize) -> Option<&BarsStack<T>> {
         self.stacks.get(index).map(|entry| &entry.stack)
     }
+    /// Mutates the stack at `index`, then relayouts and repaints the chart.
+    ///
+    /// Does nothing if `index` is out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.add_stack([1, 2]);
+    /// chart.update_stack(0, |stack| {
+    ///     stack.set_label("Q1");
+    ///     stack.get_mut(1).unwrap().set_value(20);
+    /// });
+    /// ```
     pub fn update_stack<F>(&mut self, index: usize, f: F)
     where
         F: FnOnce(&mut BarsStack<T>),
@@ -190,58 +293,164 @@ where
             self.repaint_surface();
         }
     }
+    /// Removes every stack, clears the selection, and repaints the chart.
     pub fn clear(&mut self) {
         self.stacks.clear();
         self.selection = Selection::None;
         self.clear_hovered();
         self.repaint_surface();
     }
+    /// Sets how stack totals are mapped onto the plot height.
+    ///
+    /// * [`StackBarScale::FromZero`] draws every stack from zero. The visible range includes
+    ///   zero and every stack's upward and downward totals.
+    /// * [`StackBarScale::FromZeroMinRange`] does the same, and also expands the range so
+    ///   that it covers `min` and `max`.
+    /// * [`StackBarScale::FitData`] stretches the smallest and largest totals across the
+    ///   full plot height. When those totals have no span, segments are not drawn.
+    /// * [`StackBarScale::Fixed`] uses the given `min` and `max`. Totals outside that
+    ///   range are drawn at the corresponding edge of the plot.
+    /// * [`StackBarScale::Percentage`] scales each stack so the absolute values of its
+    ///   segments sum to 100%.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.set_stacks_scale(vstackedbarchart::StackBarScale::Fixed { min: 0, max: 100 });
+    /// ```
     pub fn set_stacks_scale(&mut self, scale: StackBarScale<T>) {
         self.scale = scale;
         self.repaint_surface();
     }
+    /// Sets the format used for Y-axis labels, the zero-line label, and hover tooltips.
+    ///
+    /// While the scale is [`StackBarScale::Percentage`], Y-axis labels use
+    /// [`Self::set_percentage_format`] instead. Tooltips still use this format for the
+    /// stack total and the segment value.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<f64>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.set_number_format(FormatNumber::new(10).decimals(1));
+    /// ```
     pub fn set_number_format(&mut self, format: FormatNumber) {
         self.number_format = format;
         self.repaint_surface();
     }
+    /// Sets the format used for percentage values.
+    ///
+    /// This format is used for Y-axis labels while the scale is [`StackBarScale::Percentage`],
+    /// and for the share shown in a hover tooltip. A new chart uses a `%` suffix.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix("%"));
+    /// ```
     pub fn set_percentage_format(&mut self, format: FormatNumber) {
         self.percentage_format = format;
         self.repaint_surface();
     }
+    /// Sets the thickness, in cells, of stacks that do not specify their own.
+    ///
+    /// Values below 1 are treated as 1. A draw mode may raise the thickness further:
+    /// [`StackBarDrawMode::Rectangle`] needs at least 2 cells and
+    /// [`StackBarDrawMode::FilledRectangle`] needs at least 3. A stack can override this
+    /// with [`BarsStack::set_thickness`](BarsStack::set_thickness).
     pub fn set_default_bar_width(&mut self, width: u8) {
         self.defaults.thickness = width.max(1);
         self.refresh_thickness();
         self.repaint_surface();
     }
+    /// Sets the gap, in cells, before stacks that do not specify their own spacing.
+    ///
+    /// A stack can override this with [`BarsStack::set_spacing`](BarsStack::set_spacing).
     pub fn set_default_bar_spacing(&mut self, spacing: u8) {
         self.defaults.spacing = spacing;
         self.repaint_surface();
     }
+    /// Sets the draw mode of segments that do not specify their own.
+    ///
+    /// A segment can override this with [`StackBar::set_draw_mode`](StackBar::set_draw_mode).
+    /// The mode can raise the thickness of a stack when the chart is laid out.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.set_default_bar_drawmode(StackBarDrawMode::Fill(BarFillType::Shade50));
+    /// ```
     pub fn set_default_bar_drawmode(&mut self, draw_mode: StackBarDrawMode) {
         self.defaults.draw_mode = draw_mode;
         self.refresh_thickness();
         self.repaint_surface();
     }
+    /// Sets the character attribute of segments that do not specify their own.
+    ///
+    /// Until this is called, those segments cycle through the theme bar colors by segment
+    /// index. A segment can still override the default with [`StackBar::set_attr`](StackBar::set_attr).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.set_default_bar_attr(CharAttribute::with_fore_color(Color::Yellow));
+    /// ```
     pub fn set_default_bar_attr(&mut self, attr: CharAttribute) {
         self.defaults.attr = Some(attr);
         self.repaint_surface();
     }
+    /// Shows or hides the Y axis and the column reserved for its labels.
+    ///
+    /// The horizontal grid is controlled separately by [`Self::set_yaxis_show_grid`].
     pub fn set_yaxis_visible(&mut self, visible: bool) {
         self.yaxis.visible = visible;
         self.repaint_surface();
     }
+    /// Shows or hides the horizontal grid lines and the numeric labels beside them.
     pub fn set_yaxis_show_grid(&mut self, show_grid: bool) {
         self.yaxis.show_grid = show_grid;
         self.repaint_surface();
     }
+    /// Sets how many characters are reserved for Y-axis labels.
+    ///
+    /// Values below 1 are treated as 1. This width is used only while the Y axis is visible.
     pub fn set_yaxis_width(&mut self, width: u8) {
         self.yaxis.width = width.max(1);
         self.repaint_surface();
     }
+    /// Sets the distance, in rows, between horizontal grid lines and their labels.
+    ///
+    /// Values below 1 are treated as 1.
     pub fn set_yaxis_step(&mut self, step: u8) {
         self.yaxis.step = step.max(1);
         self.repaint_surface();
     }
+    /// Sets how labels are drawn under the stacks.
+    ///
+    /// * [`XAxisLabelMode::None`] draws no X axis.
+    /// * [`XAxisLabelMode::Index`] labels each stack with `start + stack index`.
+    /// * [`XAxisLabelMode::StackLabels`] uses each stack's own label and skips empty ones.
+    /// * [`XAxisLabelMode::Custom`] copies the given spans. Spans are ordered by
+    ///   start index, then by end index. A span that overlaps an earlier one is dropped.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    /// chart.add_stacks([[1, 2], [3, 4], [5, 6], [7, 8]]);
+    /// let spans = [BarSpan::new(0, 2, "H1"), BarSpan::new(2, 2, "H2")];
+    /// chart.set_xaxis_label_mode(vstackedbarchart::XAxisLabelMode::Custom(&spans));
+    /// ```
     pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
         match xaxis {
             XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
@@ -295,6 +504,10 @@ where
             0
         }
     }
+    /// Returns the index of the selected stack.
+    ///
+    /// This is set both when the whole stack is selected and when one of its segments is selected.
+    /// Returns `None` when nothing is selected.
     #[inline(always)]
     pub fn selected_stack(&self) -> Option<u32> {
         match self.selection {
@@ -302,6 +515,9 @@ where
             Selection::Stack(index) | Selection::Cell(index, _) => Some(index),
         }
     }
+    /// Returns the index of the selected segment within its stack.
+    ///
+    /// Returns `None` when a whole stack is selected or when nothing is selected.
     #[inline(always)]
     pub fn selected_cell(&self) -> Option<u32> {
         match self.selection {
@@ -309,11 +525,17 @@ where
             Selection::None | Selection::Stack(_) => None,
         }
     }
+    /// Selects the whole stack at `index` without raising a selection event.
+    ///
+    /// Does nothing when `index` is out of range.
     pub fn select_stack(&mut self, index: usize) {
         if index < self.stacks.len() {
             self.set_selection(Selection::Stack(index as u32));
         }
     }
+    /// Selects segment `cell_index` of the stack at `stack_index` without raising a selection event.
+    ///
+    /// Does nothing when either index is out of range.
     pub fn select_cell(&mut self, stack_index: usize, cell_index: usize) {
         if let Some(entry) = self.stacks.get(stack_index) {
             if cell_index < entry.stack.count() {
@@ -321,6 +543,7 @@ where
             }
         }
     }
+    /// Clears the selection without raising a selection event.
     pub fn clear_selection(&mut self) {
         self.set_selection(Selection::None);
     }
