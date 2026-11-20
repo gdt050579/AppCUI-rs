@@ -3,6 +3,7 @@ use crate::graphics::*;
 use crate::system::*;
 use crate::ui::common::traits::*;
 use crate::ui::common::*;
+use crate::backend::Palette;
 
 pub struct InternalBuilder {
     pub(crate) size: Option<Size>,
@@ -19,6 +20,7 @@ pub struct InternalBuilder {
     pub(crate) log_append: bool,
     pub(crate) use_color_schema: bool,
     pub(crate) restore_screen: bool,
+    pub(crate) palette: Palette,
     #[cfg(test)]
     pub(crate) runtime_check: Option<fn()>,
 }
@@ -39,6 +41,7 @@ impl InternalBuilder {
             log_append: false,
             use_color_schema: true,
             restore_screen: true,
+            palette: Palette::Terminal,
             #[cfg(test)]
             runtime_check: None,
         }
@@ -204,8 +207,14 @@ macro_rules! impl_terminal_builder_methods {
         /// App::new().color_schema(false);
         /// ```
         #[inline(always)]
+        #[deprecated(since = "0.5.10", note = "Use palette instead")]
         pub fn color_schema(mut self, enabled: bool) -> Self {
             self.builder.color_schema(enabled);
+            self
+        }
+
+        pub fn palette(mut self, palette: crate::backend::Palette) -> Self {
+            self.builder.palette = palette;
             self
         }
 

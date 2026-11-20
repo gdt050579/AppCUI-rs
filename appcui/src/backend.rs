@@ -68,6 +68,10 @@ use self::windows_vt::WindowsVTTerminal;
 #[cfg(feature = "CROSSTERM")]
 use self::crossterm::CrossTerm;
 
+
+pub use self::palette::Palette;
+pub use self::palette::ColorPalette;
+
 pub(crate) trait Backend {
     fn update_screen(&mut self, surface: &Surface);
     fn on_resize(&mut self, new_size: Size);

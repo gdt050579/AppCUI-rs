@@ -1,11 +1,13 @@
 use crate::graphics::Color;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Palette {
     Terminal,
     BuiltIn,
     Custom(ColorPalette),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct ColorPalette {
     pub(crate) colors: [(u8, u8, u8); 16],
 }
