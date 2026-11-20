@@ -515,6 +515,7 @@ impl ValueMapping {
         mapping
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn height(&self) -> u32 {
         self.height
     }
@@ -523,10 +524,12 @@ impl ValueMapping {
         self.zero
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn above(&self) -> u32 {
         self.height - self.zero
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn below(&self) -> u32 {
         self.zero
     }
