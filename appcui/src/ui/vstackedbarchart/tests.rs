@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use std::ops::DerefMut;
-use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode, Selection};
+use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::events::{EventType, GenericVStackedBarChartEvents};
-use super::stackbar::{paint_segment, resolve_attr, segment_rows, ValueMapping};
+use crate::ui::components::{paint_segment, resolve_attr, segment_rows, ValueMapping};
 use crate::ui::components::BarFillType;
 
 fn in_app(f: impl FnOnce() + 'static) {

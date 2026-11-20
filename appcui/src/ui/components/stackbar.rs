@@ -357,7 +357,7 @@ where
     }
 }
 
-pub(super) fn segment_rows(y: i32, len: i16) -> Option<(i32, i32)> {
+pub(crate) fn segment_rows(y: i32, len: i16) -> Option<(i32, i32)> {
     if len > 0 {
         Some((y - len as i32 + 1, y))
     } else if len < 0 {
@@ -424,7 +424,7 @@ where
     pub(crate) fn has_negative(&self) -> bool {
         self.negative_sum < 0.0
     }
-    pub(super) fn update_segments(&mut self, mapping: &ValueMapping, percentage: bool) {
+    pub(crate) fn update_segments(&mut self, mapping: &ValueMapping, percentage: bool) {
         let total = self.abs_total();
         let to_domain = |cumulative: f64| -> f64 {
             if !percentage {
@@ -465,7 +465,7 @@ where
     }
 }
 
-pub(super) fn paint_segment(surface: &mut Surface, x: i32, y: i32, thickness: u8, len: i16, mode: StackBarDrawMode, attr: CharAttribute) {
+pub(crate) fn paint_segment(surface: &mut Surface, x: i32, y: i32, thickness: u8, len: i16, mode: StackBarDrawMode, attr: CharAttribute) {
     let height = len.unsigned_abs();
     if height == 0 || thickness == 0 {
         return;
@@ -490,12 +490,12 @@ fn paint_rectangle(surface: &mut Surface, rect: Rect, line_type: LineType, attr:
     surface.draw_rect(rect, line_type, attr);
 }
 
-pub(super) fn resolve_attr(bar: Option<CharAttribute>, default: Option<CharAttribute>, theme: CharAttribute) -> CharAttribute {
+pub(crate) fn resolve_attr(bar: Option<CharAttribute>, default: Option<CharAttribute>, theme: CharAttribute) -> CharAttribute {
     bar.or(default).unwrap_or(theme)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(super) struct ValueMapping {
+pub(crate) struct ValueMapping {
     lo: f64,
     scale: f64,
     height: u32,
@@ -503,7 +503,7 @@ pub(super) struct ValueMapping {
 }
 
 impl ValueMapping {
-    pub(super) fn new(lo: f64, hi: f64, height: u32) -> Self {
+    pub(crate) fn new(lo: f64, hi: f64, height: u32) -> Self {
         let lo = if lo.is_finite() { lo } else { 0.0 };
         let scale = if height > 0 && hi.is_finite() && hi > lo && (hi - lo).is_finite() {
             height as f64 / (hi - lo)
@@ -515,41 +515,41 @@ impl ValueMapping {
         mapping
     }
     #[inline(always)]
-    pub(super) fn height(&self) -> u32 {
+    pub(crate) fn height(&self) -> u32 {
         self.height
     }
     #[inline(always)]
-    pub(super) fn zero(&self) -> u32 {
+    pub(crate) fn zero(&self) -> u32 {
         self.zero
     }
     #[inline(always)]
-    pub(super) fn above(&self) -> u32 {
+    pub(crate) fn above(&self) -> u32 {
         self.height - self.zero
     }
     #[inline(always)]
-    pub(super) fn below(&self) -> u32 {
+    pub(crate) fn below(&self) -> u32 {
         self.zero
     }
     #[inline(always)]
-    pub(super) fn bottom_value(&self) -> f64 {
+    pub(crate) fn bottom_value(&self) -> f64 {
         self.lo
     }
     #[inline(always)]
-    pub(super) fn value_per_cell(&self) -> f64 {
+    pub(crate) fn value_per_cell(&self) -> f64 {
         if self.scale > 0.0 {
             1.0 / self.scale
         } else {
             0.0
         }
     }
-    pub(super) fn position(&self, value: f64) -> u32 {
+    pub(crate) fn position(&self, value: f64) -> u32 {
         let p = (value - self.lo) * self.scale;
         if p.is_nan() {
             return self.zero;
         }
         p.round().clamp(0.0, self.height as f64) as u32
     }
-    pub(super) fn offset(&self, value: f64) -> i32 {
+    pub(crate) fn offset(&self, value: f64) -> i32 {
         self.position(value) as i32 - self.zero as i32
     }
 }
