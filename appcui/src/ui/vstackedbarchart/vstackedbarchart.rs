@@ -1,6 +1,6 @@
 use super::events::{EventData, EventType};
 use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout, ValueMapping};
-use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
+use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::prelude::*;
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
@@ -30,6 +30,14 @@ pub(super) struct XAxis {
 }
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
+pub(super) enum Selection {
+    #[default]
+    None,
+    Stack(u32),
+    Cell(u32, u32),
+}
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnKeyPressed + OnMouseEvent, internal = true)]
 pub struct VStackedBarChart<T>

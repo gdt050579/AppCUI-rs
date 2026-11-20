@@ -494,14 +494,6 @@ pub(super) fn resolve_attr(bar: Option<CharAttribute>, default: Option<CharAttri
     bar.or(default).unwrap_or(theme)
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
-pub enum Selection {
-    #[default]
-    None,
-    Stack(u32),
-    Cell(u32, u32),
-}
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(super) struct ValueMapping {
     lo: f64,

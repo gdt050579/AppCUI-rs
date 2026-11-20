@@ -24,4 +24,4 @@ pub use self::stackbar::BarsStackBuilder;
 pub use super::components::BarFillType;
 pub use super::components::BarSpan;
 
-use self::stackbar::Selection;
+use self::vstackedbarchart::Selection;
