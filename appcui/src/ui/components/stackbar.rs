@@ -1,11 +1,30 @@
+//! Types shared by [`VStackedBarChart`](crate::ui::vstackedbarchart::VStackedBarChart).
+//!
+//! A [`StackBar`] is one segment of a [`BarsStack`]. Positive segments stack upward from zero
+//! and negative segments stack downward, in the order they were added. Build a segment with
+//! [`StackBarBuilder`], or convert a number through [`From`]. A stack stores those segments,
+//! an optional label, and optional thickness and spacing. Build one with [`BarsStackBuilder`],
+//! or convert a sequence of numbers through [`From`].
+//!
+//! [`StackBarDrawMode`] chooses how a segment is painted. [`StackBarScale`] chooses how the
+//! chart maps stack totals onto the plot.
+
 use crate::graphics::{CharAttribute, Character, LineType, Rect, SpecialChar, Surface};
 use crate::ui::common::Number;
 use crate::ui::components::BarFillType;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+/// How a [`VStackedBarChart`](crate::ui::vstackedbarchart::VStackedBarChart) draws one segment of a stack.
+///
+/// A stack is as wide as the thickest requirement among its segments. A requested thickness
+/// below that minimum is raised when the stack is laid out. [`Fill`](Self::Fill) with
+/// [`BarFillType::Solid`] is the default.
 pub enum StackBarDrawMode {
+    /// Fills the segment with a repeated character. Thickness is at least 1.
     Fill(BarFillType),
+    /// Draws an empty rectangle of the given [`LineType`]. Thickness is at least 2.
     Rectangle(LineType),
+    /// Draws a rectangle of the given [`LineType`], filled with a solid block. Thickness is at least 3.
     FilledRectangle(LineType),
 }
 
@@ -21,21 +40,64 @@ impl StackBarDrawMode {
 }
 
 impl Default for StackBarDrawMode {
+    /// Returns [`StackBarDrawMode::Fill`] with [`BarFillType::Solid`].
     fn default() -> Self {
         StackBarDrawMode::Fill(BarFillType::Solid)
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
+/// How a [`VStackedBarChart`](crate::ui::vstackedbarchart::VStackedBarChart) maps stack totals onto the plot.
+///
+/// Positive segments grow upward from zero and negative segments grow downward. The plot runs
+/// from bottom to top. A new chart uses [`FromZero`](Self::FromZero).
 pub enum StackBarScale<T: Number + 'static> {
+    /// Draws every stack from zero. The visible range includes zero and every stack's upward and downward totals.
+    ///
+    /// The upward total is the sum of a stack's positive segments. The downward total is the sum of its negative segments.
     FromZero,
-    FromZeroMinRange { min: T, max: T },
+    /// Draws every stack from zero, and expands the range so that it covers `min`, `max`, and every stack total.
+    ///
+    /// A non-finite `min` or `max` is treated as zero.
+    FromZeroMinRange {
+        /// Lowest value that must remain inside the scale.
+        min: T,
+        /// Highest value that must remain inside the scale.
+        max: T,
+    },
+    /// Stretches the smallest and largest upward and downward stack totals across the full plot.
+    ///
+    /// The upward total is the sum of a stack's positive segments. The downward total is the sum
+    /// of its negative segments. When those totals have no span, segments are not drawn.
     FitData,
-    Fixed { min: T, max: T },
+    /// Uses a fixed range. Totals outside it are drawn at the corresponding edge of the plot.
+    ///
+    /// `min` is the bottom of the plot and `max` is the top. When `min` is not lower than `max`,
+    /// or either bound is non-finite, segments are not drawn.
+    Fixed {
+        /// Lowest value in the range. This is the bottom of the plot.
+        min: T,
+        /// Highest value in the range. This is the top of the plot.
+        max: T,
+    },
+    /// Scales each stack so the sum of the absolute values of its segments is 100%.
+    ///
+    /// The plot runs from the largest downward share to the largest upward share. A stack of
+    /// only positive values fills from 0% to 100%. A stack with both signs splits that 100%
+    /// above and below zero.
     Percentage,
 }
 
 #[derive(Clone, Debug)]
+/// One segment in a [`BarsStack`].
+///
+/// A segment stores its value and label. Color and draw mode are optional: a field left unset
+/// uses the chart default. Segments are stacked in the order they were added. Positive values
+/// pile upward from zero, each one on top of the previous positive total. Negative values pile
+/// downward the same way. A value of zero, or a non-finite value, occupies no cells. A value of
+/// type `T` converts into a segment through [`From`].
+///
+/// The label is included in the hover tooltip when it is not empty.
 pub struct StackBar<T: Number + 'static> {
     pub(crate) value: T,
     pub(crate) label: String,
@@ -44,48 +106,63 @@ pub struct StackBar<T: Number + 'static> {
 }
 
 impl<T: Number + 'static> StackBar<T> {
+    /// Returns the numeric value of this segment.
     #[inline(always)]
     pub fn value(&self) -> T {
         self.value
     }
+    /// Sets the numeric value of this segment.
     #[inline(always)]
     pub fn set_value(&mut self, value: T) -> &mut Self {
         self.value = value;
         self
     }
+    /// Returns the label displayed for this segment.
+    ///
+    /// A [`VStackedBarChart`](crate::ui::vstackedbarchart::VStackedBarChart) includes it in the
+    /// hover tooltip when it is not empty.
     #[inline(always)]
     pub fn label(&self) -> &str {
         &self.label
     }
+    /// Sets the label displayed for this segment.
     #[inline(always)]
     pub fn set_label(&mut self, label: &str) -> &mut Self {
         self.label.clear();
         self.label.push_str(label);
         self
     }
+    /// Returns the character attribute of this segment, or `None` if the chart default is used.
     #[inline(always)]
     pub fn attr(&self) -> Option<CharAttribute> {
         self.attr
     }
+    /// Sets the character attribute of this segment.
     #[inline(always)]
     pub fn set_attr(&mut self, attr: CharAttribute) -> &mut Self {
         self.attr = Some(attr);
         self
     }
+    /// Clears the segment-specific attribute so the chart default is used.
     #[inline(always)]
     pub fn clear_attr(&mut self) -> &mut Self {
         self.attr = None;
         self
     }
+    /// Returns the draw mode of this segment, or `None` if the chart default is used.
     #[inline(always)]
     pub fn draw_mode(&self) -> Option<StackBarDrawMode> {
         self.draw_mode
     }
+    /// Sets the draw mode of this segment.
+    ///
+    /// The mode can raise the thickness of the whole stack when the stack is laid out.
     #[inline(always)]
     pub fn set_draw_mode(&mut self, draw_mode: StackBarDrawMode) -> &mut Self {
         self.draw_mode = Some(draw_mode);
         self
     }
+    /// Clears the segment-specific draw mode so the chart default is used.
     #[inline(always)]
     pub fn clear_draw_mode(&mut self) -> &mut Self {
         self.draw_mode = None;
@@ -93,11 +170,27 @@ impl<T: Number + 'static> StackBar<T> {
     }
 }
 
+/// Builds a [`StackBar`] by setting only the properties that should differ from the chart defaults.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// let bar = StackBarBuilder::new(10)
+///     .label("Jun")
+///     .attr(CharAttribute::with_fore_color(Color::Yellow))
+///     .draw_mode(StackBarDrawMode::Fill(BarFillType::Shade50))
+///     .build();
+/// assert_eq!(bar.value(), 10);
+/// assert_eq!(bar.label(), "Jun");
+/// assert!(bar.attr().is_some());
+/// ```
 pub struct StackBarBuilder<T: Number + 'static> {
     bar: StackBar<T>,
 }
 
 impl<T: Number + 'static> StackBarBuilder<T> {
+    /// Starts a segment with `value`. Color, label, and draw mode stay unset.
     pub fn new(value: T) -> Self {
         Self {
             bar: StackBar {
@@ -108,18 +201,24 @@ impl<T: Number + 'static> StackBarBuilder<T> {
             },
         }
     }
+    /// Sets the label displayed for the segment.
     pub fn label(mut self, label: &str) -> Self {
         self.bar.label = label.to_string();
         self
     }
+    /// Sets the character attribute of the segment.
     pub fn attr(mut self, attr: CharAttribute) -> Self {
         self.bar.attr = Some(attr);
         self
     }
+    /// Sets the draw mode of the segment.
+    ///
+    /// The mode can raise the thickness of the whole stack when the stack is laid out.
     pub fn draw_mode(mut self, draw_mode: StackBarDrawMode) -> Self {
         self.bar.draw_mode = Some(draw_mode);
         self
     }
+    /// Returns the finished segment.
     pub fn build(self) -> StackBar<T> {
         self.bar
     }
@@ -129,6 +228,7 @@ impl<T> From<T> for StackBar<T>
 where
     T: Number + 'static,
 {
+    /// Creates a segment that stores `value`. Label, color, and draw mode stay unset.
     fn from(value: T) -> Self {
         StackBarBuilder::new(value).build()
     }
@@ -138,12 +238,23 @@ impl<T> From<&T> for StackBar<T>
 where
     T: Number + 'static,
 {
+    /// Creates a segment from a borrowed value. Label, color, and draw mode stay unset.
     fn from(value: &T) -> Self {
         (*value).into()
     }
 }
 
 #[derive(Clone, Debug)]
+/// One column of a [`VStackedBarChart`](crate::ui::vstackedbarchart::VStackedBarChart).
+///
+/// Positive [`StackBar`] values pile upward from zero and negative values pile downward.
+/// Thickness and spacing are optional and apply to the whole column: a field left unset uses
+/// the chart default. The thickness is shared by every segment and is raised when a segment's
+/// draw mode needs more cells. A sequence of numbers converts into a stack through [`From`].
+/// [`BarsStack::new`] and [`Default`] produce an empty stack.
+///
+/// The label is drawn under the column when the chart shows stack labels, and it is included
+/// in the hover tooltip when it is not empty.
 pub struct BarsStack<T: Number + 'static> {
     pub(crate) bars: Vec<StackBar<T>>,
     pub(crate) label: String,
@@ -153,6 +264,7 @@ pub struct BarsStack<T: Number + 'static> {
 }
 
 impl<T: Number + 'static> BarsStack<T> {
+    /// Creates an empty stack with no label and no thickness or spacing override.
     pub fn new() -> Self {
         Self {
             bars: Vec::new(),
@@ -162,6 +274,9 @@ impl<T: Number + 'static> BarsStack<T> {
             computed_thickness: 0,
         }
     }
+    /// Appends one segment and returns this stack.
+    ///
+    /// `bar` can be a [`StackBar`] or a number, which converts into a segment.
     pub fn add_bar<B>(&mut self, bar: B) -> &mut Self
     where
         B: Into<StackBar<T>>,
@@ -169,6 +284,9 @@ impl<T: Number + 'static> BarsStack<T> {
         self.bars.push(bar.into());
         self
     }
+    /// Appends every segment from `bars` and returns this stack.
+    ///
+    /// Each item can be a [`StackBar`] or a number, which converts into a segment.
     pub fn add_bars<B>(&mut self, bars: impl IntoIterator<Item = B>) -> &mut Self
     where
         B: Into<StackBar<T>>,
@@ -176,51 +294,72 @@ impl<T: Number + 'static> BarsStack<T> {
         self.bars.extend(bars.into_iter().map(|bar| bar.into()));
         self
     }
+    /// Returns the number of segments in this stack.
     #[inline(always)]
     pub fn count(&self) -> usize {
         self.bars.len()
     }
+    /// Returns the segment at `index`, or `None` when `index` is past the last segment.
     #[inline(always)]
     pub fn get(&self, index: usize) -> Option<&StackBar<T>> {
         self.bars.get(index)
     }
+    /// Returns a mutable reference to the segment at `index`, or `None` when `index` is past the last segment.
     #[inline(always)]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut StackBar<T>> {
         self.bars.get_mut(index)
     }
+    /// Returns the label displayed for this stack.
+    ///
+    /// A [`VStackedBarChart`](crate::ui::vstackedbarchart::VStackedBarChart) can show it under
+    /// the column. The hover tooltip includes it when it is not empty.
     #[inline(always)]
     pub fn label(&self) -> &str {
         &self.label
     }
+    /// Sets the label displayed for this stack.
     #[inline(always)]
     pub fn set_label(&mut self, label: &str) -> &mut Self {
         self.label.clear();
         self.label.push_str(label);
         self
     }
+    /// Returns the thickness of this stack, in cells, or `None` if the chart default is used.
     #[inline(always)]
     pub fn thickness(&self) -> Option<u8> {
         self.thickness
     }
+    /// Sets the thickness of this stack, in cells.
+    ///
+    /// Every segment uses this width. A value below 1 is raised to 1 when the stack is laid out.
+    /// A draw mode may raise it further: [`StackBarDrawMode::Rectangle`] needs at least 2 cells
+    /// and [`StackBarDrawMode::FilledRectangle`] needs at least 3. The widest requirement among
+    /// the segments is used.
     #[inline(always)]
     pub fn set_thickness(&mut self, thickness: u8) -> &mut Self {
         self.thickness = Some(thickness);
         self
     }
+    /// Clears the stack-specific thickness so the chart default is used.
+    ///
+    /// A draw mode may still raise that default when the stack is laid out.
     #[inline(always)]
     pub fn clear_thickness(&mut self) -> &mut Self {
         self.thickness = None;
         self
     }
+    /// Returns the spacing before this stack, in cells, or `None` if the chart default is used.
     #[inline(always)]
     pub fn spacing(&self) -> Option<u8> {
         self.spacing
     }
+    /// Sets the gap, in cells, before this stack.
     #[inline(always)]
     pub fn set_spacing(&mut self, spacing: u8) -> &mut Self {
         self.spacing = Some(spacing);
         self
     }
+    /// Clears the stack-specific spacing so the chart default is used.
     #[inline(always)]
     pub fn clear_spacing(&mut self) -> &mut Self {
         self.spacing = None;
@@ -247,19 +386,41 @@ impl<T: Number + 'static> BarsStack<T> {
 }
 
 impl<T: Number + 'static> Default for BarsStack<T> {
+    /// Returns an empty stack. Equivalent to [`BarsStack::new`].
     fn default() -> Self {
         Self::new()
     }
 }
 
+/// Builds a [`BarsStack`] by setting only the properties that should differ from the chart defaults.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// let stack = BarsStackBuilder::<i32>::new()
+///     .label("North")
+///     .bar(10)
+///     .bar(StackBarBuilder::new(-4).label("returns").build())
+///     .thickness(3)
+///     .spacing(1)
+///     .build();
+/// assert_eq!(stack.count(), 2);
+/// assert_eq!(stack.label(), "North");
+/// assert_eq!(stack.get(1).unwrap().value(), -4);
+/// ```
 pub struct BarsStackBuilder<T: Number + 'static> {
     stack: BarsStack<T>,
 }
 
 impl<T: Number + 'static> BarsStackBuilder<T> {
+    /// Starts an empty stack. Label, thickness, and spacing stay unset.
     pub fn new() -> Self {
         Self { stack: BarsStack::new() }
     }
+    /// Appends one segment.
+    ///
+    /// `bar` can be a [`StackBar`] or a number, which converts into a segment.
     pub fn bar<B>(mut self, bar: B) -> Self
     where
         B: Into<StackBar<T>>,
@@ -267,6 +428,9 @@ impl<T: Number + 'static> BarsStackBuilder<T> {
         self.stack.bars.push(bar.into());
         self
     }
+    /// Appends every segment from `bars`.
+    ///
+    /// Each item can be a [`StackBar`] or a number, which converts into a segment.
     pub fn bars<B>(mut self, bars: impl IntoIterator<Item = B>) -> Self
     where
         B: Into<StackBar<T>>,
@@ -274,24 +438,34 @@ impl<T: Number + 'static> BarsStackBuilder<T> {
         self.stack.bars.extend(bars.into_iter().map(|bar| bar.into()));
         self
     }
+    /// Sets the label displayed for the stack.
     pub fn label(mut self, label: &str) -> Self {
         self.stack.label = label.to_string();
         self
     }
+    /// Sets the thickness of the stack, in cells.
+    ///
+    /// Every segment uses this width. A value below 1 is raised to 1 when the stack is laid out.
+    /// A draw mode may raise it further: [`StackBarDrawMode::Rectangle`] needs at least 2 cells
+    /// and [`StackBarDrawMode::FilledRectangle`] needs at least 3. The widest requirement among
+    /// the segments is used.
     pub fn thickness(mut self, thickness: u8) -> Self {
         self.stack.thickness = Some(thickness);
         self
     }
+    /// Sets the gap, in cells, before the stack.
     pub fn spacing(mut self, spacing: u8) -> Self {
         self.stack.spacing = Some(spacing);
         self
     }
+    /// Returns the finished stack.
     pub fn build(self) -> BarsStack<T> {
         self.stack
     }
 }
 
 impl<T: Number + 'static> Default for BarsStackBuilder<T> {
+    /// Returns an empty builder. Equivalent to [`BarsStackBuilder::new`].
     fn default() -> Self {
         Self::new()
     }
@@ -301,6 +475,7 @@ impl<T> From<&[T]> for BarsStack<T>
 where
     T: Number + 'static,
 {
+    /// Creates a stack with one segment per value. Label, thickness, and spacing stay unset.
     fn from(values: &[T]) -> Self {
         let mut stack = BarsStack::new();
         stack.add_bars(values);
@@ -312,6 +487,7 @@ impl<T> From<Vec<T>> for BarsStack<T>
 where
     T: Number + 'static,
 {
+    /// Creates a stack with one segment per value. Label, thickness, and spacing stay unset.
     fn from(values: Vec<T>) -> Self {
         let mut stack = BarsStack::new();
         stack.add_bars(values);
@@ -323,6 +499,7 @@ impl<T> From<&Vec<T>> for BarsStack<T>
 where
     T: Number + 'static,
 {
+    /// Creates a stack with one segment per value. Label, thickness, and spacing stay unset.
     fn from(values: &Vec<T>) -> Self {
         values.as_slice().into()
     }
@@ -332,6 +509,7 @@ impl<T, const N: usize> From<[T; N]> for BarsStack<T>
 where
     T: Number + 'static,
 {
+    /// Creates a stack with one segment per value. Label, thickness, and spacing stay unset.
     fn from(values: [T; N]) -> Self {
         let mut stack = BarsStack::new();
         stack.add_bars(values);
@@ -343,6 +521,7 @@ impl<T, const N: usize> From<&[T; N]> for BarsStack<T>
 where
     T: Number + 'static,
 {
+    /// Creates a stack with one segment per value. Label, thickness, and spacing stay unset.
     fn from(values: &[T; N]) -> Self {
         values.as_slice().into()
     }
@@ -352,6 +531,7 @@ impl<T> From<&BarsStack<T>> for BarsStack<T>
 where
     T: Number + 'static,
 {
+    /// Creates a stack by cloning `stack`.
     fn from(stack: &BarsStack<T>) -> Self {
         stack.clone()
     }
