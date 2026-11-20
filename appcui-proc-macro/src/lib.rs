@@ -121,6 +121,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::UsageChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHeatMapEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -197,6 +198,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::UsageChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHeatMapEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -296,6 +298,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::UsageChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericHeatMapEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::Default);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
@@ -371,6 +374,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::UsageChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericHeatMapEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -471,6 +475,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::UsageChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHeatMapEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -3000,6 +3005,11 @@ pub fn bufferview(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn vbarchart(input: TokenStream) -> TokenStream {
     crate::controls::vbarchart::create(input)
+}
+
+#[proc_macro]
+pub fn vstackedbarchart(input: TokenStream) -> TokenStream {
+    crate::controls::vstackedbarchart::create(input)
 }
 
 /// Creates a new horizontal bar chart for a numeric series.

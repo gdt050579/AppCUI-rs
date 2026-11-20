@@ -31,6 +31,8 @@ use crate::ui::{
     usagechart::events::UsageChartEvents,
     heatmap,
     heatmap::events::GenericHeatMapEvents,
+    vstackedbarchart,
+    vstackedbarchart::events::GenericVStackedBarChartEvents,
     hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview, markdown_composer::events::MarkdownComposerEvents,
 };
 
@@ -77,6 +79,7 @@ pub(crate) enum ControlEventData {
     LineChart(linechart::events::EventData),
     UsageChart(usagechart::events::EventData),
     HeatMap(heatmap::events::EventData),
+    VStackedBarChart(vstackedbarchart::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -271,6 +274,17 @@ impl ControlEvent {
                     GenericHeatMapEvents::on_cell_selected(receiver, self.emitter.cast(), data.type_id, row, column)
                 }
                 heatmap::events::EventType::ClearSelection => GenericHeatMapEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id),
+            },
+            ControlEventData::VStackedBarChart(data) => match data.event_type {
+                vstackedbarchart::events::EventType::ClearSelection => {
+                    GenericVStackedBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }
+                vstackedbarchart::events::EventType::StackSelected(index) => {
+                    GenericVStackedBarChartEvents::on_stack_selected(receiver, self.emitter.cast(), data.type_id, index)
+                }
+                vstackedbarchart::events::EventType::CellSelected { stack_index, cell_index } => {
+                    GenericVStackedBarChartEvents::on_cell_selected(receiver, self.emitter.cast(), data.type_id, stack_index, cell_index)
+                }
             },
         }
     }
