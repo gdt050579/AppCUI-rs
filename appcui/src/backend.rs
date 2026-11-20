@@ -20,6 +20,7 @@ mod debug;
 #[cfg(all(target_family = "unix", feature = "NCURSES"))]
 mod ncurses;
 mod system_event_thread;
+mod palette;
 // #[cfg(target_family = "unix")]
 // mod ncurses;
 #[cfg(target_family = "unix")]
