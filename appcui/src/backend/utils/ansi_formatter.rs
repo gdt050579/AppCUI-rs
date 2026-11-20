@@ -1,3 +1,4 @@
+use crate::backend::ColorPalette;
 use crate::graphics::{CharFlags, Color, Point, Surface};
 use crate::utils::IsWideChar;
 use std::io::Write;
@@ -14,6 +15,7 @@ pub(crate) struct AnsiFormatter {
 }
 
 impl AnsiFormatter {
+    const APPCUI_TO_ANSI: [u8; 16] = [0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15];
     pub(crate) fn new(capacity: usize, flags: AnsiFlags) -> Self {
         Self {
             text: String::with_capacity(capacity),
@@ -55,6 +57,27 @@ impl AnsiFormatter {
     #[inline(always)]
     pub(crate) fn reset_screen(&mut self) {
         self.text.push_str("\x1b[0m\x1b[2J\x1b[3J\x1b[H");
+    }
+
+    pub(crate) fn set_palette(&mut self, palette: ColorPalette) {
+        let mut buffer: [u8;10] = [0, 0, b'/',0, 0, b'/',0, 0, 0x1b, b'\\'];
+        let hex = "0123456789abcdef".as_bytes();
+        for (i, color) in palette.colors.iter().enumerate() {
+            let idx = Self::APPCUI_TO_ANSI[i];
+            self.text.push_str("\x1b]4;");
+            self.write_number(idx as i32);
+            self.text.push_str(";rgb:");
+            buffer[0] = hex[(color.0 / 16) as usize];
+            buffer[1] = hex[(color.0 % 16) as usize];
+            buffer[3] = hex[(color.1 / 16) as usize];
+            buffer[4] = hex[(color.1 % 16) as usize];
+            buffer[6] = hex[(color.2 / 16) as usize];
+            buffer[7] = hex[(color.2 % 16) as usize];
+            self.text.push_str(unsafe { std::str::from_utf8_unchecked(&buffer) });
+        }
+    }
+    pub(crate) fn reset_palette(&mut self) {
+        self.text.push_str("\x1b]104\x1b\\");
     }
 
     #[inline(always)]
