@@ -5,6 +5,7 @@ use super::XAxisLabelFormat;
 use super::events::{EventType, GenericVStackedBarChartEvents};
 use crate::ui::components::{paint_segment, resolve_attr, segment_rows, ValueMapping};
 use crate::ui::components::BarFillType;
+use super::vstackedbarchart::Selection;
 
 fn in_app(f: impl FnOnce() + 'static) {
     let script = "
@@ -4433,7 +4434,7 @@ fn overlay_surface(chart: &VStackedBarChart<i32>) -> Surface {
     let mut surface = Surface::new(30, 14);
     surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     let theme = chart.theme();
-    chart.on_paint(&mut surface, &theme);
+    chart.on_paint(&mut surface, theme);
     surface
 }
 
