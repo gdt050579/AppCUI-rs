@@ -1,4 +1,4 @@
-use crate::backend::ColorPalette;
+use crate::backend::{ColorPalette, Palette};
 use crate::graphics::{CharFlags, Color, Point, Surface};
 use crate::utils::IsWideChar;
 use std::io::Write;
@@ -59,8 +59,16 @@ impl AnsiFormatter {
         self.text.push_str("\x1b[0m\x1b[2J\x1b[3J\x1b[H");
     }
 
-    pub(crate) fn set_palette(&mut self, palette: ColorPalette) {
-        let mut buffer: [u8;10] = [0, 0, b'/',0, 0, b'/',0, 0, 0x1b, b'\\'];
+    #[inline(always)]
+    pub(crate) fn set_palette(&mut self, palette: Palette) {
+        match palette {
+            Palette::Terminal => {}
+            Palette::BuiltIn => self.set_color_palette(ColorPalette::built_in()),
+            Palette::Custom(colors) => self.set_color_palette(colors),
+        }
+    }
+    fn set_color_palette(&mut self, palette: ColorPalette) {
+        let mut buffer: [u8; 10] = [0, 0, b'/', 0, 0, b'/', 0, 0, 0x1b, b'\\'];
         let hex = "0123456789abcdef".as_bytes();
         for (i, color) in palette.colors.iter().enumerate() {
             let idx = Self::APPCUI_TO_ANSI[i];
