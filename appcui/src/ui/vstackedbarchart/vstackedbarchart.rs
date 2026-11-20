@@ -269,6 +269,7 @@ where
         self.repaint_surface();
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(super) fn yaxis_format(&self) -> &FormatNumber {
         if matches!(self.scale, StackBarScale::Percentage) {
             &self.percentage_format
@@ -933,14 +934,6 @@ where
     pub(super) fn value_mapping(&self, height: u32) -> ValueMapping {
         let (lo, hi) = self.compute_range();
         ValueMapping::new(lo, hi, height)
-    }
-    pub(super) fn update_segments_layout(&mut self, height: u32) {
-        let mapping = self.value_mapping(height);
-        self.apply_segments(&mapping);
-    }
-    pub(super) fn update_yaxis_data(&mut self, height: u32) {
-        let mapping = self.value_mapping(height);
-        self.apply_yaxis(&mapping);
     }
     pub(super) fn update_plot_layout(&mut self, height: u32) {
         let mapping = self.value_mapping(height);

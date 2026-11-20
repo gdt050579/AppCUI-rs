@@ -2054,7 +2054,7 @@ fn check_chart_value_mapping_empty_chart() {
 }
 
 fn segments_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32, index: usize) -> Vec<(i16, i16)> {
-    chart.update_segments_layout(height);
+    chart.update_plot_layout(height);
     chart.stacks[index].layout.iter().map(|s| (s.offset, s.len)).collect()
 }
 
@@ -2254,7 +2254,6 @@ fn check_segments_zero_height() {
 fn check_segments_empty_stack_and_empty_chart() {
     in_app(|| {
         let mut chart = new_chart();
-        chart.update_segments_layout(10);
         chart.add_stack(BarsStack::<i32>::new());
         assert!(segments_of(&mut chart, 10, 0).is_empty());
     });
@@ -2284,7 +2283,7 @@ fn check_segments_huge_height_does_not_overflow() {
 }
 
 fn yaxis_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32) -> (i32, f64, f64) {
-    chart.update_yaxis_data(height);
+    chart.update_plot_layout(height);
     (chart.yaxis.zero, chart.yaxis.bottom_value, chart.yaxis.bottom_step)
 }
 
