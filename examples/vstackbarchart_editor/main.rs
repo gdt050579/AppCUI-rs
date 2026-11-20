@@ -667,12 +667,8 @@ impl StackedBarChartEditor {
         };
         let chart = self.chart;
         if let Some(ctrl) = self.control_mut(chart) {
-            ctrl.update_stacks(|stacks| {
-                stacks.clear();
-                for (label, values) in parsed {
-                    stacks.push(build_stack(&label, &values));
-                }
-            });
+            ctrl.clear();
+            ctrl.add_stacks(parsed.into_iter().map(|(label, values)| build_stack(&label, &values)));
         }
         self.clear_selection_ui();
     }

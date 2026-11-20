@@ -1,6 +1,6 @@
 use super::events::{EventData, EventType};
 use super::stackbar::{paint_segment, resolve_attr, segment_rows, StackWithLayout, ValueMapping};
-use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, Stacks, XAxisLabelFormat, XAxisLabelMode};
+use super::{BarsStack, Flags, Selection, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::prelude::*;
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
@@ -181,24 +181,6 @@ where
             self.clear_hovered();
             self.repaint_surface();
         }
-    }
-    pub fn update_stacks<F>(&mut self, f: F)
-    where
-        F: FnOnce(&mut Stacks<'_, T>),
-    {
-        let defaults = self.defaults;
-        f(&mut Stacks {
-            inner: &mut self.stacks,
-            selection: &mut self.selection,
-            default_thickness: defaults.thickness,
-            default_draw_mode: defaults.draw_mode,
-        });
-        for entry in self.stacks.iter_mut() {
-            entry.stack.update_actual_thickness(defaults.thickness, defaults.draw_mode);
-        }
-        self.clamp_selection();
-        self.clear_hovered();
-        self.repaint_surface();
     }
     pub fn clear(&mut self) {
         self.stacks.clear();
