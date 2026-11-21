@@ -27,6 +27,7 @@ impl WindowsVTTerminal {
             },
         );
         ansi_formatter.set_palette(builder.palette);
+        ansi_formatter.execute();
         Input::new(input_console).start(sender);
         Ok(WindowsVTTerminal { console, ansi_formatter })
     }
@@ -42,6 +43,7 @@ impl Backend for WindowsVTTerminal {
     fn on_close(&mut self) {
         self.ansi_formatter.clear();
         self.ansi_formatter.reset_screen();
+        self.ansi_formatter.reset_palette();
         self.ansi_formatter.disable_mouse_events();
         self.ansi_formatter.execute();
         self.console.on_close();

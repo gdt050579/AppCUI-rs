@@ -85,6 +85,11 @@ impl AnsiFormatter {
         }
     }
     pub(crate) fn reset_palette(&mut self) {
+        for slot in 0..16 {
+            self.text.push_str("\x1b]104;");
+            self.write_number(slot);
+            self.text.push_str("\x1b\\");
+        }        
         self.text.push_str("\x1b]104\x1b\\");
     }
 
