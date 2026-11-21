@@ -50,6 +50,7 @@ use crate::{
         linechart::events::GenericLineChartEvents,
         usagechart::events::UsageChartEvents,
         heatmap::events::GenericHeatMapEvents,
+        vstackedbarchart::events::GenericVStackedBarChartEvents,
     },
 };
 
@@ -273,6 +274,7 @@ pub trait Control:
     + GenericLineChartEvents
     + UsageChartEvents
     + GenericHeatMapEvents
+    + GenericVStackedBarChartEvents
 {
 }
 

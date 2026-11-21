@@ -350,6 +350,10 @@ name = "minesweeper"
 path = "minesweeper/main.rs"
 
 [[example]]
+name = "file_navigator"
+path = "file_navigator/main.rs"
+
+[[example]]
 name = "flappy"
 path = "flappy/main.rs"
 
@@ -380,6 +384,10 @@ path = "graph_editor/main.rs"
 [[example]]
 name = "vbarchart_editor"
 path = "vbarchart_editor/main.rs"
+
+[[example]]
+name = "vstackbarchart_editor"
+path = "vstackbarchart_editor/main.rs"
 
 [[example]]
 name = "hbarchart_editor"
@@ -426,12 +434,24 @@ name = "window_guide"
 path = "window_guide/main.rs"
 
 [[example]]
+name = "palette"
+path = "palette/main.rs"
+
+[[example]]
+name = "palette_gray"
+path = "palette_gray/main.rs"
+
+[[example]]
 name = "panels_3d"
 path = "panels_3d/main.rs"
 
 [[example]]
 name = "hbarchart"
 path = "hbarchart/main.rs"
+
+[[example]]
+name = "vstackedbarchart"
+path = "vstackedbarchart/main.rs"
 
 [[example]]
 name = "piechart"
@@ -484,6 +504,10 @@ path = "numericselector/main.rs"
 [[example]]
 name = "booking_form"
 path = "booking_form/main.rs"
+
+[[example]]
+name = "progressbar"
+path = "progressbar/main.rs"
 
 
 [lints]

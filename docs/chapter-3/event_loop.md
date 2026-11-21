@@ -259,6 +259,7 @@ impl PieChartEvents for MyWin {}
 impl GenericLineChartEvents for MyWin {}
 impl UsageChartEvents for MyWin {}
 impl GenericHeatMapEvents for MyWin {}
+impl GenericVStackedBarChartEvents for MyWin {}
 ```
 
 Leaving `OnPaint` empty draws nothing: the title bar and the children are painted by `base`. Forward the input traits the same way the sample forwards `OnKeyPressed` and `OnMouseEvent`.

@@ -12,16 +12,33 @@ For clipboard based operations, it relies on the following APIs:
 
 Input (mouse / keyboard / console resize) is handled by the following APIs:
 
-| API                               | Task(s)                                                            |
-| --------------------------------- | ------------------------------------------------------------------ |
-| `GetStdHandle(...)`               | To gain access to **stdin** and **stdout**                         |
-| `GetConsoleScreenBufferInfo(...)` | To get information about console size and position                 |
-| `GetConsoleMode(...)`             | To get information about the current mode of the console           |
-| `ReadConsoleInputW(...)`          | To read input events (keys, mouse, resizing, console closing)      |
-| `SetConsoleTitleW(...)`           | To set the title (caption) of the console                          |
-| `SetConsoleScreenBufferSize(...)` | To resize the console to a specific **width** and **height**       |
+| API                               | Task(s)                                                       |
+| --------------------------------- | ------------------------------------------------------------- |
+| `GetStdHandle(...)`               | To gain access to **stdin** and **stdout**                    |
+| `GetConsoleScreenBufferInfo(...)` | To get information about console size and position            |
+| `GetConsoleMode(...)`             | To get information about the current mode of the console      |
+| `ReadConsoleInputW(...)`          | To read input events (keys, mouse, resizing, console closing) |
+| `SetConsoleTitleW(...)`           | To set the title (caption) of the console                     |
+| `SetConsoleScreenBufferSize(...)` | To resize the console to a specific **width** and **height**  |
 
 The output is done via VT100 escape sequences (please refer to [Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code) for more information). This backend supports true colors (24 bits per pixel) and wide characters (2 bytes per character) but it depends on the Windows version to support them.
+
+## Palette
+
+Windows VT uses the same console object as [Windows Console](windows_console.md), so `.palette(...)` still updates the console color table through `SetConsoleScreenBufferInfoEx`. The general rules for the two builder methods are in [Palette](../application.md#palette).
+
+| Palette             | Console color table                                   |
+| ------------------- | ----------------------------------------------------- |
+| `Palette::Terminal` | Left unchanged. This is the default.                  |
+| `Palette::BuiltIn`  | Replaced with the standard AppCUI colors.             |
+| `Palette::Custom`   | Replaced with the RGB values from the `ColorPalette`. |
+
+`.palette_as_rgb(...)` chooses how those colors are painted with ANSI sequences:
+
+* `false` (the default). Characters use the 16 color indexes. `BuiltIn` and `Custom` are also loaded into those indexes with an OSC 4 sequence.
+* `true`. Each character is painted with a 24-bit RGB sequence (`38;2` / `48;2`) taken from the palette. This requires `Palette::BuiltIn` or `Palette::Custom`.
+
+When the application ends, Windows VT does not restore the console color table with an ANSI sequence. The table saved at startup is written back with `SetConsoleScreenBufferInfoEx`, the same call Windows Console uses.
 
 ## Limitations:
 

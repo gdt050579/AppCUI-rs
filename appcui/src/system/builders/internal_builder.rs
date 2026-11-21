@@ -1,4 +1,5 @@
 use crate::backend;
+use crate::backend::Palette;
 use crate::graphics::*;
 use crate::system::*;
 use crate::ui::common::traits::*;
@@ -17,8 +18,9 @@ pub struct InternalBuilder {
     pub(crate) max_timer_count: u8,
     pub(crate) log_file: Option<String>,
     pub(crate) log_append: bool,
-    pub(crate) use_color_schema: bool,
     pub(crate) restore_screen: bool,
+    pub(crate) palette: Palette,
+    pub(crate) use_rgb_for_palette: bool,
     #[cfg(test)]
     pub(crate) runtime_check: Option<fn()>,
 }
@@ -37,14 +39,21 @@ impl InternalBuilder {
             theme: Theme::new(Themes::Default),
             log_file: None,
             log_append: false,
-            use_color_schema: true,
             restore_screen: true,
+            palette: Palette::Terminal,
+            use_rgb_for_palette: false,
             #[cfg(test)]
             runtime_check: None,
         }
     }
     #[inline(always)]
     pub(crate) fn build(self) -> Result<App, Error> {
+        if matches!(self.palette, Palette::Terminal) && self.use_rgb_for_palette {
+            return Err(Error::new(
+                ErrorKind::InvalidParameter,
+                "palette_as_rgb(true) has no effect with Palette::Terminal. Select Palette::BuiltIn or Palette::Custom as well.".to_string(),
+            ));
+        }
         #[cfg(test)]
         {
             let check = self.runtime_check;
@@ -58,6 +67,10 @@ impl InternalBuilder {
         {
             App::create(self)
         }
+    }
+    #[inline(always)]
+    pub(crate) fn is_palette_changed(&self) -> bool {
+        !(matches!(self.palette, Palette::Terminal)) && !self.use_rgb_for_palette
     }
     #[inline(always)]
     pub(crate) fn size(&mut self, terminal_size: Size) {
@@ -98,10 +111,6 @@ impl InternalBuilder {
     pub(crate) fn log_file(&mut self, name: &str, append: bool) {
         self.log_file = Some(String::from(name));
         self.log_append = append;
-    }
-    #[inline(always)]
-    pub(crate) fn color_schema(&mut self, enabled: bool) {
-        self.use_color_schema = enabled;
     }
     #[inline(always)]
     pub(crate) fn restore_screen(&mut self, enable: bool) {
@@ -187,25 +196,71 @@ macro_rules! impl_terminal_builder_methods {
             self
         }
 
-        /// Enables or disables the terminal color schema.
+        /// Chooses whether named colors are painted as 24-bit RGB.
         ///
-        /// When enabled (the default), the backend may map AppCUI colors through
-        /// the terminal's color schema. Disable this to keep the exact colors
-        /// defined by the theme.
+        /// When `enable` is `true`, a backend that supports this flag writes each color
+        /// with the RGB values from the current [`palette`](Self::palette). When `enable`
+        /// is `false` (the default), that backend uses the terminal's 16 color slots and
+        /// installs the palette into those slots.
+        ///
+        /// RGB mode needs a palette to read those values from.
+        /// [`Palette::Terminal`](crate::backend::Palette::Terminal) does not supply one, so
+        /// `palette_as_rgb(true)` together with that palette (including the default, when
+        /// [`palette`](Self::palette) is never called) makes [`run`](Self::run) return
+        /// [`ErrorKind::InvalidParameter`](crate::system::ErrorKind::InvalidParameter).
+        /// Select [`Palette::BuiltIn`](crate::backend::Palette::BuiltIn) or
+        /// [`Palette::Custom`](crate::backend::Palette::Custom) as well.
+        /// `palette_as_rgb(false)` with `Palette::Terminal` is valid.
         ///
         /// # Parameters
-        /// * `enabled` - `true` to use the terminal color schema, `false` to disable it.
+        /// * `enable` - `true` to emit RGB colors, `false` to use the 16-color schema.
+        ///
+        /// # Remarks
+        /// Windows VT, Termios, and CrossTerm honor this flag. The Windows Console backend ignores
+        /// it and always uses its 16-color table. NCurses and the Web Terminal ignore it as well.
+        /// The `Palette::Terminal` check still runs for every backend.
         ///
         /// # Examples
         ///
         /// ```rust, no_run
         /// use appcui::prelude::*;
         ///
-        /// App::new().color_schema(false);
+        /// App::new()
+        ///     .palette(appcui::backend::Palette::BuiltIn)
+        ///     .palette_as_rgb(true);
         /// ```
         #[inline(always)]
-        pub fn color_schema(mut self, enabled: bool) -> Self {
-            self.builder.color_schema(enabled);
+        pub fn palette_as_rgb(mut self, enable: bool) -> Self {
+            self.builder.use_rgb_for_palette = enable;
+            self
+        }
+
+        /// Sets the palette used for the 16 named colors.
+        ///
+        /// The default is [`Palette::Terminal`](crate::backend::Palette::Terminal), which
+        /// keeps the backend's default colors. [`Palette::BuiltIn`](crate::backend::Palette::BuiltIn)
+        /// installs the standard AppCUI colors.
+        /// [`Palette::Custom`](crate::backend::Palette::Custom) installs RGB values from a
+        /// [`ColorPalette`](crate::backend::ColorPalette).
+        ///
+        /// How those values reach the terminal depends on [`palette_as_rgb`](Self::palette_as_rgb).
+        /// `palette_as_rgb(true)` requires `BuiltIn` or `Custom`. Passing `Palette::Terminal`
+        /// (or leaving the default) while RGB mode is enabled makes [`run`](Self::run) return
+        /// [`ErrorKind::InvalidParameter`](crate::system::ErrorKind::InvalidParameter).
+        ///
+        /// # Parameters
+        /// * `palette` - The palette installed when the application starts.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().palette(appcui::backend::Palette::BuiltIn);
+        /// ```
+        #[inline(always)]
+        pub fn palette(mut self, palette: crate::backend::Palette) -> Self {
+            self.builder.palette = palette;
             self
         }
 
@@ -325,7 +380,7 @@ macro_rules! impl_terminal_builder_methods {
 
 macro_rules! impl_ui_builder_methods {
     () => {
-        /// Enables the application bar at the top of the desktop. 
+        /// Enables the application bar at the top of the desktop.
         ///
         /// The app bar hosts menus and other application-wide commands. It is
         /// disabled by default.

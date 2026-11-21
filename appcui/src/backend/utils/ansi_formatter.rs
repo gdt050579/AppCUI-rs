@@ -1,8 +1,54 @@
+use crate::backend::{ColorPalette, Palette};
 use crate::graphics::{CharFlags, Color, Point, Surface};
 use crate::utils::IsWideChar;
 use std::io::Write;
 use EnumBitFlags::EnumBitFlags;
 
+#[derive(Copy, Clone)]
+struct AnsiPaletteEntry {
+    buf: [u8; 11],
+    len: u8,
+}
+impl AnsiPaletteEntry {
+    #[inline(always)]
+    fn as_str(&self) -> &str {
+        unsafe { std::str::from_utf8_unchecked(&self.buf[..self.len as usize]) }
+    }
+    fn new(txt: &str) -> Self {
+        let len = txt.len().min(11);
+        let mut buf: [u8; 11] = [0; 11];
+        buf[..len].copy_from_slice(&txt.as_bytes()[..len]);
+        Self { buf, len: len as u8 }
+    }
+    fn from_rgb(r: u8, g: u8, b: u8) -> Self {
+        let mut buf: [u8; 11] = [0; 11];
+        let v = [r, g, b];
+        let mut pos = 0;
+        for (index, c) in v.iter().enumerate() {
+            let mut value = *c;
+            if value > 99 {
+                buf[pos] = b'0' + (value / 100);
+                value %= 100;
+                pos += 1;
+                buf[pos] = b'0' + (value / 10);
+                value %= 10;
+                pos += 1;
+            } else if value > 9 {
+                buf[pos] = b'0' + (value / 10);
+                value %= 10;
+                pos += 1;
+            }
+            buf[pos] = b'0' + value;
+            pos += 1;
+            if index < 2 {
+                buf[pos] = b';';
+                pos += 1;
+            }
+        }
+        // "255;255;255" fills all 11 bytes, so there is no room for a trailing NUL.
+        Self { buf, len: pos as u8 }
+    }
+}
 #[EnumBitFlags]
 pub(crate) enum AnsiFlags {
     Use16ColorSchema = 1,
@@ -11,13 +57,49 @@ pub(crate) enum AnsiFlags {
 pub(crate) struct AnsiFormatter {
     text: String,
     flags: AnsiFlags,
+    palette: [AnsiPaletteEntry; 16],
 }
 
 impl AnsiFormatter {
+    const APPCUI_TO_ANSI: [u8; 16] = [0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15];
     pub(crate) fn new(capacity: usize, flags: AnsiFlags) -> Self {
         Self {
             text: String::with_capacity(capacity),
             flags,
+            palette: [
+                // Black
+                AnsiPaletteEntry::new("0;0;0"),
+                // DarkBlue
+                AnsiPaletteEntry::new("0;0;128"),
+                // DarkGreen
+                AnsiPaletteEntry::new("0;128;0"),
+                // Teal
+                AnsiPaletteEntry::new("0;128;128"),
+                // DarkRed
+                AnsiPaletteEntry::new("128;0;0"),
+                // Magenta
+                AnsiPaletteEntry::new("128;0;128"),
+                // Olive
+                AnsiPaletteEntry::new("128;128;0"),
+                // Silver
+                AnsiPaletteEntry::new("196;196;196"),
+                // Gray
+                AnsiPaletteEntry::new("128;128;128"),
+                // Blue
+                AnsiPaletteEntry::new("0;0;255"),
+                // Green
+                AnsiPaletteEntry::new("0;255;0"),
+                // Aqua
+                AnsiPaletteEntry::new("0;255;255"),
+                // Red
+                AnsiPaletteEntry::new("255;0;0"),
+                // Pink
+                AnsiPaletteEntry::new("255;0;255"),
+                // Yellow
+                AnsiPaletteEntry::new("255;255;0"),
+                // White
+                AnsiPaletteEntry::new("255;255;255"),
+            ],
         }
     }
     #[inline(always)]
@@ -55,6 +137,46 @@ impl AnsiFormatter {
     #[inline(always)]
     pub(crate) fn reset_screen(&mut self) {
         self.text.push_str("\x1b[0m\x1b[2J\x1b[3J\x1b[H");
+    }
+
+    #[inline(always)]
+    pub(crate) fn set_palette(&mut self, palette: Palette) {
+        match palette {
+            Palette::Terminal => {}
+            Palette::BuiltIn => self.set_color_palette(ColorPalette::built_in()),
+            Palette::Custom(colors) => self.set_color_palette(colors),
+        }
+    }
+    fn set_color_palette(&mut self, palette: ColorPalette) {
+        if self.flags.contains_one(AnsiFlags::Use16ColorSchema) {
+            let mut buffer: [u8; 10] = [0, 0, b'/', 0, 0, b'/', 0, 0, 0x1b, b'\\'];
+            let hex = "0123456789abcdef".as_bytes();
+            for (i, color) in palette.colors.iter().enumerate() {
+                let idx = Self::APPCUI_TO_ANSI[i];
+                self.text.push_str("\x1b]4;");
+                self.write_number(idx as i32);
+                self.text.push_str(";rgb:");
+                buffer[0] = hex[(color.0 / 16) as usize];
+                buffer[1] = hex[(color.0 % 16) as usize];
+                buffer[3] = hex[(color.1 / 16) as usize];
+                buffer[4] = hex[(color.1 % 16) as usize];
+                buffer[6] = hex[(color.2 / 16) as usize];
+                buffer[7] = hex[(color.2 % 16) as usize];
+                self.text.push_str(unsafe { std::str::from_utf8_unchecked(&buffer) });
+            }
+        } else {
+            for (i, color) in palette.colors.iter().enumerate() {
+                self.palette[i] = AnsiPaletteEntry::from_rgb(color.0, color.1, color.2);
+            }
+        }
+    }
+    pub(crate) fn reset_palette(&mut self) {
+        for slot in 0..16 {
+            self.text.push_str("\x1b]104;");
+            self.write_number(slot);
+            self.text.push_str("\x1b\\");
+        }
+        self.text.push_str("\x1b]104\x1b\\");
     }
 
     #[inline(always)]
@@ -268,22 +390,22 @@ impl AnsiFormatter {
     #[inline(always)]
     fn write_color_as_rgb(&mut self, color: Color) {
         match color {
-            Color::Black => self.text.push_str("0;0;0"),
-            Color::DarkRed => self.text.push_str("128;0;0"),
-            Color::DarkGreen => self.text.push_str("0;128;0"),
-            Color::Olive => self.text.push_str("128;128;0"),
-            Color::DarkBlue => self.text.push_str("0;0;128"),
-            Color::Magenta => self.text.push_str("128;0;128"),
-            Color::Teal => self.text.push_str("0;128;128"),
-            Color::Silver => self.text.push_str("196;196;196"),
-            Color::Gray => self.text.push_str("128;128;128"),
-            Color::Red => self.text.push_str("255;0;0"),
-            Color::Green => self.text.push_str("0;255;0"),
-            Color::Yellow => self.text.push_str("255;255;0"),
-            Color::Blue => self.text.push_str("0;0;255"),
-            Color::Pink => self.text.push_str("255;0;255"),
-            Color::Aqua => self.text.push_str("0;255;255"),
-            Color::White => self.text.push_str("255;255;255"),
+            Color::Black
+            | Color::DarkRed
+            | Color::DarkGreen
+            | Color::Olive
+            | Color::DarkBlue
+            | Color::Magenta
+            | Color::Teal
+            | Color::Silver
+            | Color::Gray
+            | Color::Red
+            | Color::Green
+            | Color::Yellow
+            | Color::Blue
+            | Color::Pink
+            | Color::Aqua
+            | Color::White => self.text.push_str(self.palette[color.as_color_index() as usize].as_str()),
             Color::Transparent => self.text.push_str("0;0;0"),
             #[cfg(feature = "TRUE_COLORS")]
             Color::RGB(r, g, b) => {

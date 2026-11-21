@@ -5,13 +5,52 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
-## [Unreleased]
+## [0.5.10] - 2026-11-20
+
+### Added
+- **VStackedBarChart** control: vertical stacked bar chart where each column (a stack) is made of
+  several bars (segments) stacked on top of each other, with positive values growing upward and
+  negative values downward from a zero line. Generic over any numeric type. Stacks are built with
+  `BarsStackBuilder` (or from plain values / arrays) and each bar has a value, an optional label,
+  an optional color and its own draw mode (`Fill`, `Rectangle`, `FilledRectangle`).
+  Supports:
+  - scale modes (`FromZero`, `FitData`, `Fixed`, `FromZeroMinRange`, `Percentage`);
+  - X axis labels (none, stack labels, index, or custom spans) and a Y axis with grid and step;
+  - horizontal scrolling by keyboard (`Left`/`Right`, `Home`/`End`, `Ctrl+Left`/`Ctrl+Right`),
+    scrollbars and the mouse wheel, with the same behavior as `VBarChart`;
+  - selection of a bar or of a whole stack by keyboard, mouse click (bar) and double click (stack),
+    kept visible without focus, with a `theme.chart.selection_border` frame and the
+    `DimBarsOnSelection` flag;
+  - hover tooltips, number formatting and `ShowZeroLineOnYAxis`;
+  - the `on_stack_selected` / `on_cell_selected` / `on_clear_selection` events
+    (`VStackedBarChartEvents`).
+  Created with `VStackedBarChart::new` or `vstackedbarchart!`.
+- `vstackedbarchart!` proc-macro (`appcui-proc-macro` 0.3.10), together with the
+  `VStackedBarChartEvents` event trait wiring for `#[Window(events = ...)]` and modal windows.
+- Public types `BarsStack`, `BarsStackBuilder`, `StackBar`, `StackBarBuilder`, `StackBarDrawMode`
+  and `StackBarScale`.
+- **Sprite**: a rectangular block of `Character`s with no origin or clip area, to be drawn onto a
+  surface. Methods: `Sprite::new`, `size`, `get`, `set`, `clear`, `resize` and `edit` (draw into a
+  sprite using the regular `Surface` API). New method `Surface::draw_sprite(x, y, &sprite)`
+  (respects the surface origin and clip area).
+- new examples: `vstackedbarchart`, `vstackbarchart_editor`, `progressbar` (by
+  @vishwakmandaram in #304, closes #263), 
+- new example: `file_navigator` (by @emreocell in #302)
+- documentation: chapters for `VStackedBarChart`, `Sprite` and for the proc-macros
+  (including how to debug macro output), a refreshed `Window` guide with real screenshots
+  (by @harshit3355 in #296), and a new gallery entry.
 
 ### Added
 - `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and aqua accents)
 
 ### Fixed
-- Error message from #[Window(events = WrongTrait)] now refers to the events attribute
+- The error message for `#[Window(events = WrongTrait)]` now refers to the `events` attribute
+  instead of `overwrite` (by @peso in #297).
+
+### Changed
+- Internal clean-ups: Clippy fixes in the examples (`connect_four`, `game_2048`, `pacman`) and
+  in `UsageChart` (the percentage computation no longer risks a division by zero), and the shared
+  stacked-bar code moved into `ui/components`.
 
 ## [0.5.9] - 2026-11-14
 
@@ -292,6 +331,8 @@ background tasks, dialogs, themes, the layout builder and the gallery. The
 [0.4.0 release notes](https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.4.0) list every pull
 request and its author.
 
+[0.5.10]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.10
+[0.5.9]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.9
 [0.5.8]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.8
 [0.5.7]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.7
 [0.5.6]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.6

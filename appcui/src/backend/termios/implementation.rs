@@ -28,6 +28,7 @@ pub struct TermiosTerminal {
     size: Size,
     orig_termios: Termios,
     ansi_buffer: AnsiFormatter,
+    palette_changed: bool,
 }
 
 impl TermiosTerminal {
@@ -42,12 +43,13 @@ impl TermiosTerminal {
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
             orig_termios,
+            palette_changed: false,
             ansi_buffer: AnsiFormatter::new(
                 16384,
-                if builder.use_color_schema {
-                    AnsiFlags::Use16ColorSchema
-                } else {
+                if builder.use_rgb_for_palette {
                     AnsiFlags::None
+                } else {
+                    AnsiFlags::Use16ColorSchema
                 },
             ),
         };
@@ -76,9 +78,10 @@ impl TermiosTerminal {
                 t.size = size;
             }
         }
-
+        t.palette_changed = builder.is_palette_changed();
         t.ansi_buffer.clear();
         t.ansi_buffer.enable_mouse_events();
+        t.ansi_buffer.set_palette(builder.palette);
         //t.ansi_buffer.write_string("\x1b[?1000h\x1b[?1002h\x1b[?1003h");
         t.ansi_buffer.execute();
 
@@ -131,6 +134,9 @@ impl Backend for TermiosTerminal {
     fn on_close(&mut self) {
         self.ansi_buffer.clear();
         self.ansi_buffer.reset_screen();
+        if self.palette_changed {
+            self.ansi_buffer.reset_palette();
+        }
         self.ansi_buffer.disable_mouse_events();
         self.ansi_buffer.show_cursor();
         self.ansi_buffer.execute();

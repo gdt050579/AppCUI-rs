@@ -288,6 +288,24 @@ fn generate_hbarchart_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_HBARCHART_ON_CLEAR_SELECTION)", &on_clear_selection_code)
 }
 
+fn generate_vstackedbarchart_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericVStackedBarChartEvents) {
+        panic!("Missing generic type for VStackedBarChart event (Have you used events=VStackedBarChartEvents<Type> ?)");
+    }
+    let mut on_clear_selection_code = String::new();
+    let mut on_stack_selected_code = String::new();
+    let mut on_cell_selected_code = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericVStackedBarChartEvents].iter() {
+        on_clear_selection_code.push_str(templates::VSTACKEDBARCHART_ON_CLEAR_SELECTION_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_stack_selected_code.push_str(templates::VSTACKEDBARCHART_ON_STACK_SELECTED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_cell_selected_code.push_str(templates::VSTACKEDBARCHART_ON_CELL_SELECTED_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::VSTACKEDBARCHART_TRAIT_DEF
+        .replace("$(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_CLEAR_SELECTION)", &on_clear_selection_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_STACK_SELECTED)", &on_stack_selected_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_CELL_SELECTED)", &on_cell_selected_code)
+}
+
 fn generate_heatmap_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericHeatMapEvents) {
         panic!("Missing generic type for HeatMap event (Have you used events=HeatMapEvents<Type> ?)");
@@ -397,6 +415,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericHBarChartEvents => code.push_str(generate_hbarchart_events(&mut a).as_str()),
                         AppCUITrait::GenericLineChartEvents => code.push_str(generate_linechart_events(&mut a).as_str()),
                         AppCUITrait::GenericHeatMapEvents => code.push_str(generate_heatmap_events(&mut a).as_str()),
+                        AppCUITrait::GenericVStackedBarChartEvents => code.push_str(generate_vstackedbarchart_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

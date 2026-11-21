@@ -473,6 +473,58 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static VSTACKEDBARCHART_TRAIT_DEF: &str = "
+trait VStackedBarChartEvents<T: Number+'static> {
+    fn on_clear_selection(&mut self, handle: Handle<VStackedBarChart<T>>) -> EventProcessStatus;
+    fn on_stack_selected(&mut self, handle: Handle<VStackedBarChart<T>>, index: u32) -> EventProcessStatus;
+    fn on_cell_selected(&mut self, handle: Handle<VStackedBarChart<T>>, stack_index: u32, cell_index: u32) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericVStackedBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_stack_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_STACK_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_cell_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, stack_index: u32, cell_index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_CELL_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VStackedBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VStackedBarChartEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_ON_STACK_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VStackedBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VStackedBarChartEvents::<$(TYPE)>::on_stack_selected(self, h, index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_ON_CELL_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VStackedBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VStackedBarChartEvents::<$(TYPE)>::on_cell_selected(self, h, stack_index, cell_index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };

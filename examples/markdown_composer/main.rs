@@ -56,10 +56,10 @@ impl MarkdownComposerEvents for MyWin {
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
     {
-        App::new().backend(backend::Type::WindowsVT).color_schema(false).window(MyWin::new).run()
+        App::new().backend(backend::Type::WindowsVT).palette(appcui::backend::Palette::BuiltIn).window(MyWin::new).run()
     }
     #[cfg(not(target_os = "windows"))]
     {
-        App::new().color_schema(false).window(MyWin::new).run()
+        App::new().palette(appcui::backend::Palette::BuiltIn).window(MyWin::new).run()
     }
 }

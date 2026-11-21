@@ -8,7 +8,7 @@ A window is the core component of an application. It is the object where all eve
 
 The `Type` changes a window's frame, while `Background` communicates the meaning of its content. Initialization flags control interactions such as resizing and closing.
 
-These screenshots show focused windows rendered by the [window guide example](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/window_guide) with the default theme. The example uses RGB colors (`color_schema(false)`) so the terminal's color palette does not change the theme colors. An inactive window uses the theme's inactive background instead.
+These screenshots show focused windows rendered by the [window guide example](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/window_guide) with the default theme. The example installs the [built-in AppCUI palette](../../chapter-2/application.md#palette) (`.palette(Palette::BuiltIn)`) so the named colors match the theme. An inactive window uses the theme's inactive background instead.
 
 ### Frame styles
 

@@ -63,7 +63,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, pie charts, line charts, usage charts, heatmaps, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, stacked bar charts, pie charts, line charts, usage charts, heatmaps, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via the console API and virtual terminal, Linux and macOS via termios, with optional ncurses and crossterm backends)
@@ -72,6 +72,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 - [x] mouse support
 - [x] clipboard support
 - [x] color themes
+- [x] color palettes (16 named colors and 24-bit RGB colors)
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc.)
 - [x] true-color support (24 bits per pixel) for terminals that support it.
@@ -133,6 +134,7 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 - **LineChart** — line chart for a numeric series (scale, axes, and per-point appearance)
 - **UsageChart** — horizontal bar split into segments that share one total (per-segment fill and a hover tooltip)
 - **HeatMap** — grid of cells with values, labels, and colors
+- **VStackedBarChart** — stacked vertical bar chart for a numeric series (scale, axes, and per-bar appearance)
 
 ### Text
 - **TextField** — single-line text input
