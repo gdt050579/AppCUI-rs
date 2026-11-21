@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## Untracked
+
+### Added
+- `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and aqua accents) by @emreocell
+
 ## [0.5.10] - 2026-11-20
 
 ### Added
@@ -39,9 +44,6 @@ screenshots and the full notes.
 - documentation: chapters for `VStackedBarChart`, `Sprite` and for the proc-macros
   (including how to debug macro output), a refreshed `Window` guide with real screenshots
   (by @harshit3355 in #296), and a new gallery entry.
-
-### Added
-- `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and aqua accents)
 
 ### Fixed
 - The error message for `#[Window(events = WrongTrait)]` now refers to the `events` attribute

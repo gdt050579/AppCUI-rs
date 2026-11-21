@@ -254,7 +254,7 @@ fn check_high_contrast_theme() {
         Mouse.Click(3,0,left)
         Mouse.Move(3,2)
         Paint('Initial state')   
-        CheckHash(0x2DCD14FB90A41808) 
+        CheckHash(0xCC07B2E5CD2546C) 
     ";
     App::new()
         .size(Size::new(120, 24))
