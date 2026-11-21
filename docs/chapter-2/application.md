@@ -109,7 +109,7 @@ This method chooses **which** RGB values the 16 named colors have.
 | Yellow     | `Color::Yellow`    | Red=**255**, Green=**255**, Blue=**0**   | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 0);border: 2px solid white;"></div>   |
 | White      | `Color::White`     | Red=**255**, Green=**255**, Blue=**255** | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 255);border: 2px solid white;"></div> |
 
-On Windows Console, `BuiltIn` and `Custom` replace the console color table for the lifetime of the application. The previous table is restored when the application ends. On Windows VT, the same values are used for the colors the backend paints. On [Termios](backends/termios.md#palette), `BuiltIn` and `Custom` are written into the terminal's 16 color slots with OSC 4 when `.palette_as_rgb(false)` (the default), and each character is painted with 24-bit RGB when `.palette_as_rgb(true)`. On exit, Termios sends OSC 104 to ask the terminal to restore those slots. That reset depends on the terminal: some terminals, including WSL, leave the new colors in place. NCurses, the Web Terminal, and CrossTerm ignore the palette.
+On Windows Console, `BuiltIn` and `Custom` replace the console color table for the lifetime of the application. The previous table is restored when the application ends. On Windows VT, the same values are used for the colors the backend paints. On [Termios](backends/termios.md#palette) and [CrossTerm](backends/crossterm.md#palette), `BuiltIn` and `Custom` are written into the terminal's 16 color slots with OSC 4 when `.palette_as_rgb(false)` (the default), and each character is painted with 24-bit RGB when `.palette_as_rgb(true)`. On exit, those backends send OSC 104 to ask the terminal to restore those slots. That reset depends on the terminal: some terminals, including WSL, leave the new colors in place. NCurses and the Web Terminal ignore the palette.
 
 A custom table lists only the colors you want to change. Each entry is `(color, red, green, blue)`. The table starts from the built-in AppCUI colors above, so a color you leave out keeps that value. A later entry for the same color replaces the earlier one. `Color::Transparent` has no slot and panics.
 
@@ -142,7 +142,7 @@ This method chooses **how** the palette is sent to the terminal.
 
 `palette_as_rgb(true)` together with `Palette::Terminal` (including the case where you never call `.palette(...)`) makes `run()` return `ErrorKind::InvalidParameter`. `palette_as_rgb(false)` with `Palette::Terminal` is the default and is valid.
 
-Windows VT and Termios honor this flag. The Windows Console backend ignores it and always uses its 16-color table. The `Palette::Terminal` check still runs for every backend, including ones that ignore the flag.
+Windows VT, Termios, and CrossTerm honor this flag. The Windows Console backend ignores it and always uses its 16-color table. The `Palette::Terminal` check still runs for every backend, including ones that ignore the flag.
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {

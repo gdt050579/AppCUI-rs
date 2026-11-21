@@ -168,12 +168,12 @@ System events are events that are not related to the keyboard or mouse, but are 
 | Set dimension   | Yes             | Yes        | -       | -       | Yes          | -         |
 | Set title       | Yes             | Yes        | -       | -       | Yes          | -         |
 | Restore screen  | Yes             | Yes        | -       | -       | `N/A`        | -         |
-| Set palette     | Yes             | Yes        | -       | Yes     | -            | -         |
-| Restore palette | Yes             | Yes        | -       | Yes     | -            | -         |
+| Set palette     | Yes             | Yes        | -       | Yes     | -            | Yes       |
+| Restore palette | Yes             | Yes        | -       | Yes     | -            | Yes       |
 | ANSI Based      | -               | Yes        | -       | Yes     | -            | Yes       |
 
 * `N/A` (not applicable) means that there is no original screen prior to the app execution so there is nothing to restore.
-* **Restore palette** is `Yes` for Termios because the backend sends OSC 104 on exit. The terminal decides whether those colors actually return. Some terminals, such as WSL, keep the palette that was set. See [Termios](backends/termios.md#limitations).
+* **Restore palette** is `Yes` for Termios and CrossTerm because those backends send OSC 104 on exit. The terminal decides whether those colors actually return. Some terminals, such as WSL, keep the palette that was set. See [Termios](backends/termios.md#limitations) and [CrossTerm](backends/crossterm.md#palette).
 
 ## Clipboard
 
