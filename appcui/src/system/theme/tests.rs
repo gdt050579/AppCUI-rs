@@ -246,3 +246,23 @@ fn check_light_theme() {
         .run()
         .unwrap()
 }
+
+#[test]
+fn check_high_contrast_theme() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(3,0,left)
+        Mouse.Move(3,2)
+        Paint('Initial state')   
+        CheckHash(0x2DCD14FB90A41808) 
+    ";
+    App::new()
+        .size(Size::new(120, 24))
+        .debug_script(script)
+        .theme(Theme::new(Themes::HighContrast))
+        .command_bar()
+        .app_bar()
+        .window(WindowWithTheme::new)
+        .run()
+        .unwrap()
+}

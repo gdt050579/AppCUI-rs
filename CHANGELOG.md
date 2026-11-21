@@ -40,6 +40,9 @@ screenshots and the full notes.
   (including how to debug macro output), a refreshed `Window` guide with real screenshots
   (by @harshit3355 in #296), and a new gallery entry.
 
+### Added
+- `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and aqua accents)
+
 ### Fixed
 - The error message for `#[Window(events = WrongTrait)]` now refers to the `events` attribute
   instead of `overwrite` (by @peso in #297).

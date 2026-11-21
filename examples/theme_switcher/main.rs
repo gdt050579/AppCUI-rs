@@ -13,7 +13,7 @@ struct FileInformation {
 }
 
 #[Window(events : MenuEvents+AppBarEvents, 
-        commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme)]
+        commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme+HighContrastTheme)]
 struct MyWindow {
     h_file: Handle<MenuButton>,
     h_theme: Handle<MenuButton>,
@@ -39,7 +39,8 @@ impl MyWindow {
             "class: MyWindow, items=[
                 {&Default,cmd:DefaultTheme,selected: true},
                 {'Dark Gray',cmd:DarkGrayTheme, selected: false},
-                {'&Light',cmd:LightTheme, selected: false}
+                {'&Light',cmd:LightTheme, selected: false},
+                {'&High Contrast',cmd:HighContrastTheme, selected: false}
             ]"
         ),0,Side::Left));
 
@@ -127,6 +128,7 @@ impl MenuEvents for MyWindow {
             mywindow::Commands::DefaultTheme => Some(Themes::Default),
             mywindow::Commands::DarkGrayTheme => Some(Themes::DarkGray),
             mywindow::Commands::LightTheme => Some(Themes::Light),
+            mywindow::Commands::HighContrastTheme => Some(Themes::HighContrast),
             _ => None,
         };
         if let Some(theme) = stock_theme {
@@ -144,3 +146,4 @@ impl AppBarEvents for MyWindow {
 fn main() -> Result<(), appcui::system::Error> {
     App::new().size(Size::new(120, 24)).app_bar().palette(appcui::backend::Palette::BuiltIn).window(MyWindow::new).run()
 }
+ 
