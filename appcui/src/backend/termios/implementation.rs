@@ -12,7 +12,6 @@ use super::{
     size_reader::SizeReader,
 };
 use crate::backend::utils::{AnsiFlags, AnsiFormatter};
-use crate::backend::Palette;
 use crate::{
     backend::{termios::api::sizing::listen_for_resizes, Backend, SystemEventReader},
     graphics::*,
