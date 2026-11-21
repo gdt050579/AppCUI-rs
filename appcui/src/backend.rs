@@ -15,12 +15,14 @@
 //! - **Web Terminal**: browser canvas. Default on WebAssembly.
 //!
 //! NCurses and CrossTerm are never selected automatically. What each backend can display and which input it can read depends on the terminal.
+//!
+//! Named colors can be remapped through the [`palette`] module.
 
 mod debug;
 #[cfg(all(target_family = "unix", feature = "NCURSES"))]
 mod ncurses;
 mod system_event_thread;
-mod palette;
+pub mod palette;
 // #[cfg(target_family = "unix")]
 // mod ncurses;
 #[cfg(target_family = "unix")]
