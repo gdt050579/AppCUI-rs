@@ -35,7 +35,7 @@ pub(crate) struct Console {
     shared_visible_region: Arc<Mutex<structs::SMALL_RECT>>,
     orig_screen: Option<OriginalScreen>,
     orig_color_table: [u32; 16],
-    info: structs::CONSOLE_SCREEN_BUFFER_INFOEX,
+    color_table_changed: bool,
 }
 
 impl Console {
@@ -184,7 +184,7 @@ impl Console {
                 shared_visible_region: Arc::new(Mutex::new(info.window)),
                 orig_screen,
                 orig_color_table,
-                info,
+                color_table_changed: chage_color_table,
             })
         }
     }
@@ -381,10 +381,14 @@ impl Console {
         unsafe {
             let _ = api::SetConsoleMode(self.stdin, self.stdin_original_mode_flags);
             let _ = api::SetConsoleMode(self.stdout, self.stdout_original_mode_flags);
-            // revert the console color table
-            if self.info.color_table != self.orig_color_table {
-                self.info.color_table = self.orig_color_table;
-                let _ = api::SetConsoleScreenBufferInfoEx(self.stdout, &self.info);
+            // revert the console color table (read the current info first, so that
+            // only the color table is changed and not the size, cursor, etc.)
+            if self.color_table_changed {
+                if let Ok(mut info) = Self::screen_buffer_info(self.stdout) {
+                    info.color_table = self.orig_color_table;
+                    let _ = api::SetConsoleScreenBufferInfoEx(self.stdout, &info);
+                }
+                self.color_table_changed = false;
             }
         }
         if let Some(os) = self.orig_screen.take() {
