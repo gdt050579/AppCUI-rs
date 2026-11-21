@@ -43,12 +43,12 @@ fn main() -> Result<(), appcui::system::Error> {
     {
         App::new()
             .backend(appcui::backend::Type::WindowsVT)
-            .color_schema(false)
+            .palette(appcui::backend::Palette::BuiltIn)
             .window(build_window)
             .run()
     }
     #[cfg(not(target_os = "windows"))]
     {
-        App::new().color_schema(false).window(build_window).run()
+        App::new().palette(appcui::backend::Palette::BuiltIn).window(build_window).run()
     }
 }

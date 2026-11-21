@@ -58,10 +58,10 @@ impl DebugTerminal {
             size: Size::new(w, h),
             ansi_buffer: AnsiFormatter::new(
                 (w * h) as usize,
-                if builder.use_color_schema {
-                    AnsiFlags::Use16ColorSchema
-                } else {
+                if builder.use_rgb_for_palette {
                     AnsiFlags::None
+                } else {
+                    AnsiFlags::Use16ColorSchema
                 },
             ),
             commands,

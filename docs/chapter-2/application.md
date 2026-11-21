@@ -64,7 +64,7 @@ fn main() -> Result<(), appcui::system::Error> {
         .app_bar()                    // top application bar should be enabled
         .command_bar()                // command bar should be enabled
         .log_file("debug.log", false) // log into debug.log
-        .color_schema(false)          // use AppCUI predefined colors
+        .palette(appcui::backend::Palette::BuiltIn)          // use AppCUI predefined colors
         .restore_screen(true)         // restore original screen when finished
         .window(|| {                  // add the following window
             window!("'Demo',a:c,w:40,h:10")
