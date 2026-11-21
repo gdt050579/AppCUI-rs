@@ -20,7 +20,7 @@ impl WindowsVTTerminal {
         let input_console = console.clone();
         let mut ansi_formatter = AnsiFormatter::new(
             16384,
-            if builder.use_color_schema {
+            if builder.use_rgb_for_palette {
                 AnsiFlags::Use16ColorSchema
             } else {
                 AnsiFlags::None

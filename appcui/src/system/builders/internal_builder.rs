@@ -21,6 +21,7 @@ pub struct InternalBuilder {
     pub(crate) use_color_schema: bool,
     pub(crate) restore_screen: bool,
     pub(crate) palette: Palette,
+    pub(crate) use_rgb_for_palette: bool,
     #[cfg(test)]
     pub(crate) runtime_check: Option<fn()>,
 }
@@ -42,6 +43,7 @@ impl InternalBuilder {
             use_color_schema: true,
             restore_screen: true,
             palette: Palette::Terminal,
+            use_rgb_for_palette: false,
             #[cfg(test)]
             runtime_check: None,
         }
@@ -213,6 +215,10 @@ macro_rules! impl_terminal_builder_methods {
             self
         }
 
+        pub fn palette_as_rgb(mut self, enable: bool) -> Self {
+            self.builder.use_rgb_for_palette = enable;
+            self
+        }
         pub fn palette(mut self, palette: crate::backend::Palette) -> Self {
             self.builder.palette = palette;
             self
