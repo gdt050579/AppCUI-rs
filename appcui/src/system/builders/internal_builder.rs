@@ -1,9 +1,9 @@
 use crate::backend;
+use crate::backend::Palette;
 use crate::graphics::*;
 use crate::system::*;
 use crate::ui::common::traits::*;
 use crate::ui::common::*;
-use crate::backend::Palette;
 
 pub struct InternalBuilder {
     pub(crate) size: Option<Size>,
@@ -50,6 +50,12 @@ impl InternalBuilder {
     }
     #[inline(always)]
     pub(crate) fn build(self) -> Result<App, Error> {
+        if matches!(self.palette, Palette::Terminal) && self.use_rgb_for_palette {
+            return Err(Error::new(
+                ErrorKind::InvalidParameter,
+                ".palette(Palette::BuiltIn) and .palette_as_rgb(true) options make no sense together. To use .palette_as_rgb(true) you need to also select a palette (BuiltIn or Custom)".to_string(),
+            ));
+        }
         #[cfg(test)]
         {
             let check = self.runtime_check;
@@ -361,7 +367,7 @@ macro_rules! impl_terminal_builder_methods {
 
 macro_rules! impl_ui_builder_methods {
     () => {
-        /// Enables the application bar at the top of the desktop. 
+        /// Enables the application bar at the top of the desktop.
         ///
         /// The app bar hosts menus and other application-wide commands. It is
         /// disabled by default.
