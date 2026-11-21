@@ -667,7 +667,7 @@ fn check_colors_schema_false() {
         Paint('1. Initial state')
         CheckHash(0x29C1D764587643BE)
     ";
-    App::new().size(Size::new(70, 20)).debug_script(script).color_schema(false).window(|| {
+    App::new().size(Size::new(70, 20)).debug_script(script).palette(crate::backend::Palette::BuiltIn).window(|| {
         let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
         let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
         let s = c.drawing_surface_mut();
@@ -686,13 +686,13 @@ fn check_colors_schema_false() {
 
 
 #[test]
-fn check_colors_schema_true() {
+fn check_terminal_palette() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0x29C1D764587643BE)
     ";
-    App::new().size(Size::new(70, 20)).debug_script(script).color_schema(true).window(|| {
+    App::new().size(Size::new(70, 20)).debug_script(script).palette(crate::backend::Palette::Terminal).window(|| {
         let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
         let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
         let s = c.drawing_surface_mut();

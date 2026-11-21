@@ -72,10 +72,10 @@ impl TimerEvents for GlobeDesktop {
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
     {
-        App::new().backend(appcui::backend::Type::WindowsVT).desktop(GlobeDesktop::new()).color_schema(false).run()
+        App::new().backend(appcui::backend::Type::WindowsVT).desktop(GlobeDesktop::new()).palette(appcui::backend::Palette::BuiltIn).run()
     }
     #[cfg(not(target_os = "windows"))]
     {
-        App::new().desktop(GlobeDesktop::new()).color_schema(false).run()
+        App::new().desktop(GlobeDesktop::new()).palette(appcui::backend::Palette::BuiltIn).run()
     }
 }

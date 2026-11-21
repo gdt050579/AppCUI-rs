@@ -35,7 +35,7 @@ fn main() -> Result<(), appcui::system::Error> {
 
     App::new()
         .size(Size::new(32, 9))
-        .color_schema(false)
+        .palette(appcui::backend::Palette::BuiltIn)
         .window(move || Window::with_type(title, layout!("a:c,w:30,h:7"), flags, window_type, background))
         .run()
 }

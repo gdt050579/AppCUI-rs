@@ -124,11 +124,11 @@ fn main() -> Result<(), appcui::system::Error> {
             .backend(appcui::backend::Type::WindowsVT)
             .desktop(MyDesktop::new())
             .app_bar()
-            .color_schema(false)
+            .palette(appcui::backend::Palette::BuiltIn)
             .run()
     }
     #[cfg(not(target_os = "windows"))]
     {
-        App::new().desktop(MyDesktop::new()).app_bar().color_schema(false).run()
+        App::new().desktop(MyDesktop::new()).app_bar().palette(appcui::backend::Palette::BuiltIn).run()
     }
 }

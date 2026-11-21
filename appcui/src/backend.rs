@@ -15,11 +15,14 @@
 //! - **Web Terminal**: browser canvas. Default on WebAssembly.
 //!
 //! NCurses and CrossTerm are never selected automatically. What each backend can display and which input it can read depends on the terminal.
+//!
+//! Named colors can be remapped through the [`palette`] module.
 
 mod debug;
 #[cfg(all(target_family = "unix", feature = "NCURSES"))]
 mod ncurses;
 mod system_event_thread;
+pub mod palette;
 // #[cfg(target_family = "unix")]
 // mod ncurses;
 #[cfg(target_family = "unix")]
@@ -66,6 +69,10 @@ use self::windows_vt::WindowsVTTerminal;
 //#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
 #[cfg(feature = "CROSSTERM")]
 use self::crossterm::CrossTerm;
+
+
+pub use self::palette::Palette;
+pub use self::palette::ColorPalette;
 
 pub(crate) trait Backend {
     fn update_screen(&mut self, surface: &Surface);

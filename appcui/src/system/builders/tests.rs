@@ -243,3 +243,25 @@ fn check_input_app_dialog() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_palette_as_rgb_rejects_terminal_palette() {
+    // The default palette is Terminal, so enabling RGB alone is rejected.
+    let err = App::new().palette_as_rgb(true).run().unwrap_err();
+    assert_eq!(err.kind, ErrorKind::InvalidParameter);
+
+    // Either call order is the same pair once the builder is consumed.
+    let err = App::new()
+        .palette(crate::backend::Palette::Terminal)
+        .palette_as_rgb(true)
+        .run()
+        .unwrap_err();
+    assert_eq!(err.kind, ErrorKind::InvalidParameter);
+
+    let err = App::new()
+        .palette_as_rgb(true)
+        .palette(crate::backend::Palette::Terminal)
+        .run()
+        .unwrap_err();
+    assert_eq!(err.kind, ErrorKind::InvalidParameter);
+}

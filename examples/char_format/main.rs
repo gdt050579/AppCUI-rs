@@ -37,7 +37,6 @@ fn main() -> Result<(), appcui::system::Error> {
     {
         App::new()
             .backend(appcui::backend::Type::WindowsVT)
-            .color_schema(true)
             .window(build_window)
             .run()
     }

@@ -45,12 +45,12 @@ pub enum Type {
 
 ## OS Support
 
-| OS      | Windows Console | Windows VT | NCurses    | Termios | Web Terminal | CrossTerm   |
-| ------- | --------------- | ---------- | ---------- | ------- | ------------ | ----------- |
-| Windows | Yes             | Yes        | -          | -       | -            | `CROSSTERM` |
-| Linux   | -               | -          | `NCURSES`  | Yes     | -            | `CROSSTERM` |
-| macOS   | -               | -          | `NCURSES`  | Yes     | -            | `CROSSTERM` |
-| Web     | -               | -          | -          | -       | Yes          | -           |
+| OS      | Windows Console | Windows VT | NCurses   | Termios | Web Terminal | CrossTerm   |
+| ------- | --------------- | ---------- | --------- | ------- | ------------ | ----------- |
+| Windows | Yes             | Yes        | -         | -       | -            | `CROSSTERM` |
+| Linux   | -               | -          | `NCURSES` | Yes     | -            | `CROSSTERM` |
+| macOS   | -               | -          | `NCURSES` | Yes     | -            | `CROSSTERM` |
+| Web     | -               | -          | -         | -       | Yes          | -           |
 
 `Yes` means the backend is compiled in. A feature name means that backend is compiled only when that crate feature is enabled. Termios is built in on Linux and macOS. NCurses and CrossTerm are never selected automatically.
 
@@ -82,14 +82,14 @@ Each backend comes with different support related to what can be displayed on th
 
 In terms of the output method, each backend uses a different approach:
 
-| Backend         | Output method                                                           |
-| --------------- | ----------------------------------------------------------------------- |
-| Windows Console | Direct output via Windows API                                           |
-| Windows VT      | ANSI sequences                                                          |
+| Backend         | Output method                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| Windows Console | Direct output via Windows API                                                                  |
+| Windows VT      | ANSI sequences                                                                                 |
 | NCurses         | Direct output via NCurses API. Enable the `NCURSES` feature and install ncurses on the system. |
-| Termios         | ANSI sequences                                                          |
-| Web Terminal    | HTML elements and browser APIs                                          |
-| CrossTerm       | ANSI sequences (directly via the `crossterm` crate API)                 |
+| Termios         | ANSI sequences                                                                                 |
+| Web Terminal    | HTML elements and browser APIs                                                                 |
+| CrossTerm       | ANSI sequences (directly via the `crossterm` crate API)                                        |
 
 ## Character Attributes
 
@@ -124,9 +124,9 @@ Capturing the input implies the following capabilities from any backend:
 | Alt+Key            | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Shift+Key          | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Ctrl+Key           | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
-| Alt+Shift+Key      | Yes             | Yes        | -       | -       | -            | -         |
+| Alt+Shift+Key      | Yes             | Yes        | -       | Yes     | -            | -         |
 | Ctrl+Shift+Key     | Yes             | Yes        | -       | -       | -            | -         |
-| Ctrl+Alt+Key       | Yes             | Yes        | -       | -       | -            | -         |
+| Ctrl+Alt+Key       | Yes             | Yes        | -       | Yes     | -            | -         |
 | Ctrl+Alt+Shift+Key | Yes             | Yes        | -       | -       | -            | -         |
 | Alt pressed        | Yes             | Yes        | -       | -       | -            | -         |
 | Shift pressed      | Yes             | Yes        | -       | -       | -            | -         |
@@ -140,16 +140,16 @@ Capturing the input implies the following capabilities from any backend:
 | Move & Drag  | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Wheel        | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
 
-**Remarks:** Input support is highly dependent on the terminal and the OS. AppCUI uses the following approach to intercept input:
+**Remarks:** Input support is highly dependent on the terminal and the OS. Termios maps `Alt+Shift` and `Ctrl+Alt` for letters (an ESC prefix) and for CSI keys such as arrows, function keys, Home, End, Page Up, Page Down, Insert, Delete, and Tab. `Ctrl+Shift` and `Ctrl+Alt+Shift` on a letter stay in the `Ctrl` and `Ctrl+Alt` bytes, so those two rows stay unsupported. See [Termios](backends/termios.md#todo). AppCUI uses the following approach to intercept input:
 
-| Backend         | Approach                                                                                           |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| Windows Console | Read the input directly from the console via Windows API                                           |
-| Windows VT      | Read the input directly from the console via Windows API                                           |
+| Backend         | Approach                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Windows Console | Read the input directly from the console via Windows API                                                                  |
+| Windows VT      | Read the input directly from the console via Windows API                                                                  |
 | NCurses         | Read the input directly from the console via NCurses API. Enable the `NCURSES` feature and install ncurses on the system. |
-| Termios         | Read the input directly from the console via Termios API                                           |
-| Web Terminal    | Read the input directly from the browser                                                           |
-| CrossTerm       | Read the input via the `crossterm` crate API                                                       |
+| Termios         | Read the input directly from the console via Termios API                                                                  |
+| Web Terminal    | Read the input directly from the browser                                                                                  |
+| CrossTerm       | Read the input via the `crossterm` crate API                                                                              |
 
 
 ## System events
@@ -163,36 +163,40 @@ System events are events that are not related to the keyboard or mouse, but are 
 
 ## Other capabilities
 
-| Capabilities   | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
-| -------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
-| Set dimension  | Yes             | Yes        | -       | -       | Yes          | -         |
-| Set title      | Yes             | Yes        | -       | -       | Yes          | -         |
-| Restore screen | Yes             | Yes        | -       | -       | `N/A`        | -         |
+| Capabilities    | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| --------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Set dimension   | Yes             | Yes        | -       | -       | Yes          | -         |
+| Set title       | Yes             | Yes        | -       | -       | Yes          | -         |
+| Restore screen  | Yes             | Yes        | -       | -       | `N/A`        | -         |
+| Set palette     | Yes             | Yes        | -       | Yes     | -            | Yes       |
+| Restore palette | Yes             | Yes        | -       | Yes     | -            | Yes       |
+| ANSI Based      | -               | Yes        | -       | Yes     | -            | Yes       |
 
 * `N/A` (not applicable) means that there is no original screen prior to the app execution so there is nothing to restore.
+* **Restore palette** is `Yes` for Termios and CrossTerm because those backends send OSC 104 on exit. The terminal decides whether those colors actually return. Some terminals, such as WSL, keep the palette that was set. See [Termios](backends/termios.md#limitations) and [CrossTerm](backends/crossterm.md#palette).
 
 ## Clipboard
 
 AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following backends:
 
-| Backend         | Clipboard Support | API Used                                                |
-| --------------- | ----------------- | ------------------------------------------------------- |
-| Windows Console | Yes               | Windows API                                             |
-| Windows VT      | Yes               | Windows API                                             |
-| NCurses         | Yes               | via copypasta crate                                     |
-| Termios         | Yes               | via copypasta crate                                     |
-| Web Terminal    | Yes               | Browser API                                             |
+| Backend         | Clipboard Support | API Used                                                   |
+| --------------- | ----------------- | ---------------------------------------------------------- |
+| Windows Console | Yes               | Windows API                                                |
+| Windows VT      | Yes               | Windows API                                                |
+| NCurses         | Yes               | via copypasta crate                                        |
+| Termios         | Yes               | via copypasta crate                                        |
+| Web Terminal    | Yes               | Browser API                                                |
 | CrossTerm       | Yes               | via copypasta crate (Linux/macOS) or Windows API (Windows) |
 
 ## Defaults
 
 By default, when initializing an `App` object via `App::new()`, the following backend will be used:
 
-| OS      | Default backend | Other available backends                         |
-| ------- | --------------- | ------------------------------------------------ |
-| Windows | Windows Console | Windows VT, CrossTerm (`CROSSTERM`)              |
-| Linux   | Termios         | NCurses (`NCURSES`), CrossTerm (`CROSSTERM`)     |
-| macOS   | Termios         | NCurses (`NCURSES`), CrossTerm (`CROSSTERM`)     |
-| Web     | Web Terminal    | —                                                |
+| OS      | Default backend | Other available backends                     |
+| ------- | --------------- | -------------------------------------------- |
+| Windows | Windows Console | Windows VT, CrossTerm (`CROSSTERM`)          |
+| Linux   | Termios         | NCurses (`NCURSES`), CrossTerm (`CROSSTERM`) |
+| macOS   | Termios         | NCurses (`NCURSES`), CrossTerm (`CROSSTERM`) |
+| Web     | Web Terminal    | —                                            |
 
 `App::new()` uses the default backend for the current OS. NCurses and CrossTerm are used only when the matching feature is enabled and `.backend(...)` selects them.

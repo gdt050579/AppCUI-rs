@@ -72,6 +72,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 - [x] mouse support
 - [x] clipboard support
 - [x] color themes
+- [x] color palettes (16 named colors and 24-bit RGB colors)
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc.)
 - [x] true-color support (24 bits per pixel) for terminals that support it.

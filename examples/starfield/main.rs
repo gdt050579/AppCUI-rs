@@ -88,7 +88,7 @@ fn main() -> Result<(), appcui::system::Error> {
             .fps(5)
             .title("Starfield")
             .clear_char(None)
-            .color_schema(false)
+            .palette(appcui::backend::Palette::BuiltIn)
             .backend(appcui::backend::Type::WindowsVT)
             .run()
     }
@@ -98,7 +98,7 @@ fn main() -> Result<(), appcui::system::Error> {
             .fps(5)
             .title("Starfield")
             .clear_char(None)
-            .color_schema(false)
+            .palette(appcui::backend::Palette::BuiltIn)
             .run()
     }
 }

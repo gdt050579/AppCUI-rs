@@ -12,24 +12,26 @@ use std::sync::mpsc::Sender;
 pub struct WindowsVTTerminal {
     console: win32::Console,
     ansi_formatter: AnsiFormatter,
+    palette_changed: bool,
 }
 
 impl WindowsVTTerminal {
     pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let console = win32::Console::new(builder, true)?;
         let input_console = console.clone();
+        let palette_changed = builder.is_palette_changed();
+        let mut ansi_formatter = AnsiFormatter::new(
+            16384,
+            if builder.use_rgb_for_palette {
+                AnsiFlags::None
+            } else {
+                AnsiFlags::Use16ColorSchema
+            },
+        );
+        ansi_formatter.set_palette(builder.palette);
+        ansi_formatter.execute();
         Input::new(input_console).start(sender);
-        Ok(WindowsVTTerminal {
-            console,
-            ansi_formatter: AnsiFormatter::new(
-                16384,
-                if builder.use_color_schema {
-                    AnsiFlags::Use16ColorSchema
-                } else {
-                    AnsiFlags::None
-                },
-            ),
-        })
+        Ok(WindowsVTTerminal { console, ansi_formatter, palette_changed })
     }
 }
 
@@ -43,10 +45,13 @@ impl Backend for WindowsVTTerminal {
     fn on_close(&mut self) {
         self.ansi_formatter.clear();
         self.ansi_formatter.reset_screen();
+        if self.palette_changed {
+            self.ansi_formatter.reset_palette();
+        }
         self.ansi_formatter.disable_mouse_events();
         self.ansi_formatter.execute();
         self.console.on_close();
-    }    
+    }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
         // safety check --> surface size should be the same as self.width/height size

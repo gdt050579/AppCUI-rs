@@ -1,6 +1,9 @@
 use super::input::Input;
 use crate::{
-    backend::{Backend, SystemEventReader},
+    backend::{
+        utils::{AnsiFlags, AnsiFormatter},
+        Backend, ColorPalette, Palette, SystemEventReader,
+    },
     graphics::{CharFlags, Color, Size, Surface},
     system::{Error, SystemEvent},
 };
@@ -25,7 +28,9 @@ use copypasta::ClipboardProvider;
 
 pub(crate) struct CrossTerm {
     size: Size,
-    use_color_schema: bool,
+    use_rgb_for_palette: bool,
+    palette_changed: bool,
+    rgb_palette: ColorPalette,
     screen_chars: Vec<Character> // Contains characters painted on screen
 }
 
@@ -55,7 +60,13 @@ impl CrossTerm {
 
         let mut term = CrossTerm {
             size: Size::new(width as u32, height as u32),
-            use_color_schema: builder.use_color_schema,
+            use_rgb_for_palette: builder.use_rgb_for_palette,
+            palette_changed: builder.is_palette_changed(),
+            rgb_palette: match builder.palette {
+                Palette::Custom(palette) => palette,
+                // Palette::Terminal never reaches RGB mode (rejected by InternalBuilder::build)
+                _ => ColorPalette::built_in(),
+            },
             screen_chars: Vec::new()
         };
         
@@ -74,13 +85,20 @@ impl CrossTerm {
             )
         })?;
 
+        if term.palette_changed {
+            // indexed mode: reprogram the 16 terminal slots (OSC 4)
+            let mut ansi = AnsiFormatter::new(512, AnsiFlags::Use16ColorSchema);
+            ansi.set_palette(builder.palette);
+            let _ = execute!(stdout(), Print(ansi.text()));
+        }
+
         Input::new().start(sender);
 
         Ok(term)
     }
 
     fn convert_color(&self, color: Color) -> CrosstermColor {
-        if self.use_color_schema {
+        if !self.use_rgb_for_palette {
             match color {
                 Color::Black => CrosstermColor::Black,
                 Color::DarkRed => CrosstermColor::DarkRed,
@@ -89,8 +107,8 @@ impl CrossTerm {
                 Color::DarkBlue => CrosstermColor::DarkBlue,
                 Color::Magenta => CrosstermColor::DarkMagenta,
                 Color::Teal => CrosstermColor::DarkCyan,
-                Color::Silver => CrosstermColor::White,
-                Color::Gray => CrosstermColor::Grey,
+                Color::Silver => CrosstermColor::Grey,
+                Color::Gray => CrosstermColor::DarkGrey,
                 Color::Red => CrosstermColor::Red,
                 Color::Green => CrosstermColor::Green,
                 Color::Yellow => CrosstermColor::Yellow,
@@ -104,25 +122,13 @@ impl CrossTerm {
             }
         } else {
             match color {
-                Color::Black => CrosstermColor::Rgb { r: 0, g: 0, b: 0 },
-                Color::DarkRed => CrosstermColor::Rgb { r: 128, g: 0, b: 0 },
-                Color::DarkGreen => CrosstermColor::Rgb { r: 0, g: 128, b: 0 },
-                Color::Olive => CrosstermColor::Rgb { r: 128, g: 128, b: 0 },
-                Color::DarkBlue => CrosstermColor::Rgb { r: 0, g: 0, b: 128 },
-                Color::Magenta => CrosstermColor::Rgb { r: 128, g: 0, b: 128 },
-                Color::Teal => CrosstermColor::Rgb { r: 0, g: 128, b: 128 },
-                Color::Silver => CrosstermColor::Rgb { r: 196, g: 196, b: 196 },
-                Color::Gray => CrosstermColor::Rgb { r: 128, g: 128, b: 128 },
-                Color::Red => CrosstermColor::Rgb { r: 255, g: 0, b: 0 },
-                Color::Green => CrosstermColor::Rgb { r: 0, g: 255, b: 0 },
-                Color::Yellow => CrosstermColor::Rgb { r: 255, g: 255, b: 0 },
-                Color::Blue => CrosstermColor::Rgb { r: 0, g: 0, b: 255 },
-                Color::Pink => CrosstermColor::Rgb { r: 255, g: 0, b: 255 },
-                Color::Aqua => CrosstermColor::Rgb { r: 0, g: 255, b: 255 },
-                Color::White => CrosstermColor::Rgb { r: 255, g: 255, b: 255 },
                 Color::Transparent => CrosstermColor::Reset,
                 #[cfg(feature = "TRUE_COLORS")]
                 Color::RGB(r, g, b) => CrosstermColor::Rgb { r, g, b },
+                _ => {
+                    let (r, g, b) = self.rgb_palette.colors[color.as_color_index() as usize];
+                    CrosstermColor::Rgb { r, g, b }
+                }
             }
         }
     }
@@ -275,6 +281,11 @@ impl Backend for CrossTerm {
 
     fn on_close(&mut self) {
         let _ = execute!(stdout(), DisableMouseCapture);
+        if self.palette_changed {
+            let mut ansi = AnsiFormatter::new(256, AnsiFlags::Use16ColorSchema);
+            ansi.reset_palette();
+            let _ = execute!(stdout(), Print(ansi.text()));
+        }
         let _ = execute!(stdout(), LeaveAlternateScreen, Show, ResetColor);
         let _ = disable_raw_mode();
     }
