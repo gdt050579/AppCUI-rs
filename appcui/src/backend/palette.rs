@@ -17,8 +17,10 @@
 //! | [`Palette::BuiltIn`] | The standard AppCUI colors from [`ColorPalette::built_in`]. Silver is `(192, 192, 192)`. |
 //! | [`Palette::Custom`] | RGB values you supply through [`ColorPalette::from_pairs`]. |
 //!
-//! Windows Console writes `BuiltIn` and `Custom` into the console color table. Windows VT uses
-//! the same values for the colors it paints. Other backends may ignore the palette.
+//! Windows Console writes `BuiltIn` and `Custom` into the console color table. Windows VT and
+//! Termios use the same values for the colors they paint. Termios restores the 16 color slots
+//! with OSC 104 when the application ends; some terminals, including WSL, ignore that reset.
+//! NCurses, the Web Terminal, and CrossTerm ignore the palette.
 //!
 //! # Examples
 //!

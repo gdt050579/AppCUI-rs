@@ -216,9 +216,9 @@ macro_rules! impl_terminal_builder_methods {
         /// * `enable` - `true` to emit RGB colors, `false` to use the 16-color schema.
         ///
         /// # Remarks
-        /// Windows VT honors this flag. The Windows Console backend ignores it and always
-        /// uses its 16-color table. Other backends may ignore it as well. The
-        /// `Palette::Terminal` check still runs for every backend.
+        /// Windows VT and Termios honor this flag. The Windows Console backend ignores it and
+        /// always uses its 16-color table. NCurses, the Web Terminal, and CrossTerm ignore it
+        /// as well. The `Palette::Terminal` check still runs for every backend.
         ///
         /// # Examples
         ///
