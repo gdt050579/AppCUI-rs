@@ -21,9 +21,9 @@ impl WindowsVTTerminal {
         let mut ansi_formatter = AnsiFormatter::new(
             16384,
             if builder.use_rgb_for_palette {
-                AnsiFlags::Use16ColorSchema
-            } else {
                 AnsiFlags::None
+            } else {
+                AnsiFlags::Use16ColorSchema
             },
         );
         ansi_formatter.set_palette(builder.palette);

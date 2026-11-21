@@ -45,7 +45,7 @@ impl AnsiPaletteEntry {
                 pos += 1;
             }
         }
-        buf[pos] = 0;
+        // "255;255;255" fills all 11 bytes, so there is no room for a trailing NUL.
         Self { buf, len: pos as u8 }
     }
 }
@@ -149,10 +149,6 @@ impl AnsiFormatter {
     }
     fn set_color_palette(&mut self, palette: ColorPalette) {
         if self.flags.contains_one(AnsiFlags::Use16ColorSchema) {
-            for (i, color) in palette.colors.iter().enumerate() {
-                self.palette[i] = AnsiPaletteEntry::from_rgb(color.0, color.1, color.2);
-            }
-        } else {
             let mut buffer: [u8; 10] = [0, 0, b'/', 0, 0, b'/', 0, 0, 0x1b, b'\\'];
             let hex = "0123456789abcdef".as_bytes();
             for (i, color) in palette.colors.iter().enumerate() {
@@ -167,6 +163,10 @@ impl AnsiFormatter {
                 buffer[6] = hex[(color.2 / 16) as usize];
                 buffer[7] = hex[(color.2 % 16) as usize];
                 self.text.push_str(unsafe { std::str::from_utf8_unchecked(&buffer) });
+            }
+        } else {
+            for (i, color) in palette.colors.iter().enumerate() {
+                self.palette[i] = AnsiPaletteEntry::from_rgb(color.0, color.1, color.2);
             }
         }
     }
