@@ -12,6 +12,7 @@ pub(crate) enum AnsiFlags {
 pub(crate) struct AnsiFormatter {
     text: String,
     flags: AnsiFlags,
+    palette_changed: bool,
 }
 
 impl AnsiFormatter {
@@ -20,6 +21,7 @@ impl AnsiFormatter {
         Self {
             text: String::with_capacity(capacity),
             flags,
+            palette_changed: false,
         }
     }
     #[inline(always)]
@@ -83,14 +85,17 @@ impl AnsiFormatter {
             buffer[7] = hex[(color.2 % 16) as usize];
             self.text.push_str(unsafe { std::str::from_utf8_unchecked(&buffer) });
         }
+        self.palette_changed = true;
     }
     pub(crate) fn reset_palette(&mut self) {
-        for slot in 0..16 {
-            self.text.push_str("\x1b]104;");
-            self.write_number(slot);
-            self.text.push_str("\x1b\\");
-        }        
-        self.text.push_str("\x1b]104\x1b\\");
+        if self.palette_changed {
+            for slot in 0..16 {
+                self.text.push_str("\x1b]104;");
+                self.write_number(slot);
+                self.text.push_str("\x1b\\");
+            }
+            self.text.push_str("\x1b]104\x1b\\");
+        }
     }
 
     #[inline(always)]
