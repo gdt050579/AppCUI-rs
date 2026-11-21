@@ -7,6 +7,9 @@
 //!
 //! Pass a palette to any application builder. If you never do, the application uses
 //! [`Palette::Terminal`], which keeps the backend's default colors.
+//! `palette_as_rgb(true)` cannot be combined with [`Palette::Terminal`]: [`run`](crate::system::MultiWindowAppBuilder::run)
+//! returns [`ErrorKind::InvalidParameter`](crate::system::ErrorKind::InvalidParameter).
+//! Use [`Palette::BuiltIn`] or [`Palette::Custom`] when RGB output is enabled.
 //!
 //! | Variant | What the backend uses |
 //! |---------|------------------------|
@@ -48,6 +51,10 @@ use crate::graphics::Color;
 /// (the same method is available on every application builder). If you never call it, the
 /// application uses [`Palette::Terminal`].
 ///
+/// [`Palette::Terminal`] cannot be used with `palette_as_rgb(true)`. That combination makes
+/// `run` return [`ErrorKind::InvalidParameter`](crate::system::ErrorKind::InvalidParameter).
+/// [`Palette::BuiltIn`] and [`Palette::Custom`] are valid with RGB mode.
+///
 /// A palette holds one RGB triple for each named color from
 /// [`Black`](crate::graphics::Color::Black) through [`White`](crate::graphics::Color::White).
 /// [`Transparent`](crate::graphics::Color::Transparent) has no slot.
@@ -62,6 +69,8 @@ use crate::graphics::Color;
 #[derive(Debug, Clone, Copy)]
 pub enum Palette {
     /// Keep the backend's default colors and leave the terminal palette unchanged.
+    ///
+    /// This is the default. It cannot be combined with `palette_as_rgb(true)`.
     Terminal,
 
     /// The standard AppCUI colors returned by [`ColorPalette::built_in`].

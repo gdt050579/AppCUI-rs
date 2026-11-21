@@ -53,7 +53,7 @@ impl InternalBuilder {
         if matches!(self.palette, Palette::Terminal) && self.use_rgb_for_palette {
             return Err(Error::new(
                 ErrorKind::InvalidParameter,
-                ".palette(Palette::BuiltIn) and .palette_as_rgb(true) options make no sense together. To use .palette_as_rgb(true) you need to also select a palette (BuiltIn or Custom)".to_string(),
+                "palette_as_rgb(true) has no effect with Palette::Terminal. Select Palette::BuiltIn or Palette::Custom as well.".to_string(),
             ));
         }
         #[cfg(test)]
@@ -205,19 +205,31 @@ macro_rules! impl_terminal_builder_methods {
         /// is `false` (the default), that backend uses the terminal's 16 color slots and
         /// installs the palette into those slots.
         ///
+        /// RGB mode needs a palette to read those values from.
+        /// [`Palette::Terminal`](crate::backend::Palette::Terminal) does not supply one, so
+        /// `palette_as_rgb(true)` together with that palette (including the default, when
+        /// [`palette`](Self::palette) is never called) makes [`run`](Self::run) return
+        /// [`ErrorKind::InvalidParameter`](crate::system::ErrorKind::InvalidParameter).
+        /// Select [`Palette::BuiltIn`](crate::backend::Palette::BuiltIn) or
+        /// [`Palette::Custom`](crate::backend::Palette::Custom) as well.
+        /// `palette_as_rgb(false)` with `Palette::Terminal` is valid.
+        ///
         /// # Parameters
         /// * `enable` - `true` to emit RGB colors, `false` to use the 16-color schema.
         ///
         /// # Remarks
         /// Windows VT honors this flag. The Windows Console backend ignores it and always
-        /// uses its 16-color table. Other backends may ignore it as well.
+        /// uses its 16-color table. Other backends may ignore it as well. The
+        /// `Palette::Terminal` check still runs for every backend.
         ///
         /// # Examples
         ///
         /// ```rust, no_run
         /// use appcui::prelude::*;
         ///
-        /// App::new().palette_as_rgb(true);
+        /// App::new()
+        ///     .palette(appcui::backend::Palette::BuiltIn)
+        ///     .palette_as_rgb(true);
         /// ```
         #[inline(always)]
         pub fn palette_as_rgb(mut self, enable: bool) -> Self {
@@ -234,6 +246,9 @@ macro_rules! impl_terminal_builder_methods {
         /// [`ColorPalette`](crate::backend::ColorPalette).
         ///
         /// How those values reach the terminal depends on [`palette_as_rgb`](Self::palette_as_rgb).
+        /// `palette_as_rgb(true)` requires `BuiltIn` or `Custom`. Passing `Palette::Terminal`
+        /// (or leaving the default) while RGB mode is enabled makes [`run`](Self::run) return
+        /// [`ErrorKind::InvalidParameter`](crate::system::ErrorKind::InvalidParameter).
         ///
         /// # Parameters
         /// * `palette` - The palette installed when the application starts.
