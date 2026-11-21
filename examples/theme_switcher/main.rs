@@ -146,3 +146,4 @@ impl AppBarEvents for MyWindow {
 fn main() -> Result<(), appcui::system::Error> {
     App::new().size(Size::new(120, 24)).app_bar().palette(appcui::backend::Palette::BuiltIn).window(MyWindow::new).run()
 }
+ 

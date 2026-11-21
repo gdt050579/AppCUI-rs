@@ -86,8 +86,8 @@ pub(crate) fn new() -> Theme {
             },
         },
         tab: TabTheme {
-            text: controlattr!("black,silver", "black,white", "black,aqua", "gray,?", "black,y"),
-            hotkey: controlattr!("dr,silver", "dr,white", "dr,aqua", "gray,?", "dr,y"),
+            text: controlattr!("black,silver", "black,white", "black,aqua", "gray,?", "black,gray"),
+            hotkey: controlattr!("dr,silver", "dr,white", "dr,aqua", "gray,?", "dr,gray"),
         },
         scrollbar: ScrollBarTheme {
             arrow: controlattr!("black,silver", "black,y", "black,aqua", "gray", "black,white"),
