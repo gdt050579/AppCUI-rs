@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use super::{api, constants, structs};
 use crate::backend::utils::win32::OriginalScreen;
+use crate::backend::Palette;
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
@@ -33,6 +34,8 @@ pub(crate) struct Console {
     last_mouse_pos: Point,
     shared_visible_region: Arc<Mutex<structs::SMALL_RECT>>,
     orig_screen: Option<OriginalScreen>,
+    orig_color_table: [u32; 16],
+    info: structs::CONSOLE_SCREEN_BUFFER_INFOEX,
 }
 
 impl Console {
@@ -135,21 +138,37 @@ impl Console {
             }
             let w = (info.window.right as u32) + 1 - (info.window.left as u32);
             let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
-            if !builder.use_color_schema {
-                // set the color schema to match AppCUI colors
-                info.color_table = constants::APPCUI_COLOR_SCEHMA;
-                if api::SetConsoleScreenBufferInfoEx(h_stdout, &info) == constants::FALSE {
-                    return Err(Error::new(
-                        ErrorKind::InitializationFailure,
-                        format!(
-                            "SetConsoleScreenBufferInfoEx failed to set a new color schema on current console !\nWindow code error: {}",
-                            api::GetLastError()
-                        ),
-                    ));
+            let orig_color_table = info.color_table;
+            let chage_color_table = match builder.palette {
+                Palette::Terminal => false,
+                Palette::BuiltIn => {
+                    info.color_table = constants::APPCUI_COLOR_SCEHMA;
+                    true
                 }
+                Palette::Custom(colors) => {
+                    for (i, color) in colors.colors.iter().enumerate() {
+                        info.color_table[i] = (color.0 as u32) | ((color.1 as u32) << 8) | ((color.2 as u32) << 16);
+                    }
+                    true
+                }
+            };
+            if chage_color_table && api::SetConsoleScreenBufferInfoEx(h_stdout, &info) == constants::FALSE {
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!(
+                        "SetConsoleScreenBufferInfoEx failed to set a new color schema on current console !\nWindow code error: {}",
+                        api::GetLastError()
+                    ),
+                ));
             }
             let orig_screen = if builder.restore_screen {
-                OriginalScreen::new(h_stdout, Size::new(w, h), info.window.left as i32, info.window.top as i32, info.cursor_pos)
+                OriginalScreen::new(
+                    h_stdout,
+                    Size::new(w, h),
+                    info.window.left as i32,
+                    info.window.top as i32,
+                    info.cursor_pos,
+                )
             } else {
                 None
             };
@@ -164,6 +183,8 @@ impl Console {
                 last_mouse_pos: Point::new(i32::MAX, i32::MAX),
                 shared_visible_region: Arc::new(Mutex::new(info.window)),
                 orig_screen,
+                orig_color_table,
+                info,
             })
         }
     }
@@ -360,6 +381,11 @@ impl Console {
         unsafe {
             let _ = api::SetConsoleMode(self.stdin, self.stdin_original_mode_flags);
             let _ = api::SetConsoleMode(self.stdout, self.stdout_original_mode_flags);
+            // revert the console color table
+            if self.info.color_table != self.orig_color_table {
+                self.info.color_table = self.orig_color_table;
+                let _ = api::SetConsoleScreenBufferInfoEx(self.stdout, &self.info);
+            }
         }
         if let Some(os) = self.orig_screen.take() {
             os.restore();

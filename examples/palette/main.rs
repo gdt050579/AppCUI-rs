@@ -84,16 +84,9 @@ fn custom_palette() -> ColorPalette {
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    #[cfg(not(windows))]
-    return App::new()
+    App::new()
+        //.backend(appcui::backend::Type::WindowsVT)
         .palette(Palette::Custom(custom_palette()))
         .window(MyWin::new)
-        .run();
-    
-    #[cfg(windows)]
-    return App::new()
-        .backend(appcui::backend::Type::WindowsVT)
-        .palette(Palette::Custom(custom_palette()))
-        .window(MyWin::new)
-        .run();
+        .run()
 }
