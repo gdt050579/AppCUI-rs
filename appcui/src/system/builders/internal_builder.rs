@@ -192,14 +192,45 @@ macro_rules! impl_terminal_builder_methods {
             self
         }
 
-        /// Enables or disables the terminal color schema.
+        /// Chooses whether named colors are painted as 24-bit RGB.
         ///
-        /// When enabled (the default), the backend may map AppCUI colors through
-        /// the terminal's color schema. Disable this to keep the exact colors
-        /// defined by the theme.
+        /// When `enable` is `true`, a backend that supports this flag writes each color
+        /// with the RGB values from the current [`palette`](Self::palette). When `enable`
+        /// is `false` (the default), that backend uses the terminal's 16 color slots and
+        /// installs the palette into those slots.
         ///
         /// # Parameters
-        /// * `enabled` - `true` to use the terminal color schema, `false` to disable it.
+        /// * `enable` - `true` to emit RGB colors, `false` to use the 16-color schema.
+        ///
+        /// # Remarks
+        /// Windows VT honors this flag. The Windows Console backend ignores it and always
+        /// uses its 16-color table. Other backends may ignore it as well.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().palette_as_rgb(true);
+        /// ```
+        #[inline(always)]
+        pub fn palette_as_rgb(mut self, enable: bool) -> Self {
+            self.builder.use_rgb_for_palette = enable;
+            self
+        }
+
+        /// Sets the palette used for the 16 named colors.
+        ///
+        /// The default is [`Palette::Terminal`](crate::backend::Palette::Terminal), which
+        /// keeps the backend's default colors. [`Palette::BuiltIn`](crate::backend::Palette::BuiltIn)
+        /// installs the standard AppCUI colors.
+        /// [`Palette::Custom`](crate::backend::Palette::Custom) installs RGB values from a
+        /// [`ColorPalette`](crate::backend::ColorPalette).
+        ///
+        /// How those values reach the terminal depends on [`palette_as_rgb`](Self::palette_as_rgb).
+        ///
+        /// # Parameters
+        /// * `palette` - The palette installed when the application starts.
         ///
         /// # Examples
         ///
@@ -208,17 +239,7 @@ macro_rules! impl_terminal_builder_methods {
         ///
         /// App::new().palette(appcui::backend::Palette::BuiltIn);
         /// ```
-        // #[inline(always)]
-        // #[deprecated(since = "0.5.10", note = "Use palette instead")]
-        // pub fn color_schema(mut self, enabled: bool) -> Self {
-        //     self.builder.color_schema(enabled);
-        //     self
-        // }
-
-        pub fn palette_as_rgb(mut self, enable: bool) -> Self {
-            self.builder.use_rgb_for_palette = enable;
-            self
-        }
+        #[inline(always)]
         pub fn palette(mut self, palette: crate::backend::Palette) -> Self {
             self.builder.palette = palette;
             self
