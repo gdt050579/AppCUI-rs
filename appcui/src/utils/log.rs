@@ -1,3 +1,14 @@
+//! Debug-only logging to a file or the browser console.
+//!
+//! [`log!`] formats a tagged message and, in debug builds, passes it to
+//! `write_log_to_file`. In release builds the macro expands to nothing, so the
+//! message is not formatted and nothing is written.
+//!
+//! On native targets, open a file with
+//! [`log_file`](crate::system::MultiWindowAppBuilder::log_file) when building
+//! the application. Until that file is opened, log calls do nothing. On WASM,
+//! debug messages are written to the browser console.
+
 #[cfg(not(target_arch = "wasm32"))]
 use std::{cell::RefCell, sync::Mutex};
 
@@ -14,6 +25,31 @@ pub(crate) fn init_log_file(name: &str, append: bool) {
     }
 }
 
+/// Writes one tagged line in debug builds.
+///
+/// On native targets the line is `[YYYY-MM-DD HH:MM:SS] [tag] message` and is
+/// appended to the file opened by
+/// [`log_file`](crate::system::MultiWindowAppBuilder::log_file).
+/// If that file was never opened, or the log lock cannot be taken, the call
+/// does nothing.
+///
+/// On WASM the same text is written to the browser console. The timestamp is
+/// an ISO time.
+///
+/// This function is compiled only when debug assertions are enabled. Prefer
+/// [`log!`] when the message needs formatting.
+///
+/// # Panics
+///
+/// Panics on native targets when the log file is open and writing the line fails.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// #[cfg(debug_assertions)]
+/// write_log_to_file("INFO", "Application started");
+/// ```
 #[cfg(debug_assertions)]
 pub fn write_log_to_file(tag: &str, message: &str) {
     #[cfg(not(target_arch = "wasm32"))]

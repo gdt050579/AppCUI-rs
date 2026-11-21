@@ -85,6 +85,13 @@ macro_rules! impl_app_desktop_methods {
             GenericBufferViewEvents,
             HyperLinkEvents,
             GenericHSliderEvents,
+            GenericVBarChartEvents,
+            GenericHBarChartEvents,
+            PieChartEvents,
+            GenericLineChartEvents,
+            UsageChartEvents,
+            GenericHeatMapEvents,
+            GenericVStackedBarChartEvents,
             EditorEvents,
         );
     };

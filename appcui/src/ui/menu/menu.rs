@@ -275,8 +275,7 @@ impl Menu {
     fn move_currentitem_to(&mut self, key: Key) {
         let mut idx: TempVec<usize, 64> = TempVec::new();
         let items_count = self.items.len();
-        for i in 0usize..items_count {
-            let item = &self.items[i];
+        for (i, item) in self.items.iter().enumerate().take(items_count) {
             if !item.is_enabled() {
                 continue;
             }
@@ -285,7 +284,6 @@ impl Menu {
             }
         }
         if idx.is_empty() {
-            // no items or all items are disabled
             self.current = VectorIndex::Invalid;
             return;
         }

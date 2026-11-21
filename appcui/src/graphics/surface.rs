@@ -3,6 +3,9 @@ use std::path::Path;
 use super::image::Glyph;
 use super::BitTile;
 use super::BitTileRenderMethod;
+use super::Sprite;
+use super::PaletteTile;
+use super::PaletteTileRenderMethod;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
@@ -46,8 +49,8 @@ impl From<char> for CharacterType {
     }
 }
 
-const MAX_SURFACE_WIDTH: u32 = 10000;
-const MAX_SURFACE_HEIGHT: u32 = 10000;
+pub(super) const MAX_SURFACE_WIDTH: u32 = 10000;
+pub(super) const MAX_SURFACE_HEIGHT: u32 = 10000;
 
 /// A structure that represents a 2D surface for drawing characters and images.
 /// The surface is defined as a matrix (width x height) of characters, where each character is of type [Character].
@@ -92,6 +95,22 @@ impl Surface {
         };
         s.chars.resize(count, Character::default());
         s
+    }
+
+    pub(super) fn from_parts(chars: Vec<Character>, size: Size) -> Surface {
+        let w = size.width.saturating_sub(1) as i32;
+        let h = size.height.saturating_sub(1) as i32;
+        Self {
+            size,
+            chars,
+            origin: Point::default(),
+            base_origin: Point::default(),
+            clip: ClipArea::new(0, 0, w, h),
+            base_clip: ClipArea::new(0, 0, w, h),
+            cursor: Cursor::new(),
+            right_most: w,
+            bottom_most: h,    
+        }
     }
 
     /// Creates a new surface from a string with the specified size.
@@ -327,9 +346,7 @@ impl Surface {
     /// You can use this method method if you want to fill a surface with a transparent character (e.g. if you want that surface to be printed on another surface via draw_surface method)
     pub fn reset(&mut self, ch: Character) {
         self.reset_clip_and_origin();
-        for c in &mut self.chars {
-            *c = ch;
-        }
+        self.chars.fill(ch);
     }
 
     /// Fills a horizontal line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
@@ -1165,6 +1182,111 @@ impl Surface {
         }
     }
 
+    /// Fills a rectangle by calling `generate` for every cell. If the rectangle is
+    /// outside the clip area, nothing is drawn.
+    ///
+    /// This is similar to [`fill_rect`](Self::fill_rect), but the character at each
+    /// position is produced by the callback instead of being a single constant
+    /// [`Character`]. The [`Point`] passed to `generate` uses the same coordinate
+    /// space as `rect` (relative to the current origin).
+    ///
+    /// If `generate` returns `None`, that cell is left unchanged. This can be used
+    /// to paint a pattern, a gradient, or only a subset of the rectangle.
+    ///
+    /// # Parameters
+    /// - `rect`: The rectangle to fill.
+    /// - `generate`: A function called for each cell; `Some(ch)` writes that
+    ///   character, `None` skips the cell.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.fill_rect_with(r, |p| {
+    ///     if (p.x + p.y) % 2 == 0 {
+    ///         Some(Character::new('#', Color::White, Color::Black, CharFlags::None))
+    ///     } else {
+    ///         None
+    ///     }
+    /// });
+    /// ```
+    pub fn fill_rect_with<F>(&mut self, rect: Rect, generate: F)
+    where
+        F: Fn(Point) -> Option<Character>,
+    {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        let mut p = Point::default();
+        for x in left..=right {
+            for y in top..=bottom {
+                p.x = x;
+                p.y = y;
+                if let Some(ch) = generate(p) {
+                    if let Some(pos) = self.coords_to_position(x, y) {
+                        self.chars[pos].set(ch);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Transforms every character inside a rectangle by calling `transform`.
+    /// Cells outside the clip area are skipped.
+    ///
+    /// Unlike [`fill_rect_with`](Self::fill_rect_with), this starts from the
+    /// character already on the surface. The callback receives that [`Character`]
+    /// and its [`Point`] (relative to the current origin). Return `Some(ch)` to
+    /// replace the cell, or `None` to leave it unchanged (for example to dim
+    /// everything except a selected region).
+    ///
+    /// # Parameters
+    /// - `rect`: The rectangle whose cells are transformed.
+    /// - `transform`: A function called for each visible cell; `Some(ch)`
+    ///   overwrites the cell, `None` keeps the original character.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.fill_rect(r, Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    /// surface.transform_rect(r, |ch, p| {
+    ///     if p.x % 2 == 0 {
+    ///         Some(Character::new(ch.code, Color::Gray, ch.background, ch.flags))
+    ///     } else {
+    ///         None
+    ///     }
+    /// });
+    /// ```
+    pub fn transform_rect<F>(&mut self, rect: Rect, transform: F)
+    where
+        F: Fn(Character, Point) -> Option<Character>,
+    {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        let mut p = Point::default();
+        for x in left..=right {
+            for y in top..=bottom {
+                if let Some(ch) = self.char(x, y) {
+                    p.x = x;
+                    p.y = y;
+                    if let Some(ch) = transform(*ch, p) {
+                        if let Some(pos) = self.coords_to_position(x, y) {
+                            self.chars[pos].set(ch);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// Rewrites the character at `(x, y)` as a box-drawing junction based on
     /// its four neighbors.
     ///
@@ -1268,14 +1390,19 @@ impl Surface {
     /// Copies all characters from another surface onto this one at the specified position,
     /// applying a transformation to each source character before it is written.
     /// This behaves like [`draw_surface`](Self::draw_surface), but the `transform` callback can remap
-    /// character codes, colors, or flags (for example to tint or mask the copied content).
+    /// character codes, colors, or flags, or skip a cell entirely (for example to tint or mask the copied content).
     /// If the clip area is not visible, nothing is drawn.
+    ///
+    /// The [`Point`] passed to `transform` is the coordinate on the **source** surface
+    /// (top-left of the source is `(0, 0)`). Return `Some(ch)` to write that character
+    /// to the destination, or `None` to skip that cell.
     ///
     /// # Parameters
     /// - `x`: The x-coordinate of the top-left corner where the source surface is placed.
     /// - `y`: The y-coordinate of the top-left corner where the source surface is placed.
     /// - `surface`: The source surface to copy.
-    /// - `transform`: A function called for each source character; its return value is written to the destination.
+    /// - `transform`: A function called for each source character and its source-surface
+    ///   position. `Some(ch)` writes the character; `None` skips the cell.
     ///
     /// # Example
     /// ```rust
@@ -1284,19 +1411,72 @@ impl Surface {
     /// let mut destination = Surface::new(20, 10);
     /// let mut source = Surface::new(5, 3);
     /// source.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
-    /// destination.draw_surface_with_transform(2, 2, &source, |ch| {
-    ///     Character::new(ch.code, Color::Red, ch.background, ch.flags)
+    /// destination.draw_surface_with_transform(2, 2, &source, |ch, _| {
+    ///     Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
     /// });
     /// ```
-    pub fn draw_surface_with_transform<F: Fn(Character) -> Character>(&mut self, x: i32, y: i32, surface: &Surface, transform: F) {
+    pub fn draw_surface_with_transform<F>(&mut self, x: i32, y: i32, surface: &Surface, transform: F)
+    where
+        F: Fn(Character, Point) -> Option<Character>,
+    {
         if !self.clip.is_visible() {
             return;
         }
         let mut index = 0usize;
+        let mut p = Point::default();
         for s_y in 0..=surface.bottom_most {
             for s_x in 0..=surface.right_most {
-                self.write_char(x + s_x, y + s_y, transform(surface.chars[index]));
+                p.x = s_x;
+                p.y = s_y;
+                if let Some(ch) = transform(surface.chars[index], p) {
+                    self.write_char(x + s_x, y + s_y, ch);
+                }
                 index += 1;
+            }
+        }
+    }
+
+    /// Draws a [`Sprite`] at the specified position.
+    /// The top-left corner of the sprite is placed at `(x, y)`, and its characters are written
+    /// from left to right, then top to bottom.
+    /// Each character is written with [`write_char`](Self::write_char), so the surface origin and clip area apply.
+    /// Cells that fall outside the clip area are skipped. If the clip area is not visible, nothing is drawn.
+    ///
+    /// [`write_char`](Self::write_char) updates a cell through [`Character::set`]:
+    /// a code of `'\0'` does not replace the glyph, and a [`Color::Transparent`] foreground or background
+    /// does not replace that color. Flags are always written.
+    ///
+    /// # Parameters
+    /// - `x`: The x-coordinate of the sprite's top-left corner, relative to the surface origin.
+    /// - `y`: The y-coordinate of the sprite's top-left corner, relative to the surface origin.
+    /// - `sprite`: The sprite to draw.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::{CharFlags, Character, Color, Sprite, Surface};
+    ///
+    /// let mut surface = Surface::new(20, 10);
+    /// let mut sprite = Sprite::new(3, 2);
+    /// sprite.set(0, 0, Character::new('A', Color::Yellow, Color::Black, CharFlags::None));
+    /// sprite.set(1, 0, Character::new('B', Color::Yellow, Color::Black, CharFlags::None));
+    /// surface.draw_sprite(2, 2, &sprite);
+    /// assert_eq!(surface.char(2, 2).unwrap().code, 'A');
+    /// assert_eq!(surface.char(3, 2).unwrap().code, 'B');
+    /// ```
+    pub fn draw_sprite(&mut self, x: i32, y: i32, sprite: &Sprite) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let size = sprite.size();
+        let chars = sprite.chars();
+        let mut y = y;
+        let mut px = 0;
+        for ch in chars {
+            self.write_char(x + px, y, *ch);
+            px += 1;
+            if px >= size.width as i32 {
+                px = 0;
+                y += 1;
             }
         }
     }
@@ -1490,12 +1670,14 @@ impl Surface {
         };
         let right_margin = left_margin + (width as i32);
         let mut c = Character::with_attributes(' ', format.char_attr);
+        let char_map = format.char_variant.conversion_callback();
 
         if format.has_hotkey() {
             let hkpos = format.hotkey_pos as usize;
             for (cpos, ch) in (ch_index..).zip(text.chars()) {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
+                        let ch = char_map.map(|f| f(ch)).unwrap_or(ch);
                         if cpos == hkpos {
                             self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr));
                         } else {
@@ -1510,7 +1692,7 @@ impl Surface {
             for (_, ch) in (ch_index..).zip(text.chars()) {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
-                        c.code = ch;
+                        c.code = char_map.map(|f| f(ch)).unwrap_or(ch);
                         self.chars[pos].set(c);
                     }
                 }
@@ -1775,6 +1957,52 @@ impl Surface {
             BitTileRenderMethod::SmallBlocks => tile.paint_small(self, Point::new(x, y), set_bit_color, unset_bit_color),
             BitTileRenderMethod::LargeBlocks => tile.paint_large(self, Point::new(x, y), set_bit_color, unset_bit_color),
             BitTileRenderMethod::Braille => tile.paint_braille(self, Point::new(x, y), set_bit_color, unset_bit_color),
+        }
+    }
+
+    /// Draws a [`PaletteTile`] at `(x, y)` using the selected render method.
+    ///
+    /// Every pixel of the tile holds an index; `palette` turns an index into the
+    /// [`CharAttribute`] used to draw it. Transparent pixels are not drawn, so whatever is
+    /// under them stays visible. [`PaletteTileRenderMethod`] chooses the characters:
+    /// - [`PaletteTileRenderMethod::SmallBlocks`]: half blocks (`▀`, `▄`), 1 x 2 pixels per
+    ///   character; only the foreground of each palette entry is used
+    /// - [`PaletteTileRenderMethod::LargeBlocks`]: full blocks, every pixel is 2 characters wide
+    /// - [`PaletteTileRenderMethod::Braille`]: Braille dots, 2 x 4 pixels per character; a
+    ///   character takes the palette entry that covers most of its dots
+    /// - [`PaletteTileRenderMethod::Custom`]: the given character, every pixel is 2 characters wide
+    ///
+    /// Every method draws square pixels, so the same tile gives the same picture with every
+    /// method. [`PaletteTile::render_size`] returns the size of the drawn tile, in characters.
+    ///
+    /// # Parameters
+    /// - `x`, `y`: Top-left position of the tile, relative to the origin.
+    /// - `tile`: The palette tile to paint.
+    /// - `render_method`: How the pixels are mapped to characters.
+    /// - `palette`: The attribute of every palette index.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(20, 8);
+    /// let mut tile = PaletteTile::new(4, 4);
+    /// for i in 0..4 {
+    ///     tile.set(i, i, 0);
+    ///     tile.set(3 - i, i, 1);
+    /// }
+    /// let palette = [CharAttribute::with_fore_color(Color::Red), CharAttribute::with_fore_color(Color::Green)];
+    /// surface.draw_palette_tile(2, 1, &tile, PaletteTileRenderMethod::LargeBlocks, |index| palette[index as usize]);
+    /// ```
+    pub fn draw_palette_tile<P>(&mut self, x: i32, y: i32, tile: &PaletteTile, render_method: PaletteTileRenderMethod, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        match render_method {
+            PaletteTileRenderMethod::SmallBlocks => tile.paint_small(self, Point::new(x, y), palette),
+            PaletteTileRenderMethod::LargeBlocks => tile.paint_char(self, Point::new(x, y), '\u{2588}', palette),
+            PaletteTileRenderMethod::Braille => tile.paint_braille(self, Point::new(x, y), palette),
+            PaletteTileRenderMethod::Custom(c) => tile.paint_char(self, Point::new(x, y), c, palette),
         }
     }
 

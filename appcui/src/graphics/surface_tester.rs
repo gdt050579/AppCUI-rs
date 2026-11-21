@@ -57,7 +57,7 @@ impl SurfaceTester {
                 hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
-            if let Some((r, g, b)) = ch.foreground.rgb() {
+            if let Some((r, g, b)) = ch.foreground.as_rgb() {
                 hash ^= r as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
                 hash ^= g as u64;
@@ -65,7 +65,7 @@ impl SurfaceTester {
                 hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
-            if let Some((r, g, b)) = ch.background.rgb() {
+            if let Some((r, g, b)) = ch.background.as_rgb() {
                 hash ^= r as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
                 hash ^= g as u64;

@@ -36,6 +36,20 @@ use crate::ui::{
     hslider, hslider::events::GenericHSliderEvents,
     pathfinder, treeview,
     markdown_composer::events::MarkdownComposerEvents,
+    vbarchart, 
+    vbarchart::events::GenericVBarChartEvents,
+    hbarchart,
+    hbarchart::events::GenericHBarChartEvents,
+    piechart,
+    piechart::events::PieChartEvents,
+    linechart,
+    linechart::events::GenericLineChartEvents,
+    usagechart,
+    usagechart::events::UsageChartEvents,
+    heatmap,
+    heatmap::events::GenericHeatMapEvents,
+    vstackedbarchart,
+    vstackedbarchart::events::GenericVStackedBarChartEvents,
 };
 
 #[derive(Copy, Clone)]
@@ -76,6 +90,13 @@ pub(crate) enum ControlEventData {
     Editor(editor::events::EventData),
     HyperLink(hyperlink::events::EventData),
     HSliderEvents(hslider::events::EventData),
+    VBarChart(vbarchart::events::EventData),
+    HBarChart(hbarchart::events::EventData),
+    PieChart(piechart::events::EventData),
+    LineChart(linechart::events::EventData),
+    UsageChart(usagechart::events::EventData),
+    HeatMap(heatmap::events::EventData),
+    VStackedBarChart(vstackedbarchart::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -216,6 +237,55 @@ impl ControlEvent {
             },
             ControlEventData::HyperLink(_) => HyperLinkEvents::on_open(receiver, self.emitter.cast()),
             ControlEventData::HSliderEvents(data) => GenericHSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
+            ControlEventData::VBarChart(data) => match data.event_type {
+                vbarchart::events::EventType::BarSelected(bar_index) => {
+                    GenericVBarChartEvents::on_bar_selected(receiver, self.emitter.cast(), data.type_id, bar_index)
+                }
+                vbarchart::events::EventType::ClearSelection => {
+                    GenericVBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }
+            },
+            ControlEventData::HBarChart(data) => match data.event_type {
+                hbarchart::events::EventType::BarSelected(bar_index) => {
+                    GenericHBarChartEvents::on_bar_selected(receiver, self.emitter.cast(), data.type_id, bar_index)
+                }
+                hbarchart::events::EventType::ClearSelection => {
+                    GenericHBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }
+            },
+            ControlEventData::PieChart(data) => match data.event_type {
+                piechart::events::EventType::SliceSelected(index) => PieChartEvents::on_slice_selected(receiver, self.emitter.cast(), index),
+                piechart::events::EventType::ClearSelection => PieChartEvents::on_clear_selection(receiver, self.emitter.cast()),
+            },
+            ControlEventData::LineChart(data) => match data.event_type {
+                linechart::events::EventType::PointSelected { series_index, point_index } => {
+                    GenericLineChartEvents::on_point_selected(receiver, self.emitter.cast(), data.type_id, series_index, point_index)
+                }
+                linechart::events::EventType::ClearSelection => {
+                    GenericLineChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }
+            },
+            ControlEventData::UsageChart(data) => match data.index {
+                Some(index) => UsageChartEvents::on_usage_segment_selected(receiver, self.emitter.cast(), index as usize),
+                None => UsageChartEvents::on_clear_selection(receiver, self.emitter.cast()),
+            },
+            ControlEventData::HeatMap(data) => match data.event_type {
+                heatmap::events::EventType::CellSelected { row, column } => {
+                    GenericHeatMapEvents::on_cell_selected(receiver, self.emitter.cast(), data.type_id, row, column)
+                }
+                heatmap::events::EventType::ClearSelection => GenericHeatMapEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id),
+            },
+            ControlEventData::VStackedBarChart(data) => match data.event_type {
+                vstackedbarchart::events::EventType::ClearSelection => {
+                    GenericVStackedBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }
+                vstackedbarchart::events::EventType::StackSelected(index) => {
+                    GenericVStackedBarChartEvents::on_stack_selected(receiver, self.emitter.cast(), data.type_id, index)
+                }
+                vstackedbarchart::events::EventType::CellSelected { stack_index, cell_index } => {
+                    GenericVStackedBarChartEvents::on_cell_selected(receiver, self.emitter.cast(), data.type_id, stack_index, cell_index)
+                }
+            },
         }
     }
 }

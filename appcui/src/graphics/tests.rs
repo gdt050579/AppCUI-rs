@@ -3,6 +3,7 @@ use std::str::FromStr;
 use appcui_proc_macro::*;
 
 use crate::graphics::BOX_JUNCTION;
+use crate::graphics::CharVariant;
 use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
 use crate::graphics::Rect;
@@ -18,6 +19,7 @@ use super::LineCap;
 use super::LineType;
 use super::PolyLineFormat;
 use super::PolyLineFormatBuilder;
+use super::Sprite;
 use super::Surface;
 use super::SurfaceTester;
 use super::TextAlignment;
@@ -58,6 +60,144 @@ fn check_fill_rect() {
     s.fill_rect(Rect::with_size(4, 1, 10, 2), Character::with_char('X'));
     //s.print();
     assert_eq!(s.compute_hash(), 0xD897421A927A1A1);
+}
+#[test]
+fn check_fill_rect_with() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    let filled = Character::new('#', Color::Aqua, Color::Red, CharFlags::Bold);
+    let background = Character::new('.', Color::White, Color::Black, CharFlags::None);
+    s.fill_rect_with(Rect::new(2, 1, 5, 3), |p| {
+        if (p.x + p.y) % 2 == 0 {
+            Some(filled)
+        } else {
+            None
+        }
+    });
+    for y in 1..=3 {
+        for x in 2..=5 {
+            let expected = if (x + y) % 2 == 0 { filled } else { background };
+            assert_eq!(*s.char(x, y).unwrap(), expected);
+        }
+    }
+    assert_eq!(s.char(1, 1).unwrap().code, '.');
+    assert_eq!(s.char(6, 1).unwrap().code, '.');
+    assert_eq!(s.char(2, 0).unwrap().code, '.');
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x8EBF2BA63F9B5C21);
+}
+#[test]
+fn check_fill_rect_with_clip_and_origin() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.set_clip(3, 1, 6, 3);
+    s.fill_rect_with(Rect::new(0, 0, 10, 4), |p| {
+        Some(Character::new(
+            if p.x == 4 { 'X' } else { 'O' },
+            Color::Yellow,
+            Color::Blue,
+            CharFlags::None,
+        ))
+    });
+    assert_eq!(cell_code(&s, 2, 1), '.');
+    assert_eq!(cell_code(&s, 3, 1), 'O');
+    assert_eq!(cell_code(&s, 4, 1), 'X');
+    assert_eq!(cell_code(&s, 6, 1), 'O');
+    assert_eq!(cell_code(&s, 7, 1), '.');
+    assert_eq!(cell_code(&s, 4, 0), '.');
+    assert_eq!(cell_code(&s, 4, 4), '.');
+
+    s.reset_clip();
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.set_origin(2, 1);
+    s.fill_rect_with(Rect::new(0, 0, 2, 0), |p| {
+        Some(Character::with_char(char::from_digit(p.x as u32, 10).unwrap()))
+    });
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 1), '0');
+    assert_eq!(cell_code(&s, 3, 1), '1');
+    assert_eq!(cell_code(&s, 4, 1), '2');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+}
+#[test]
+fn check_transform_rect() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(
+        Rect::new(2, 1, 6, 3),
+        Character::new('X', Color::Yellow, Color::Blue, CharFlags::None),
+    );
+    s.transform_rect(Rect::new(2, 1, 6, 3), |ch, p| {
+        if p.x % 2 == 0 {
+            Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+        } else {
+            None
+        }
+    });
+    for y in 1..=3 {
+        for x in 2..=6 {
+            let c = s.char(x, y).unwrap();
+            assert_eq!(c.code, 'X');
+            assert_eq!(c.background, Color::Blue);
+            if x % 2 == 0 {
+                assert_eq!(c.foreground, Color::Red);
+            } else {
+                assert_eq!(c.foreground, Color::Yellow);
+            }
+        }
+    }
+    assert_eq!(s.char(1, 1).unwrap().code, '.');
+    assert_eq!(s.char(1, 1).unwrap().foreground, Color::White);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x3FCAC4C5107CF9E3);
+}
+#[test]
+fn check_transform_rect_clip_and_origin() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(
+        Rect::new(0, 0, 19, 4),
+        Character::new('A', Color::Yellow, Color::Black, CharFlags::None),
+    );
+    s.set_clip(3, 1, 6, 3);
+    s.transform_rect(Rect::new(0, 0, 19, 4), |ch, p| {
+        if p.x == 4 {
+            Some(Character::new('X', Color::Red, ch.background, ch.flags))
+        } else {
+            Some(Character::new('O', Color::Aqua, ch.background, ch.flags))
+        }
+    });
+    assert_eq!(cell_code(&s, 2, 1), 'A');
+    assert_eq!(cell_code(&s, 3, 1), 'O');
+    assert_eq!(cell_code(&s, 4, 1), 'X');
+    assert_eq!(cell_code(&s, 6, 1), 'O');
+    assert_eq!(cell_code(&s, 7, 1), 'A');
+    assert_eq!(cell_code(&s, 4, 0), 'A');
+    assert_eq!(cell_code(&s, 4, 4), 'A');
+    s.reset_clip();
+    assert_eq!(s.char(2, 1).unwrap().foreground, Color::Yellow);
+    assert_eq!(s.char(3, 1).unwrap().foreground, Color::Aqua);
+    assert_eq!(s.char(4, 1).unwrap().foreground, Color::Red);
+
+    s.reset_origin();
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(
+        Rect::new(2, 1, 4, 1),
+        Character::new('A', Color::White, Color::Black, CharFlags::None),
+    );
+    s.set_origin(2, 1);
+    s.transform_rect(Rect::new(0, 0, 2, 0), |ch, p| {
+        Some(Character::new(
+            char::from_digit(p.x as u32, 10).unwrap(),
+            ch.foreground,
+            ch.background,
+            ch.flags,
+        ))
+    });
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 1), '0');
+    assert_eq!(cell_code(&s, 3, 1), '1');
+    assert_eq!(cell_code(&s, 4, 1), '2');
 }
 #[test]
 fn check_draw_rect() {
@@ -236,6 +376,98 @@ fn check_draw_surface() {
     s.draw_surface(-5, -3, &s2);
     //s.print();
     assert_eq!(s.compute_hash(), 0x3E6031703919C392);
+}
+
+#[test]
+fn check_draw_surface_with_transform() {
+    let mut s = SurfaceTester::new(20, 15);
+    let mut s2 = Surface::new(8, 6);
+    s2.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    s2.draw_rect(
+        Rect::new(0, 0, 7, 5),
+        LineType::Double,
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+    );
+    s.draw_surface_with_transform(2, 2, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    let interior = s.char(3, 3).unwrap();
+    assert_eq!(interior.code, 'X');
+    assert_eq!(interior.foreground, Color::Red);
+    let border = s.char(2, 2).unwrap();
+    assert_eq!(border.foreground, Color::Red);
+    assert_eq!(border.background, Color::DarkRed);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x1ABE84AFD5C8F01D);
+    s.draw_surface_with_transform(-2, -2, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    //s.print();
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x2BF1E4AC5E721A90);
+    s.clear(Character::with_char('.'));
+    s.set_clip(3, 3, 5, 5);
+    s.set_origin(3, 3);
+    s.draw_surface_with_transform(0, 0, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    assert_eq!(cell_code(&s, 2, 2), '.');
+    assert_eq!(cell_code(&s, 3, 3), s2.char(0, 0).unwrap().code);
+    assert_eq!(s.char(0, 0).unwrap().foreground, Color::Red);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x40B1E4E52FF3B910);
+    s.draw_surface_with_transform(-5, -3, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x1EC7D35E07AB3735);
+    s.reset_clip();
+    s.draw_surface_with_transform(-5, -3, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x853D1EBF50CB7A77);
+}
+
+#[test]
+fn check_draw_surface_with_transform_skip_and_source_point() {
+    let mut dest = SurfaceTester::new(10, 5);
+    dest.clear(Character::with_char('.'));
+    let mut src = Surface::new(3, 2);
+    src.clear(Character::new('A', Color::Yellow, Color::Black, CharFlags::None));
+
+    dest.draw_surface_with_transform(5, 2, &src, |_, p| {
+        Some(Character::with_char(char::from_digit((p.x + p.y * 3) as u32, 10).unwrap()))
+    });
+    assert_eq!(cell_code(&dest, 5, 2), '0');
+    assert_eq!(cell_code(&dest, 6, 2), '1');
+    assert_eq!(cell_code(&dest, 7, 2), '2');
+    assert_eq!(cell_code(&dest, 5, 3), '3');
+    assert_eq!(cell_code(&dest, 6, 3), '4');
+    assert_eq!(cell_code(&dest, 7, 3), '5');
+    assert_eq!(cell_code(&dest, 4, 2), '.');
+
+    dest.clear(Character::with_char('.'));
+    dest.draw_surface_with_transform(1, 1, &src, |ch, p| {
+        if p.x == 0 || p.y == 0 {
+            None
+        } else {
+            Some(Character::new('B', ch.foreground, ch.background, ch.flags))
+        }
+    });
+    assert_eq!(cell_code(&dest, 1, 1), '.');
+    assert_eq!(cell_code(&dest, 2, 1), '.');
+    assert_eq!(cell_code(&dest, 3, 1), '.');
+    assert_eq!(cell_code(&dest, 1, 2), '.');
+    assert_eq!(cell_code(&dest, 2, 2), 'B');
+    assert_eq!(cell_code(&dest, 3, 2), 'B');
+    assert_eq!(*dest.char(2, 2).unwrap(), Character::new('B', Color::Yellow, Color::Black, CharFlags::None));
+
+    let before = dest.compute_hash();
+    dest.set_clip(5, 0, 4, 2);
+    dest.draw_surface_with_transform(1, 1, &src, |ch, _| Some(ch));
+    dest.reset_clip();
+    assert_eq!(dest.compute_hash(), before);
 }
 
 #[test]
@@ -1478,6 +1710,34 @@ fn check_color_as_color_index() {
 }
 
 #[test]
+fn check_color_to_rgb() {
+    assert_eq!(Color::Black.to_rgb(), Some((0, 0, 0)));
+    assert_eq!(Color::DarkBlue.to_rgb(), Some((0, 0, 128)));
+    assert_eq!(Color::DarkGreen.to_rgb(), Some((0, 128, 0)));
+    assert_eq!(Color::Teal.to_rgb(), Some((0, 128, 128)));
+    assert_eq!(Color::DarkRed.to_rgb(), Some((128, 0, 0)));
+    assert_eq!(Color::Magenta.to_rgb(), Some((128, 0, 128)));
+    assert_eq!(Color::Olive.to_rgb(), Some((128, 128, 0)));
+    assert_eq!(Color::Silver.to_rgb(), Some((192, 192, 192)));
+    assert_eq!(Color::Gray.to_rgb(), Some((128, 128, 128)));
+    assert_eq!(Color::Blue.to_rgb(), Some((0, 0, 255)));
+    assert_eq!(Color::Green.to_rgb(), Some((0, 255, 0)));
+    assert_eq!(Color::Aqua.to_rgb(), Some((0, 255, 255)));
+    assert_eq!(Color::Red.to_rgb(), Some((255, 0, 0)));
+    assert_eq!(Color::Pink.to_rgb(), Some((255, 0, 255)));
+    assert_eq!(Color::Yellow.to_rgb(), Some((255, 255, 0)));
+    assert_eq!(Color::White.to_rgb(), Some((255, 255, 255)));
+    assert_eq!(Color::Transparent.to_rgb(), None);
+    #[cfg(feature = "TRUE_COLORS")]
+    {
+        assert_eq!(Color::RGB(0, 0, 0).to_rgb(), Some((0, 0, 0)));
+        assert_eq!(Color::RGB(255, 128, 0).to_rgb(), Some((255, 128, 0)));
+        assert_eq!(Color::RGB(1, 2, 3).to_rgb(), Some((1, 2, 3)));
+        assert_eq!(Color::RGB(255, 255, 255).to_rgb(), Some((255, 255, 255)));
+    }
+}
+
+#[test]
 fn check_draw_line_boxes() {
     let mut s = SurfaceTester::new(60, 25);
     s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
@@ -2051,6 +2311,75 @@ fn check_box_junction_non_box_chars_contribute_nothing() {
     assert_eq!(BOX_JUNCTION.mask_of('\u{2580}'), 0);
 }
 
+// BOX_JUNCTION is a static built at compile time, so these tests call BoxJunction::new() at runtime.
+#[test]
+fn check_box_junction_new_matches_static_masks() {
+    let bj = super::box_junction::BoxJunction::new();
+    for cp in 0x2500u32..=0x257F {
+        let c = char::from_u32(cp).unwrap();
+        assert_eq!(bj.mask_of(c), BOX_JUNCTION.mask_of(c), "mask_of({c})");
+    }
+    for &(idx, n, e, s, w) in super::box_junction::BOX_JUNCTION_DEFS {
+        let c = char::from_u32(0x2500 + idx as u32).unwrap();
+        assert_eq!(bj.mask_of(c), super::box_junction::mask(n, e, s, w), "mask_of({c})");
+    }
+    // characters outside the box drawing block (and box drawing chars that are not defined) have no mask
+    assert_eq!(bj.mask_of('a'), 0);
+    assert_eq!(bj.mask_of('\u{24FF}'), 0);
+    assert_eq!(bj.mask_of('\u{2580}'), 0);
+    assert_eq!(bj.mask_of('╱'), 0);
+}
+
+#[test]
+fn check_box_junction_new_matches_static_resolve() {
+    let bj = super::box_junction::BoxJunction::new();
+    let chars = [' ', '─', '│', '━', '┃', '═', '║', '┌', '┏', '╔', '┼', '╋', '╬', '╴', '╹'];
+    for &l in &chars {
+        for &u in &chars {
+            for &r in &chars {
+                for &d in &chars {
+                    assert_eq!(bj.resolve(l, u, r, d), BOX_JUNCTION.resolve(l, u, r, d), "resolve({l},{u},{r},{d})");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_box_junction_new_exact_glyphs() {
+    let bj = super::box_junction::BoxJunction::new();
+    assert_eq!(bj.resolve('─', '│', '─', '│'), Some('┼'));
+    assert_eq!(bj.resolve('━', '┃', '━', '┃'), Some('╋'));
+    assert_eq!(bj.resolve('═', '║', '═', '║'), Some('╬'));
+    assert_eq!(bj.resolve('═', '│', '═', '│'), Some('╪'));
+    assert_eq!(bj.resolve('━', '│', '─', '│'), Some('┽'));
+    assert_eq!(bj.resolve(' ', ' ', '─', '│'), Some('┌'));
+    assert_eq!(bj.resolve('─', ' ', '─', ' '), Some('─'));
+    // less than two connections
+    assert_eq!(bj.resolve('─', ' ', ' ', ' '), None);
+    assert_eq!(bj.resolve(' ', ' ', ' ', ' '), None);
+}
+
+#[test]
+fn check_box_junction_new_coerces_missing_combinations() {
+    let bj = super::box_junction::BoxJunction::new();
+    // double + heavy have no combined glyphs, so the dominant weight wins
+    // 3 heavy + 1 double -> heavy
+    assert_eq!(bj.resolve('━', '║', '━', '┃'), Some('╋'));
+    // 3 double + 1 heavy -> double
+    assert_eq!(bj.resolve('═', '┃', '═', '║'), Some('╬'));
+    // tie between double and heavy -> double
+    assert_eq!(bj.resolve('━', '║', '━', '║'), Some('╬'));
+    // 3 double + 1 single (no glyph for that mix) -> double
+    assert_eq!(bj.resolve('═', '│', '═', '║'), Some('╬'));
+    // single, double and heavy mixed: single is the most common
+    assert_eq!(bj.resolve('─', '║', '━', '│'), Some('┼'));
+    // corner made of a double and a heavy line -> tie -> double
+    assert_eq!(bj.resolve(' ', ' ', '━', '║'), Some('╔'));
+    // every coerced result must still be identical to the compile-time table
+    assert_eq!(bj.resolve('━', '║', '━', '┃'), BOX_JUNCTION.resolve('━', '║', '━', '┃'));
+}
+
 #[test]
 fn check_box_junction_on_surface_rect_simple() {
     /*
@@ -2408,4 +2737,703 @@ fn check_polyline_format_getters_setters() {
     assert!(format.end_attr().is_none());
     assert!(format.joint().is_none());
     assert!(format.joint_attr().is_none());
+}
+
+#[test]
+fn check_char_variant_upper_case() {
+    let callback = CharVariant::Uppercase.conversion_callback().unwrap();
+    for i in 'a'..='z' {
+        assert_eq!(callback(i), i.to_uppercase().next().unwrap_or(i));
+    }
+}
+
+#[test]
+fn check_char_variant_lower_case() {
+    let callback = CharVariant::Lowercase.conversion_callback().unwrap();
+    for i in 'A'..='Z' {
+        assert_eq!(callback(i), i.to_lowercase().next().unwrap_or(i));
+    }
+}
+
+fn compare_strings(s1: &str, s2: &str) {
+    assert_eq!(s1.chars().count(), s2.chars().count(), "Expcting string with the same number of characters but got: {} and {}",s1,s2);
+    let i1 = s1.chars();
+    let mut i2 = s2.chars();
+    for (index, c1) in i1.enumerate() {
+        let c2 = i2.next().unwrap();
+        assert_eq!(c1,c2,"Characters don't match {} with {} (at index {}) for S1={} and S2={}",c1,c2,index,s1,s2);
+    }
+}
+
+#[test]
+fn check_char_variant_math_bold() {
+    let callback = CharVariant::MathBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_math_italic() {
+    let callback = CharVariant::MathItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_math_bold_italic() {
+    let callback = CharVariant::MathBoldItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_script() {
+    let callback = CharVariant::Script.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_bold_script() {
+    let callback = CharVariant::ScriptBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_fraktur() {
+    let callback = CharVariant::Fraktur.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_bold_fraktur() {
+    let callback = CharVariant::FrakturBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_double_struck() {
+    let callback = CharVariant::DoubleStruck.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif() {
+    let callback = CharVariant::SansSerif.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif_bold() {
+    let callback = CharVariant::SansSerifBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif_italic() {
+    let callback = CharVariant::SansSerifItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif_bold_italic() {
+    let callback = CharVariant::SansSerifBoldItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+
+#[test]
+fn check_char_variant_monospace() {
+    let callback = CharVariant::Monospace.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_circled() {
+    let callback = CharVariant::Circled.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ⓪①②③④⑤⑥⑦⑧⑨";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_circled_negative() {
+    let callback = CharVariant::CircledNegative.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩⓿❶❷❸❹❺❻❼❽❾";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_squared() {
+    let callback = CharVariant::Squared.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_squared_negative() {
+    let callback = CharVariant::SquaredNegative.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_superscript() {
+    let callback = CharVariant::Superscript.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()";
+    let expected = "ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖqʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_subscript() {
+    let callback = CharVariant::Subscript.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()";
+    let expected = "ₐBCDₑFGₕᵢⱼₖₗₘₙₒₚQᵣₛₜᵤᵥWₓYZₐbcdₑfgₕᵢⱼₖₗₘₙₒₚqᵣₛₜᵤᵥwₓyz₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_small_caps() {
+    let callback = CharVariant::SmallCaps.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱTᴜᴠᴡXʏᴢᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_map_none_returns_same_char() {
+    let v = CharVariant::None;
+    for c in ['a', 'Z', '0', ' ', '!', 'ă', '╬', '😀'] {
+        assert_eq!(v.map(c), c);
+    }
+    assert_eq!(CharVariant::default().map('x'), 'x');
+}
+
+#[test]
+fn check_char_variant_map_custom() {
+    fn swap_ab(c: char) -> char {
+        match c {
+            'a' => 'b',
+            'b' => 'a',
+            _ => c,
+        }
+    }
+    let v = CharVariant::Custom(swap_ab);
+    assert_eq!(v.map('a'), 'b');
+    assert_eq!(v.map('b'), 'a');
+    assert_eq!(v.map('c'), 'c');
+    let s: String = "abba cab".chars().map(|c| v.map(c)).collect();
+    assert_eq!(s, "baab cba");
+}
+
+#[test]
+fn check_char_variant_map_single_chars() {
+    assert_eq!(CharVariant::Uppercase.map('a'), 'A');
+    assert_eq!(CharVariant::Lowercase.map('A'), 'a');
+    assert_eq!(CharVariant::MathBold.map('A'), '𝐀');
+    assert_eq!(CharVariant::MathItalic.map('h'), 'ℎ');
+    assert_eq!(CharVariant::Script.map('B'), 'ℬ');
+    assert_eq!(CharVariant::Fraktur.map('C'), 'ℭ');
+    assert_eq!(CharVariant::DoubleStruck.map('R'), 'ℝ');
+    assert_eq!(CharVariant::Monospace.map('0'), '𝟶');
+    assert_eq!(CharVariant::Circled.map('0'), '⓪');
+    assert_eq!(CharVariant::Circled.map('1'), '①');
+    assert_eq!(CharVariant::CircledNegative.map('0'), '⓿');
+    assert_eq!(CharVariant::Squared.map('a'), '🄰');
+    assert_eq!(CharVariant::SquaredNegative.map('A'), '🅰');
+    assert_eq!(CharVariant::Superscript.map('2'), '²');
+    assert_eq!(CharVariant::Subscript.map('2'), '₂');
+    assert_eq!(CharVariant::SmallCaps.map('a'), 'ᴀ');
+}
+
+#[test]
+fn check_char_variant_map_keeps_unmapped_chars() {
+    let variants = [
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+    ];
+    for v in variants {
+        for c in [' ', '!', '.', ',', '╬', '😀', 'ă'] {
+            assert_eq!(v.map(c), c, "{v:?} should not change {c:?}");
+        }
+    }
+}
+
+#[test]
+fn check_char_variant_map_matches_conversion_callback() {
+    fn star(_: char) -> char {
+        '*'
+    }
+    let variants = [
+        CharVariant::Uppercase,
+        CharVariant::Lowercase,
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+        CharVariant::Custom(star),
+    ];
+    for v in variants {
+        let callback = v.conversion_callback().unwrap();
+        for cp in 0x20u32..0x7F {
+            let c = char::from_u32(cp).unwrap();
+            assert_eq!(v.map(c), callback(c), "{v:?} on {c:?}");
+        }
+    }
+    assert!(CharVariant::None.conversion_callback().is_none());
+}
+
+#[test]
+fn check_write_text_with_char_variant() {
+    fn leet(c: char) -> char {
+        match c {
+            'o' | 'O' => '0',
+            'l' | 'L' => '1',
+            'e' | 'E' => '3',
+            _ => c,
+        }
+    }
+    let variants = [
+        ("None", CharVariant::None),
+        ("Uppercase", CharVariant::Uppercase),
+        ("Lowercase", CharVariant::Lowercase),
+        ("MathBold", CharVariant::MathBold),
+        ("MathItalic", CharVariant::MathItalic),
+        ("MathBoldItalic", CharVariant::MathBoldItalic),
+        ("Script", CharVariant::Script),
+        ("ScriptBold", CharVariant::ScriptBold),
+        ("Fraktur", CharVariant::Fraktur),
+        ("FrakturBold", CharVariant::FrakturBold),
+        ("DoubleStruck", CharVariant::DoubleStruck),
+        ("SansSerif", CharVariant::SansSerif),
+        ("SansSerifBold", CharVariant::SansSerifBold),
+        ("SansSerifItalic", CharVariant::SansSerifItalic),
+        ("SansSerifBoldItalic", CharVariant::SansSerifBoldItalic),
+        ("Monospace", CharVariant::Monospace),
+        ("Circled", CharVariant::Circled),
+        ("CircledNegative", CharVariant::CircledNegative),
+        ("Squared", CharVariant::Squared),
+        ("SquaredNegative", CharVariant::SquaredNegative),
+        ("Superscript", CharVariant::Superscript),
+        ("Subscript", CharVariant::Subscript),
+        ("SmallCaps", CharVariant::SmallCaps),
+        ("Custom", CharVariant::Custom(leet)),
+    ];
+    let mut s = SurfaceTester::new(50, variants.len() as u32);
+    for (index, (name, variant)) in variants.iter().enumerate() {
+        s.write_string(0, index as i32, name, CharAttribute::with_fore_color(Color::Gray), false);
+        let format = TextFormatBuilder::new()
+            .position(22, index as i32)
+            .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+            .align(TextAlignment::Left)
+            .char_variant(*variant)
+            .build();
+        s.write_text("Hello World 2026", &format);
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xD5D714C0333B5C59);
+}
+
+#[test]
+fn check_text_format_set_char_variant() {
+    fn star(_: char) -> char {
+        '*'
+    }
+    let variants = [
+        CharVariant::Uppercase,
+        CharVariant::Lowercase,
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+        CharVariant::Custom(star),
+        CharVariant::None,
+    ];
+    let attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
+    let mut format = TextFormatBuilder::new()
+        .position(4, 9)
+        .attribute(attr)
+        .align(TextAlignment::Center)
+        .wrap_type(WrapType::WordWrap(12))
+        .build();
+    assert!(matches!(format.char_variant, CharVariant::None));
+
+    for variant in variants {
+        format.set_char_variant(variant);
+        assert_eq!(std::mem::discriminant(&format.char_variant), std::mem::discriminant(&variant));
+        assert_eq!(format.char_variant.map('A'), variant.map('A'));
+        assert_eq!(format.char_variant.map('0'), variant.map('0'));
+        assert_eq!(format.x, 4);
+        assert_eq!(format.y, 9);
+        assert_eq!(format.char_attr, attr);
+        assert_eq!(format.align, TextAlignment::Center);
+        assert!(matches!(format.wrap_type, WrapType::WordWrap(12)));
+    }
+}
+
+fn sprite_cell(sprite: &Sprite, x: u32, y: u32) -> Character {
+    sprite.get(x, y).expect("sprite cell in range")
+}
+
+#[test]
+fn check_sprite_new_is_filled_with_defaults() {
+    let sprite = Sprite::new(3, 2);
+    assert_eq!(sprite.size(), Size::new(3, 2));
+    let blank = Character::default();
+    for y in 0..2 {
+        for x in 0..3 {
+            assert_eq!(sprite_cell(&sprite, x, y), blank);
+        }
+    }
+    assert!(sprite.get(3, 0).is_none());
+    assert!(sprite.get(0, 2).is_none());
+    assert!(sprite.get(u32::MAX, u32::MAX).is_none());
+}
+
+#[test]
+fn check_sprite_new_clamps_dimensions() {
+    let max_w = super::surface::MAX_SURFACE_WIDTH;
+    let max_h = super::surface::MAX_SURFACE_HEIGHT;
+
+    assert_eq!(Sprite::new(0, 0).size(), Size::new(1, 1));
+    assert_eq!(Sprite::new(0, 4).size(), Size::new(1, 4));
+    assert_eq!(Sprite::new(4, 0).size(), Size::new(4, 1));
+    assert_eq!(Sprite::new(max_w + 1, 1).size(), Size::new(max_w, 1));
+    assert_eq!(Sprite::new(1, max_h + 1).size(), Size::new(1, max_h));
+    assert_eq!(Sprite::new(u32::MAX, 1).size(), Size::new(max_w, 1));
+}
+
+#[test]
+fn check_sprite_set_get_and_clear() {
+    let mut sprite = Sprite::new(2, 2);
+    let a = Character::new('A', Color::Red, Color::Blue, CharFlags::Bold);
+    let b = Character::new('B', Color::Yellow, Color::Black, CharFlags::Underline);
+    sprite.set(0, 0, a);
+    sprite.set(1, 1, b);
+    sprite.set(2, 0, Character::with_char('X'));
+    sprite.set(0, 5, Character::with_char('Y'));
+
+    assert_eq!(sprite_cell(&sprite, 0, 0), a);
+    assert_eq!(sprite_cell(&sprite, 1, 1), b);
+    assert_eq!(sprite_cell(&sprite, 1, 0), Character::default());
+    assert_eq!(sprite_cell(&sprite, 0, 1), Character::default());
+
+    let fill = Character::new('.', Color::Green, Color::DarkRed, CharFlags::Italic);
+    sprite.clear(fill);
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(sprite_cell(&sprite, x, y), fill);
+        }
+    }
+    assert_eq!(sprite.size(), Size::new(2, 2));
+}
+
+#[test]
+fn check_sprite_resize_fills_and_clamps() {
+    let mut sprite = Sprite::new(3, 2);
+    sprite.set(0, 0, Character::with_char('A'));
+    sprite.set(2, 1, Character::with_char('B'));
+
+    let fill = Character::new('#', Color::Aqua, Color::Black, CharFlags::Bold);
+    sprite.resize(2, 1, fill);
+    assert_eq!(sprite.size(), Size::new(2, 1));
+    assert_eq!(sprite_cell(&sprite, 0, 0), fill);
+    assert_eq!(sprite_cell(&sprite, 1, 0), fill);
+    assert!(sprite.get(0, 1).is_none());
+    assert!(sprite.get(2, 0).is_none());
+
+    sprite.resize(3, 2, Character::with_char('+'));
+    assert_eq!(sprite.size(), Size::new(3, 2));
+    for y in 0..2 {
+        for x in 0..3 {
+            assert_eq!(sprite_cell(&sprite, x, y), Character::with_char('+'));
+        }
+    }
+
+    let max_w = super::surface::MAX_SURFACE_WIDTH;
+    sprite.resize(0, 0, fill);
+    assert_eq!(sprite.size(), Size::new(1, 1));
+    assert_eq!(sprite_cell(&sprite, 0, 0), fill);
+
+    sprite.resize(max_w + 5, 1, fill);
+    assert_eq!(sprite.size(), Size::new(max_w, 1));
+    assert_eq!(sprite_cell(&sprite, 0, 0), fill);
+    assert_eq!(sprite_cell(&sprite, max_w - 1, 0), fill);
+}
+
+#[test]
+fn check_sprite_edit_reads_and_writes_cells() {
+    let mut sprite = Sprite::new(3, 2);
+    let kept = Character::new('Q', Color::White, Color::Blue, CharFlags::Bold);
+    sprite.set(0, 0, kept);
+
+    sprite.edit(|surface| {
+        assert_eq!(surface.size(), Size::new(3, 2));
+        assert_eq!(*surface.char(0, 0).unwrap(), kept);
+        surface.write_char(2, 1, Character::new('W', Color::Red, Color::Black, CharFlags::Underline));
+        surface.write_string(0, 1, "ab", CharAttribute::with_color(Color::Yellow, Color::DarkGreen), false);
+    });
+
+    assert_eq!(sprite.size(), Size::new(3, 2));
+    assert_eq!(sprite_cell(&sprite, 0, 0), kept);
+    assert_eq!(
+        sprite_cell(&sprite, 2, 1),
+        Character::new('W', Color::Red, Color::Black, CharFlags::Underline)
+    );
+    assert_eq!(
+        sprite_cell(&sprite, 0, 1),
+        Character::new('a', Color::Yellow, Color::DarkGreen, CharFlags::None)
+    );
+    assert_eq!(
+        sprite_cell(&sprite, 1, 1),
+        Character::new('b', Color::Yellow, Color::DarkGreen, CharFlags::None)
+    );
+    assert_eq!(sprite_cell(&sprite, 1, 0), Character::default());
+}
+
+#[test]
+fn check_sprite_edit_follows_surface_resize() {
+    let mut sprite = Sprite::new(4, 1);
+    sprite.set(0, 0, Character::with_char('A'));
+
+    sprite.edit(|surface| {
+        surface.resize(Size::new(2, 3));
+        surface.write_char(1, 2, Character::new('Z', Color::Pink, Color::DarkBlue, CharFlags::Bold));
+    });
+
+    assert_eq!(sprite.size(), Size::new(2, 3));
+    assert_eq!(sprite_cell(&sprite, 0, 0), Character::default());
+    assert_eq!(
+        sprite_cell(&sprite, 1, 2),
+        Character::new('Z', Color::Pink, Color::DarkBlue, CharFlags::Bold)
+    );
+    assert!(sprite.get(3, 0).is_none());
+    assert!(sprite.get(0, 3).is_none());
+}
+
+fn paint_sprite(width: u32, height: u32) -> Sprite {
+    let mut sprite = Sprite::new(width, height);
+    for y in 0..height {
+        for x in 0..width {
+            let code = char::from_u32('A' as u32 + x + y * width).unwrap();
+            sprite.set(
+                x,
+                y,
+                Character::new(code, Color::Red, Color::Blue, CharFlags::Bold),
+            );
+        }
+    }
+    sprite
+}
+
+#[test]
+fn check_draw_sprite_places_rows() {
+    let mut s = SurfaceTester::new(8, 5);
+    s.clear(Character::with_char('.'));
+    let sprite = paint_sprite(3, 2);
+
+    s.draw_sprite(2, 1, &sprite);
+
+    assert_eq!(*s.char(2, 1).unwrap(), Character::new('A', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(3, 1).unwrap(), Character::new('B', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(4, 1).unwrap(), Character::new('C', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(2, 2).unwrap(), Character::new('D', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(3, 2).unwrap(), Character::new('E', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(*s.char(4, 2).unwrap(), Character::new('F', Color::Red, Color::Blue, CharFlags::Bold));
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 5, 1), '.');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+    assert_eq!(cell_code(&s, 2, 3), '.');
+    assert_eq!(sprite_cell(&sprite, 0, 0).code, 'A');
+    assert_eq!(sprite.size(), Size::new(3, 2));
+}
+
+#[test]
+fn check_draw_sprite_clips_edges_and_does_not_wrap() {
+    let mut s = SurfaceTester::new(6, 4);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    let sprite = paint_sprite(3, 2);
+
+    s.draw_sprite(-1, -1, &sprite);
+    assert_eq!(cell_code(&s, 0, 0), 'E');
+    assert_eq!(cell_code(&s, 1, 0), 'F');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+    assert_eq!(cell_code(&s, 0, 1), '.');
+
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.draw_sprite(4, 3, &sprite);
+    assert_eq!(cell_code(&s, 4, 3), 'A');
+    assert_eq!(cell_code(&s, 5, 3), 'B');
+    assert_eq!(cell_code(&s, 0, 0), '.');
+    assert_eq!(cell_code(&s, 3, 3), '.');
+
+    let before = s.compute_hash();
+    s.draw_sprite(6, 0, &sprite);
+    s.draw_sprite(-3, 0, &sprite);
+    s.draw_sprite(0, 4, &sprite);
+    s.draw_sprite(0, -2, &sprite);
+    assert_eq!(s.compute_hash(), before);
+}
+
+#[test]
+fn check_draw_sprite_respects_clip_and_origin() {
+    let mut s = SurfaceTester::new(8, 6);
+    s.clear(Character::with_char('.'));
+    let sprite = paint_sprite(3, 3);
+
+    s.set_clip(2, 2, 3, 3);
+    s.draw_sprite(1, 1, &sprite);
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 2), 'E');
+    assert_eq!(cell_code(&s, 3, 2), 'F');
+    assert_eq!(cell_code(&s, 2, 3), 'H');
+    assert_eq!(cell_code(&s, 3, 3), 'I');
+    assert_eq!(cell_code(&s, 4, 2), '.');
+    assert_eq!(cell_code(&s, 2, 4), '.');
+    assert_eq!(*s.char(2, 2).unwrap(), Character::new('E', Color::Red, Color::Blue, CharFlags::Bold));
+
+    let before = s.compute_hash();
+    s.set_clip(5, 0, 4, 2);
+    s.draw_sprite(0, 0, &sprite);
+    assert_eq!(s.compute_hash(), before);
+
+    s.reset_clip();
+    s.clear(Character::with_char('.'));
+    s.set_origin(2, 1);
+    s.draw_sprite(0, 0, &sprite);
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+    assert_eq!(cell_code(&s, 2, 1), 'A');
+    assert_eq!(cell_code(&s, 4, 1), 'C');
+    assert_eq!(cell_code(&s, 2, 3), 'G');
+    assert_eq!(cell_code(&s, 5, 1), '.');
+}
+
+#[test]
+fn check_draw_sprite_uses_character_merge() {
+    let mut s = SurfaceTester::new(4, 2);
+    s.clear(Character::new('.', Color::Yellow, Color::DarkBlue, CharFlags::Italic));
+    let mut sprite = Sprite::new(2, 1);
+    sprite.set(0, 0, Character::with_char('X'));
+    sprite.set(1, 0, Character::new('Y', Color::Green, Color::Transparent, CharFlags::Bold));
+
+    s.draw_sprite(1, 0, &sprite);
+
+    assert_eq!(
+        *s.char(1, 0).unwrap(),
+        Character::new('X', Color::Yellow, Color::DarkBlue, CharFlags::None)
+    );
+    assert_eq!(
+        *s.char(2, 0).unwrap(),
+        Character::new('Y', Color::Green, Color::DarkBlue, CharFlags::Bold)
+    );
+    assert_eq!(cell_code(&s, 0, 0), '.');
+    assert_eq!(cell_code(&s, 3, 0), '.');
+}
+
+#[test]
+fn check_sprite_rect() {
+    let mut sprite = Sprite::new(4,3);
+    sprite.clear(char!("x,red,yellow"));
+    sprite.edit(|s| s.draw_rect(Rect::new(0,0,3,2), LineType::Double, charattr!("w,dg")));
+    let mut s = SurfaceTester::new(10, 10);
+    s.draw_sprite(2, 1, &sprite);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x2E860C3ED8792281);
 }

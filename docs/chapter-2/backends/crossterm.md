@@ -10,7 +10,7 @@ Some flickering issues may be seen when using this backend (in particular for ol
 
 ## Usage
 
-This backend is not enabled by default. To enable it, you need to compile your application with the feature `CROSSTERM` enabled in your `Cargo.toml` file:
+This backend is not the default on any operating system. Linux and macOS use Termios, and Windows uses the Windows Console. To compile it, enable the `CROSSTERM` feature in your `Cargo.toml` file:
 
 ```toml
 [dependencies]

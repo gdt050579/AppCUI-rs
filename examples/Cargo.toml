@@ -305,6 +305,10 @@ name = "matrix"
 path = "matrix/main.rs"
 
 [[example]]
+name = "game_of_life"
+path = "game_of_life/main.rs"
+
+[[example]]
 name = "fractals"
 path = "fractals/main.rs"
 
@@ -346,6 +350,10 @@ name = "minesweeper"
 path = "minesweeper/main.rs"
 
 [[example]]
+name = "file_navigator"
+path = "file_navigator/main.rs"
+
+[[example]]
 name = "flappy"
 path = "flappy/main.rs"
 
@@ -372,6 +380,18 @@ path = "graphs/main.rs"
 [[example]]
 name = "graph_editor"
 path = "graph_editor/main.rs"
+
+[[example]]
+name = "vbarchart_editor"
+path = "vbarchart_editor/main.rs"
+
+[[example]]
+name = "vstackbarchart_editor"
+path = "vstackbarchart_editor/main.rs"
+
+[[example]]
+name = "hbarchart_editor"
+path = "hbarchart_editor/main.rs"
 
 [[example]]
 name = "layout_tester"
@@ -410,8 +430,52 @@ name = "window_type"
 path = "window_type/main.rs"
 
 [[example]]
+name = "window_guide"
+path = "window_guide/main.rs"
+
+[[example]]
 name = "panels_3d"
 path = "panels_3d/main.rs"
+
+[[example]]
+name = "hbarchart"
+path = "hbarchart/main.rs"
+
+[[example]]
+name = "vstackedbarchart"
+path = "vstackedbarchart/main.rs"
+
+[[example]]
+name = "piechart"
+path = "piechart/main.rs"
+
+[[example]]
+name = "piechart_editor"
+path = "piechart_editor/main.rs"
+
+[[example]]
+name = "linechart"
+path = "linechart/main.rs"
+
+[[example]]
+name = "linechart_editor"
+path = "linechart_editor/main.rs"
+
+[[example]]
+name = "usagechart"
+path = "usagechart/main.rs"
+
+[[example]]
+name = "usagechart_editor"
+path = "usagechart_editor/main.rs"
+
+[[example]]
+name = "heatmap"
+path = "heatmap/main.rs"
+
+[[example]]
+name = "heatmap_editor"
+path = "heatmap_editor/main.rs"
 
 [[example]]
 name = "hexview"
@@ -424,3 +488,19 @@ path = "hyperlink/main.rs"
 [[example]]
 name = "hslider"
 path = "hslider/main.rs"
+
+[[example]]
+name = "numericselector"
+path = "numericselector/main.rs"
+
+[[example]]
+name = "booking_form"
+path = "booking_form/main.rs"
+
+[[example]]
+name = "progressbar"
+path = "progressbar/main.rs"
+
+
+[lints]
+workspace = true

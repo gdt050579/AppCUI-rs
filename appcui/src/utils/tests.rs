@@ -1,3 +1,5 @@
+use appcui_proc_macro::numericformat;
+
 use super::Caption;
 use super::ExtractHotKeyMethod;
 use super::FormatNumber;
@@ -433,6 +435,46 @@ fn check_format_number_bin() {
 }
 
 #[test]
+fn check_numericformat_macro() {
+    let mut output: [u8; 64] = [0; 64];
+    const DECIMAL: FormatNumber = numericformat!("dec");
+    assert_eq!(DECIMAL.write_number(1234u64, &mut output), Some("1234"));
+
+    const GROUPED: FormatNumber = numericformat!("10, group: 3");
+    assert_eq!(GROUPED.write_number(1234u64, &mut output), Some("1,234"));
+
+    const CUSTOM_SEP: FormatNumber = numericformat!("dec, group: 3, sep: '_'");
+    assert_eq!(CUSTOM_SEP.write_number(1234567u64, &mut output), Some("1_234_567"));
+
+    const HEX: FormatNumber = numericformat!("hex, prefix: 0x, digits: 8");
+    assert_eq!(HEX.write_number(0x1234u64, &mut output), Some("0x00001234"));
+
+    const HEX_GROUP: FormatNumber = numericformat!("Hex, group: 4, separator: '_', prefix: '0x'");
+    assert_eq!(HEX_GROUP.write_number(0x123456u64, &mut output), Some("0x12_3456"));
+
+    const BIN: FormatNumber = numericformat!("base: binary, digits: 8, prefix: 0b");
+    assert_eq!(BIN.write_number(0b10u64, &mut output), Some("0b00000010"));
+
+    const MONEY: FormatNumber = numericformat!("dec, group: 3, sep: '_', decimals: 2, prefix: 'USD '");
+    assert_eq!(MONEY.write_float(1234.5, &mut output), Some("USD 1_234.50"));
+
+    const PADDED: FormatNumber = numericformat!("dec, fill: 10, fillchar: '#'");
+    assert_eq!(PADDED.write_number(1234u64, &mut output), Some("######1234"));
+
+    const PERCENT: FormatNumber = numericformat!("base: 10, suffix: '%'");
+    assert_eq!(PERCENT.write_number(42u64, &mut output), Some("42%"));
+
+    const NAMED: FormatNumber = numericformat!("radix: oct, prefix: '0o'");
+    assert_eq!(NAMED.write_number(8u64, &mut output), Some("0o10"));
+
+    const NO_GROUP: FormatNumber = numericformat!("dec, group: 0");
+    assert_eq!(NO_GROUP.write_number(1234u64, &mut output), Some("1234"));
+
+    const NO_FILL: FormatNumber = numericformat!("dec, fill: 0");
+    assert_eq!(NO_FILL.write_number(1234u64, &mut output), Some("1234"));
+}
+
+#[test]
 fn check_format_number_float() {
     let mut ouput: [u8; 64] = [0; 64];
     const F1: FormatNumber = FormatNumber::new(10).decimals(3);
@@ -769,6 +811,43 @@ fn check_temp_string() {
     let t: TempString<10> = TempString::new("1234567890A");
     assert_eq!(t.as_str(), "1234567890A");
     assert!(t.is_on_heap());
+
+    let mut t: TempString<10> = TempString::new("hello");
+    t.push_str("");
+    assert_eq!(t.as_str(), "hello");
+    assert!(!t.is_on_heap());
+    t.push_str("!");
+    assert_eq!(t.as_str(), "hello!");
+    assert!(!t.is_on_heap());
+    t.push_str(" world");
+    assert_eq!(t.as_str(), "hello! world");
+    assert!(t.is_on_heap());
+    t.push_str("!");
+    assert_eq!(t.as_str(), "hello! world!");
+    assert!(t.is_on_heap());
+
+    t.clear();
+    assert!(t.is_empty());
+    assert_eq!(t.as_str(), "");
+    assert!(t.is_on_heap());
+    t.push_str("ab");
+    assert_eq!(t.as_str(), "ab");
+    assert!(t.is_on_heap());
+
+    t.reset();
+    assert!(t.is_empty());
+    assert!(!t.is_on_heap());
+    t.push_str("back");
+    assert_eq!(t.as_str(), "back");
+    assert!(!t.is_on_heap());
+
+    t.reset();
+    write!(t, "n={value}", value = 42).unwrap();
+    assert_eq!(t.as_str(), "n=42");
+    assert!(!t.is_on_heap());
+    write!(t, " overflow").unwrap();
+    assert_eq!(t.as_str(), "n=42 overflow");
+    assert!(t.is_on_heap());
 }
 
 #[test]
@@ -776,9 +855,16 @@ fn check_temp_buffer() {
     let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     assert!(!buf.is_on_heap());
-    let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    let mut buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert!(buf.is_on_heap());
+    buf.clear();
+    assert!(buf.is_empty());
+    assert_eq!(buf.as_slice(), &[] as &[u8]);
+    assert!(buf.is_on_heap());
+    buf.reset();
+    assert!(buf.is_empty());
+    assert!(!buf.is_on_heap());
 }
 
 #[test]

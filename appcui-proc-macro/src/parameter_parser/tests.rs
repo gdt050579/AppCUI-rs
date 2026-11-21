@@ -66,6 +66,24 @@ fn check_tokenizer() {
 }
 
 #[test]
+fn check_tokenizer_function_call() {
+    let script = "draw-mode: Fill('X'), dm: Fill (code:88), mode: Line(Double)";
+    let t = Tokenizer::new(script).unwrap();
+    assert_eq!(t.count(), 11);
+    check_token!(script, t.get(0), "draw-mode", TokenType::Word);
+    check_token!(script, t.get(1), ":", TokenType::Eq);
+    check_token!(script, t.get(2), "Fill('X')", TokenType::Word);
+    check_token!(script, t.get(3), ",", TokenType::Separator);
+    check_token!(script, t.get(4), "dm", TokenType::Word);
+    check_token!(script, t.get(5), ":", TokenType::Eq);
+    check_token!(script, t.get(6), "Fill (code:88)", TokenType::Word);
+    check_token!(script, t.get(7), ",", TokenType::Separator);
+    check_token!(script, t.get(8), "mode", TokenType::Word);
+    check_token!(script, t.get(9), ":", TokenType::Eq);
+    check_token!(script, t.get(10), "Line(Double)", TokenType::Word);
+}
+
+#[test]
 fn check_size() {
     assert_eq!(Size::from_str("10x50"), Some(Size { width: 10, height: 50 }));
     assert_eq!(Size::from_str("   123 x   4567   "), Some(Size { width: 123, height: 4567 }));

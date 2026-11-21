@@ -1,6 +1,5 @@
 use super::ResizeMoveStatus;
 use super::Type;
-use crate::graphics::*;
 use crate::prelude::*;
 
 #[derive(Default)]

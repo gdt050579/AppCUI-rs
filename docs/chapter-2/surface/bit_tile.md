@@ -1,6 +1,6 @@
 # Bit Tiles
 
-BitTiles are compact, memory-efficient structures designed for storing and rendering monochrome (black and white) images in AppCUI. Unlike full-color images, a BitTile represents each pixel using a single bit - either set (1) or unset (0) - making them perfect for icons, simple graphics, and patterns where memory usage is a concern.
+BitTiles are compact, memory-efficient structures designed for storing and rendering monochrome (black and white) images in AppCUI. Unlike full-color images, a BitTile represents each pixel using a single bit - either set (1) or unset (0) - making them perfect for icons, simple graphics, and patterns where memory usage is a concern. For a grid that already stores a full character in every cell, see [Sprites](sprite.md).
 
 To create a BitTile, the following methods can be used:
 

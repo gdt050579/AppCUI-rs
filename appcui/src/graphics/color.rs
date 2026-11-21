@@ -305,16 +305,58 @@ impl Color {
     // }
     #[cfg(feature = "TRUE_COLORS")]
     #[inline(always)]
-    pub(crate) fn rgb(&self) -> Option<(u8, u8, u8)> {
+    pub(crate) fn as_rgb(&self) -> Option<(u8, u8, u8)> {
         match self {
             Color::RGB(r, g, b) => Some((*r, *g, *b)),
             _ => None,
+            // Color::Black => Some((0, 0, 0)),
+            // Color::DarkBlue => Some((0, 0, 128)),
+            // Color::DarkGreen => Some((0, 128, 0)),
+            // Color::Teal => Some((0, 128, 128)),
+            // Color::DarkRed => Some((128, 0, 0)),
+            // Color::Magenta => Some((128, 0, 128)),
+            // Color::Olive => Some((128, 128, 0)),
+            // Color::Silver => Some((192, 192, 192)),
+            // Color::Gray => Some((128, 128, 128)),
+            // Color::Blue => Some((0, 0, 255)),
+            // Color::Green => Some((0, 255, 0)),
+            // Color::Aqua => Some((0, 255, 255)),
+            // Color::Red => Some((255, 0, 0)),
+            // Color::Pink => Some((255, 192, 203)),
+            // Color::Yellow => Some((255, 255, 0)),
+            // Color::White => Some((255, 255, 255)),
+            // Color::Transparent => None,
         }
     }
     #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
-    pub(crate) fn rgb(&self) -> Option<(u8, u8, u8)> {
+    pub(crate) fn as_rgb(&self) -> Option<(u8, u8, u8)> {
         None
+    }
+
+    #[inline(always)]
+    pub(crate) fn to_rgb(self) -> Option<(u8, u8, u8)> {
+        match self {
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => Some((r, g, b)),
+            Color::Black => Some((0, 0, 0)),
+            Color::DarkBlue => Some((0, 0, 128)),
+            Color::DarkGreen => Some((0, 128, 0)),
+            Color::Teal => Some((0, 128, 128)),
+            Color::DarkRed => Some((128, 0, 0)),
+            Color::Magenta => Some((128, 0, 128)),
+            Color::Olive => Some((128, 128, 0)),
+            Color::Silver => Some((192, 192, 192)),
+            Color::Gray => Some((128, 128, 128)),
+            Color::Blue => Some((0, 0, 255)),
+            Color::Green => Some((0, 255, 0)),
+            Color::Aqua => Some((0, 255, 255)),
+            Color::Red => Some((255, 0, 0)),
+            Color::Pink => Some((255, 0, 255)),
+            Color::Yellow => Some((255, 255, 0)),
+            Color::White => Some((255, 255, 255)),
+            Color::Transparent => None,
+        }
     }
 
     /// Builds a color from 8-bit red, green, and blue components.

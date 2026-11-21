@@ -62,7 +62,14 @@ pub(crate) enum AppCUITrait {
     HyperLinkEvents = 53,
     GenericHSliderEvents = 54,
     MarkdownComposerEvents = 55,
-    EditorEvents = 56,
+    GenericVBarChartEvents = 56,
+    GenericHBarChartEvents = 57,
+    PieChartEvents = 58,
+    GenericLineChartEvents = 59,
+    UsageChartEvents = 60,
+    GenericHeatMapEvents = 61,
+    GenericVStackedBarChartEvents = 62,
+    EditorEvents = 63,
 }
 
 #[repr(u8)]
@@ -136,6 +143,13 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => "BufferViewEvents", // important to be without Generic
             AppCUITrait::HyperLinkEvents => "HyperLinkEvents",
             AppCUITrait::GenericHSliderEvents => "HSliderEvents",
+            AppCUITrait::GenericVBarChartEvents => "VBarChartEvents",
+            AppCUITrait::GenericHBarChartEvents => "HBarChartEvents",
+            AppCUITrait::PieChartEvents => "PieChartEvents",
+            AppCUITrait::GenericLineChartEvents => "LineChartEvents",
+            AppCUITrait::UsageChartEvents => "UsageChartEvents",
+            AppCUITrait::GenericHeatMapEvents => "HeatMapEvents",
+            AppCUITrait::GenericVStackedBarChartEvents => "VStackedBarChartEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -200,6 +214,13 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => TraitType::ControlEvent,
             AppCUITrait::HyperLinkEvents => TraitType::ControlEvent,
             AppCUITrait::GenericHSliderEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericVBarChartEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericHBarChartEvents => TraitType::ControlEvent,
+            AppCUITrait::PieChartEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericLineChartEvents => TraitType::ControlEvent,
+            AppCUITrait::UsageChartEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericHeatMapEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericVStackedBarChartEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -264,6 +285,13 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => "",
             AppCUITrait::HyperLinkEvents => "",
             AppCUITrait::GenericHSliderEvents => "",
+            AppCUITrait::GenericVBarChartEvents => "",
+            AppCUITrait::GenericHBarChartEvents => "",
+            AppCUITrait::PieChartEvents => "",
+            AppCUITrait::GenericLineChartEvents => "",
+            AppCUITrait::UsageChartEvents => "",
+            AppCUITrait::GenericHeatMapEvents => "",
+            AppCUITrait::GenericVStackedBarChartEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -328,7 +356,13 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => "impl$(TEMPLATE_TYPE) GenericBufferViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::HyperLinkEvents => "impl$(TEMPLATE_TYPE) HyperLinkEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericHSliderEvents => "impl$(TEMPLATE_TYPE) GenericHSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
-            
+            AppCUITrait::GenericVBarChartEvents => "impl$(TEMPLATE_TYPE) GenericVBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericHBarChartEvents => "impl$(TEMPLATE_TYPE) GenericHBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::PieChartEvents => "impl$(TEMPLATE_TYPE) PieChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericLineChartEvents => "impl$(TEMPLATE_TYPE) GenericLineChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::UsageChartEvents => "impl$(TEMPLATE_TYPE) UsageChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericHeatMapEvents => "impl$(TEMPLATE_TYPE) GenericHeatMapEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericVStackedBarChartEvents => "impl$(TEMPLATE_TYPE) GenericVStackedBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -343,6 +377,11 @@ impl AppCUITrait {
                 | AppCUITrait::GenericGraphViewEvents
                 | AppCUITrait::GenericBufferViewEvents
                 | AppCUITrait::GenericHSliderEvents
+                | AppCUITrait::GenericVBarChartEvents
+                | AppCUITrait::GenericHBarChartEvents
+                | AppCUITrait::GenericLineChartEvents
+                | AppCUITrait::GenericHeatMapEvents
+                | AppCUITrait::GenericVStackedBarChartEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -398,6 +437,13 @@ impl AppCUITrait {
             "BufferViewEvents" | "BufferView" => Some(AppCUITrait::GenericBufferViewEvents),
             "HyperLinkEvents" | "HyperLink" => Some(AppCUITrait::HyperLinkEvents),
             "HSliderEvents" | "HSlider" => Some(AppCUITrait::GenericHSliderEvents),
+            "VBarChartEvents" | "VBarChart" => Some(AppCUITrait::GenericVBarChartEvents),
+            "HBarChartEvents" | "HBarChart" => Some(AppCUITrait::GenericHBarChartEvents),
+            "PieChartEvents" | "PieChart" => Some(AppCUITrait::PieChartEvents),
+            "LineChartEvents" | "LineChart" => Some(AppCUITrait::GenericLineChartEvents),
+            "UsageChartEvents" | "UsageChart" => Some(AppCUITrait::UsageChartEvents),
+            "HeatMapEvents" | "HeatMap" => Some(AppCUITrait::GenericHeatMapEvents),
+            "VStackedBarChartEvents" | "VStackedBarChart" => Some(AppCUITrait::GenericVStackedBarChartEvents),
             _ => None,
         }
     }
@@ -462,7 +508,14 @@ impl AppCUITrait {
             53 => Some(AppCUITrait::HyperLinkEvents),
             54 => Some(AppCUITrait::GenericHSliderEvents),
             55 => Some(AppCUITrait::MarkdownComposerEvents),
-            56 => Some(AppCUITrait::EditorEvents),
+            56 => Some(AppCUITrait::GenericVBarChartEvents),
+            57 => Some(AppCUITrait::GenericHBarChartEvents),
+            58 => Some(AppCUITrait::PieChartEvents),
+            59 => Some(AppCUITrait::GenericLineChartEvents),
+            60 => Some(AppCUITrait::UsageChartEvents),
+            61 => Some(AppCUITrait::GenericHeatMapEvents),
+            62 => Some(AppCUITrait::GenericVStackedBarChartEvents),
+            63 => Some(AppCUITrait::EditorEvents),
             _ => None,
         };
         result?;

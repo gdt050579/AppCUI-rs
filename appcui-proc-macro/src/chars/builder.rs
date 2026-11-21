@@ -142,7 +142,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
     res.push_str("Character::new(");
     if let Some(value) = dict.get("code") {
         let code_value = unicode_number_to_value(value.get_string());
-        res.push_str(format! {"'\\u{{{code_value:x}}}'"}.as_str());
+        res.push_str(format!("'\\u{{{code_value:x}}}'").as_str());
     } else {
         let val = dict
             .get("value")

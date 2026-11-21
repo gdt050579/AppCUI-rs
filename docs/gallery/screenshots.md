@@ -6,6 +6,7 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
   - [Animations](#animations)
   - [Basic Controls](#basic-controls)
   - [Lists, Trees and Graphs](#lists-trees-and-graphs)
+  - [Charts](#charts)
   - [Games](#games)
   - [Application Bar, Command Bar and Menus](#application-bar-command-bar-and-menus)
   - [Background Tasks and Timers](#background-tasks-and-timers)
@@ -68,6 +69,29 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
 | <img src="img/lists/treeview.gif" >  | **Tree Viewer** <br> * **Code:** [examples/treeview](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/treeview) <br> * **Description:** A simple tree view with three columns where you can navigate, select, sort, filter, and fold or unfold items.  |
 | <img src="img/lists/listbox.gif" >   | **ListBox** <br> * **Code:** [examples/listbox](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/listbox) <br> * **Description:** A list box is a simple list of multiple items (no columns; all strings) that you can select from.                    |
 
+
+</details>
+
+---
+
+## Charts
+
+![charts — preview](img/charts/chart.gif)
+
+* **Code:** [examples/vbarchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/vbarchart_editor)
+* **Elements:** [Bar Chart](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/vbarchart.html)
+
+<details>
+  <summary>More Examples</summary>
+
+| Image                                        | Description                                                                                                                                                                                                                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="img/charts/hchartbar.gif" >        | **Horizontal Bar Chart** <br> * **Code:** [examples/hbarchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/hbarchart_editor) <br> * **Description:** A horizontal bar chart with a scale, axes, and per-bar appearance where you can edit the way each bar is drawn.                 |
+| <img src="img/charts/piechart.gif" >         | **Pie Chart** <br> * **Code:** [examples/piechart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/piechart_editor) <br> * **Description:** A pie chart with a scale, axes, and per-slice appearance where you can edit the way each slice is drawn.                                     |
+| <img src="img/charts/linechart.gif" >        | **Line Chart** <br> * **Code:** [examples/linechart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/linechart_editor) <br> * **Description:** A line chart with a scale, axes, and per-point appearance where you can edit the way each point is drawn.                                 |
+| <img src="img/charts/usagechart.gif" >       | **Usage Chart** <br> * **Code:** [examples/usagechart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/usagechart_editor) <br> * **Description:** A horizontal bar split into segments that share one total, with a per-segment fill and a hover tooltip.                                |
+| <img src="img/charts/heatmap.gif" >          | **HeatMap** <br> * **Code:** [examples/heatmap_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/heatmap_editor) <br> * **Description:** A heatmap with a scale, axes, and per-cell appearance where you can edit the way each cell is drawn.                                             |
+| <img src="img/charts/vstackedbarchart.gif" > | **VStackedBarChart** <br> * **Code:** [examples/vstackedbarchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/vstackedbarchart_editor) <br> * **Description:** A stacked vertical bar chart with a scale, axes, and per-bar appearance where you can edit the way each bar is drawn. |
 
 </details>
 

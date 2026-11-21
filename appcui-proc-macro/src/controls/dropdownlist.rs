@@ -29,11 +29,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_layout();
     cb.add_flags_parameter("flags", "dropdownlist::Flags", &FLAGS);
     cb.finish_control_initialization();
-    if cb.has_parameter("none") {
-        cb.add("\ncontrol.set_none_string(");
-        cb.add_string_parameter("none", None);
-        cb.add(");\n"); 
-    }
+    cb.call_method_with_string_parameter("set_none_string", "none");
     cb.add_basecontrol_operations();
     cb.into()
 }

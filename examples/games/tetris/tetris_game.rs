@@ -188,10 +188,10 @@ impl TetrisGame {
     fn clear_lines(&mut self) {
         let mut lines_to_clear = Vec::new();
 
-        for y in 0..BOARD_HEIGHT {
+        for (y, row) in self.board.iter().enumerate().take(BOARD_HEIGHT) {
             let mut is_full = true;
-            for x in 0..BOARD_WIDTH {
-                if self.board[y][x].is_empty() {
+            for cell in row.iter().take(BOARD_WIDTH) {
+                if cell.is_empty() {
                     is_full = false;
                     break;
                 }
@@ -207,8 +207,8 @@ impl TetrisGame {
                     self.board[y][x] = self.board[y - 1][x];
                 }
             }
-            for x in 0..BOARD_WIDTH {
-                self.board[0][x] = SquareState::Empty;
+            for item in self.board[0].iter_mut().take(BOARD_WIDTH) {
+                *item = SquareState::Empty;
             }
         }
 

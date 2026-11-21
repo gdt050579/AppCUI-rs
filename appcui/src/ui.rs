@@ -128,6 +128,13 @@ pub mod editor;
 pub mod bufferview;
 pub mod hslider;
 pub mod markdown_composer;
+pub mod vbarchart;
+pub mod hbarchart;
+pub mod piechart;
+pub mod linechart;
+pub mod usagechart;
+pub mod heatmap;
+pub mod vstackedbarchart;
 
 // re-export
 pub use common::ControlBase;
@@ -183,4 +190,11 @@ pub use appbar::AppBar;
 pub use graphview::GraphView;
 pub use editor::Editor;
 pub use hslider::HSlider;
+pub use vbarchart::VBarChart;
+pub use hbarchart::HBarChart;
+pub use piechart::PieChart;
+pub use linechart::LineChart;
 pub use markdown_composer::MarkdownComposer;
+pub use usagechart::UsageChart;
+pub use heatmap::HeatMap;
+pub use vstackedbarchart::VStackedBarChart;

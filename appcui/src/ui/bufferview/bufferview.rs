@@ -1793,8 +1793,8 @@ impl<T: BufferAccess + 'static> OnPaint for BufferView<T> {
             _ => None,
         };
         if let Some(attr) = attr_overwrite {
-            surface.draw_surface_with_transform(border_width - h_offset, top, &self.buf_surface, |ch| {
-                Character::with_attributes(ch.code, attr)
+            surface.draw_surface_with_transform(border_width - h_offset, top, &self.buf_surface, |ch, _| {
+                Some(Character::with_attributes(ch.code, attr))
             });
         } else {
             surface.draw_surface(border_width - h_offset, top, &self.buf_surface);

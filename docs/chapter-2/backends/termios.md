@@ -1,7 +1,7 @@
 # Termios
 
 ## Summary
-Termios is a low-level library for terminal manipulation on UNIX systems. It is utilized in AppCUI to handle terminal input and output on macOS.
+Termios is a low-level library for terminal manipulation on UNIX systems. AppCUI uses it for terminal input and output on Linux and macOS, and it is the default backend on both.
 
 ## Implementation Details
 When a `TermiosTerminal` instance is initialized, the terminal is configured to operate in *raw mode*. This mode allows the application to capture individual key press events directly, bypassing line buffering and other default terminal behaviors. To facilitate advanced input handling, a specific byte sequence is sent to `stdout` to enable mouse events, allowing AppCUI to handle mouse interactions.
@@ -18,6 +18,5 @@ At the lowest level, the implementation involves reading one or more bytes direc
 
 ## TODO
 The following features are missing from the Termios Terminal implementation:
-- **Text Styling**: Support for `CharFlags` (**bold**, *italic*, underlined characters)
 - **Key Mapping**: Some keys and key combinations are either unmapped or incorrectly mapped
-- **Cursor Visibility**: Hiding the cursor is not supported
+- **Mouse wheel**: Wheel reports are recognized and discarded, so scrolling is not delivered as a mouse event

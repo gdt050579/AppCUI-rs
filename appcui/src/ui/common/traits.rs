@@ -45,6 +45,13 @@ use crate::{
         editor::events::EditorEvents,
         hyperlink::events::HyperLinkEvents,
         hslider::events::GenericHSliderEvents,
+        vbarchart::events::GenericVBarChartEvents,
+        hbarchart::events::GenericHBarChartEvents,
+        piechart::events::PieChartEvents,
+        linechart::events::GenericLineChartEvents,
+        usagechart::events::UsageChartEvents,
+        heatmap::events::GenericHeatMapEvents,
+        vstackedbarchart::events::GenericVStackedBarChartEvents,
     },
 };
 
@@ -263,6 +270,13 @@ pub trait Control:
     + EditorEvents
     + HyperLinkEvents
     + GenericHSliderEvents
+    + GenericVBarChartEvents
+    + GenericHBarChartEvents
+    + PieChartEvents
+    + GenericLineChartEvents
+    + UsageChartEvents
+    + GenericHeatMapEvents
+    + GenericVStackedBarChartEvents
 {
 }
 

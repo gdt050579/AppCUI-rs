@@ -592,9 +592,7 @@ where
     pub(super) fn repaint(&mut self, control: &ControlBase) {
         // clear the entire surface
         let ch = Character::new(0 as char, Color::Transparent, Color::Transparent, CharFlags::None);
-        for c in &mut self.surface.chars {
-            *c = ch;
-        }
+        self.surface.chars.fill(ch);
         let state = ControlState::new(control);
         let theme = control.theme();
         let text_attr = state.node_attr(theme);

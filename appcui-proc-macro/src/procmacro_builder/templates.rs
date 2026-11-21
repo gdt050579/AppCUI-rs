@@ -325,6 +325,205 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static VBARCHART_TRAIT_DEF: &str = "
+trait VBarChartEvents<T: Number+'static> {
+    fn on_bar_selected(&mut self, handle: Handle<VBarChart<T>>, index: u32) -> EventProcessStatus;
+    fn on_clear_selection(&mut self, handle: Handle<VBarChart<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericVBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_bar_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VBARCHART_ON_BAR_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VBARCHART_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static VBARCHART_ON_BAR_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VBarChartEvents::<$(TYPE)>::on_bar_selected(self, h, index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static VBARCHART_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VBarChartEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static HBARCHART_TRAIT_DEF: &str = "
+trait HBarChartEvents<T: Number+'static> {
+    fn on_bar_selected(&mut self, handle: Handle<HBarChart<T>>, index: u32) -> EventProcessStatus;
+    fn on_clear_selection(&mut self, handle: Handle<HBarChart<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericHBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_bar_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HBARCHART_ON_BAR_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HBARCHART_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static HBARCHART_ON_BAR_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HBarChartEvents::<$(TYPE)>::on_bar_selected(self, h, index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static HBARCHART_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HBarChartEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static LINECHART_TRAIT_DEF: &str = "
+trait LineChartEvents<T: Number+'static> {
+    fn on_point_selected(&mut self, handle: Handle<LineChart<T>>, series_index: u32, point_index: u32) -> EventProcessStatus;
+    fn on_clear_selection(&mut self, handle: Handle<LineChart<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericLineChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_point_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, series_index: u32, point_index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LINECHART_ON_POINT_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LINECHART_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static LINECHART_ON_POINT_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<LineChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return LineChartEvents::<$(TYPE)>::on_point_selected(self, h, series_index, point_index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static LINECHART_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<LineChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return LineChartEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static HEATMAP_TRAIT_DEF: &str = "
+trait HeatMapEvents<T: Number+'static> {
+    fn on_cell_selected(&mut self, handle: Handle<HeatMap<T>>, row: u32, column: u32) -> EventProcessStatus;
+    fn on_clear_selection(&mut self, handle: Handle<HeatMap<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericHeatMapEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_cell_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, row: u32, column: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HEATMAP_ON_CELL_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HEATMAP_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static HEATMAP_ON_CELL_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HeatMap<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HeatMapEvents::<$(TYPE)>::on_cell_selected(self, h, row, column);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static HEATMAP_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HeatMap<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HeatMapEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_TRAIT_DEF: &str = "
+trait VStackedBarChartEvents<T: Number+'static> {
+    fn on_clear_selection(&mut self, handle: Handle<VStackedBarChart<T>>) -> EventProcessStatus;
+    fn on_stack_selected(&mut self, handle: Handle<VStackedBarChart<T>>, index: u32) -> EventProcessStatus;
+    fn on_cell_selected(&mut self, handle: Handle<VStackedBarChart<T>>, stack_index: u32, cell_index: u32) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericVStackedBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_stack_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_STACK_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_cell_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, stack_index: u32, cell_index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_VSTACKEDBARCHART_ON_CELL_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VStackedBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VStackedBarChartEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_ON_STACK_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VStackedBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VStackedBarChartEvents::<$(TYPE)>::on_stack_selected(self, h, index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static VSTACKEDBARCHART_ON_CELL_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<VStackedBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return VStackedBarChartEvents::<$(TYPE)>::on_cell_selected(self, h, stack_index, cell_index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
 
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
@@ -689,4 +888,4 @@ impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DE
         EventProcessStatus::Ignored
     }
 }
-";
+";

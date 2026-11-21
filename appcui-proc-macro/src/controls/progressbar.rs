@@ -26,27 +26,9 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_layout();
     cb.add_flags_parameter("flags", "progressbar::Flags", &FLAGS);
     cb.finish_control_initialization();
-
-    if cb.has_parameter("count") {
-        let value = cb.get_i32("count").unwrap_or(-1);
-        if value >= 0 {
-            cb.add_line(format!("control.reset({value});").as_str());
-        } else {
-            panic!("Invalid 'count' parameter (should be a positive number) for progress bar !");
-        }
-    }
-    if cb.has_parameter("value") {
-        let value = cb.get_i32("value").unwrap_or(-1);
-        if value >= 0 {
-            cb.add_line(format!("control.update_progress({value});").as_str());
-        } else {
-            panic!("Invalid 'value' parameter (should be a positive number) for progress bar !");
-        }
-    }
-    if cb.has_parameter("text") {
-        let value = cb.get_value("text").unwrap_or("").to_string();
-        cb.add_line(format!("control.update_text(\"{value}\");").as_str());
-    }
+    cb.call_method_with_integer_parameter_and_range("reset", "count", 0, i32::MAX);
+    cb.call_method_with_integer_parameter_and_range("update_progress", "value", 0, i32::MAX);
+    cb.call_method_with_string_parameter("update_text", "text");
     if cb.has_parameter("pause") {
         let should_paused = cb.get_bool("pause").unwrap_or(false);
         if should_paused {

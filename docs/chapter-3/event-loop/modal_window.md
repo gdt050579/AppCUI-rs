@@ -7,7 +7,7 @@ When a modal window is opened the rest of the windows or other modal windows wil
 
 A modal window is in fact just like a regular window (you can add other controls, you can resize and move it) and you can intercept events just like in a regular window case. However, since a modal window can not lose the focus, it has another property (**response**) that implies that it will provide a response once its execution ends. The **response** can be any kind of type (including a void type).
 
-To create a modal window that will handle events from its children, use `#[ModalWindow(...)]` method:
+To create a modal window that will handle events from its children, use the `#[ModalWindow(...)]` attribute. It rewrites the struct the same way [`#[Window]`](../event_loop.md#what-the-window-attribute-does) does: a leading `base` field, `Deref` / `DerefMut`, and an empty implementation of every event trait you did not name. The `base` field has type `ModalWindow<Response>` (the `response` parameter below) instead of `Window`.
 
 ```rs
 #[ModalWindow(events=..., response=...)]

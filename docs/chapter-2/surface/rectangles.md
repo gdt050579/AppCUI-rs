@@ -52,11 +52,13 @@ pub enum RectAlignment {
 
 To draw a rectangle on a surface, you can use the following methods:
 
-| Method                 | Description                                                                                                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `draw_rect(...)`       | Draws a rectangle on the surface by providing a `Rect` object, a line type and a character attribute.                                                                |
-| `draw_bevel_rect(...)` | Draws a beveled rectangle using a line type and two attributes (`dark` and `light`). If `raised` is `true` the top and left edges use the light color; otherwise the rectangle looks sunken. |
-| `fill_rect(...)`       | Fills a rectangle on the surface by providing a `Rect` object and a [character](../screen.md#character).                                                             |
+| Method                 | Description                                                                                                                                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draw_rect(...)`       | Draws a rectangle on the surface by providing a `Rect` object, a line type and a character attribute.                                                                                                                |
+| `draw_bevel_rect(...)` | Draws a beveled rectangle using a line type and two attributes (`dark` and `light`). If `raised` is `true` the top and left edges use the light color; otherwise the rectangle looks sunken.                         |
+| `fill_rect(...)`       | Fills a rectangle on the surface by providing a `Rect` object and a [character](../screen.md#character).                                                                                                             |
+| `fill_rect_with(...)`  | Fills a rectangle by calling a generator for every cell. The callback receives a `Point` (same coordinate space as the rectangle) and returns `Some(character)` to write that cell, or `None` to leave it unchanged. |
+| `transform_rect(...)`  | Transforms the characters already inside a rectangle. The callback receives the current [character](../screen.md#character) and its `Point`, and returns `Some(character)` to replace the cell or `None` to keep it. |
 
 Example:
 
@@ -65,7 +67,7 @@ use appcui::graphics::*;
 
 let mut surface = Surface::new(100, 50);
 let r = Rect::new(10, 10, 20, 20);
-// fill the rectangel with spaces (dark blue background)
+// fill the rectangle with spaces (dark blue background)
 surface.fill_rect(r, Character::new(' ', Color::White, Color::DarkBlue, CharFlags::None));
 // draw a border around the rectangle (white on black)
 surface.draw_rect(r, LineType::Single, CharAttribute::with_color(Color::White, Color::Black));
@@ -78,6 +80,30 @@ surface.draw_bevel_rect(
     CharAttribute::with_color(Color::White, Color::Transparent),
     true,
 );
+```
+
+`fill_rect_with` is useful when the fill is not a single character (a checkerboard, a gradient, or a sparse pattern). Returning `None` skips that cell:
+
+```rust
+surface.fill_rect_with(r, |p| {
+    if (p.x + p.y) % 2 == 0 {
+        Some(Character::new('#', Color::White, Color::Black, CharFlags::None))
+    } else {
+        None
+    }
+});
+```
+
+`transform_rect` starts from the characters already on the surface. Use it to recolor, dim, or otherwise remap a region without redrawing it. Returning `None` keeps the original cell:
+
+```rust
+surface.transform_rect(r, |ch, p| {
+    if p.x % 2 == 0 {
+        Some(Character::new(ch.code, Color::Gray, ch.background, ch.flags))
+    } else {
+        None
+    }
+});
 ```
 
 ## Methods

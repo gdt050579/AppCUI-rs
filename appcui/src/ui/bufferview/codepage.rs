@@ -173,8 +173,6 @@ impl Codepage {
     }
     /// Sets every entry in the translation table to the same character.
     pub fn fill(&mut self, ch: char) {
-        for i in 0..256 {
-            self.map[i] = ch;
-        }
+        self.map.fill(ch);
     }
 }

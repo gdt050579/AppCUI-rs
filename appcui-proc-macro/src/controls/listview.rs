@@ -52,11 +52,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_flags_parameter("flags", "listview::Flags", &FLAGS);
     cb.finish_control_initialization();
     cb.add_scroll_margin_setup("lsm", "tsm");
-    if cb.has_parameter("view") {
-        cb.add("control.set_view_mode(");
-        cb.add_enum_parameter("view", "listview::ViewMode", &VIEW_MODES, Some("Details"));
-        cb.add(");\n");
-    }
+    cb.call_method_with_enum_parameter("set_view_mode", "view", "listview::ViewMode", &VIEW_MODES);
     if cb.has_parameter("columns") {
         let mut s = String::with_capacity(256);
         let mut temp_s = String::with_capacity(64);

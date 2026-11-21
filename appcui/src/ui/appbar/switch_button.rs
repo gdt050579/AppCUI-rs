@@ -1,3 +1,10 @@
+//! A two-state button for the app bar.
+//!
+//! [`SwitchButton`] shows one caption when it is selected and another when it
+//! is not. An optional [`SwitchButtonSymbol`] is drawn beside the text.
+//! Activating the button toggles the state and raises
+//! [`AppBarEvents::on_switchbutton_state_changed`](super::events::AppBarEvents::on_switchbutton_state_changed).
+
 use super::{ItemBase, ItemStatus, Side};
 use crate::graphics::*;
 use crate::input::*;
@@ -6,14 +13,16 @@ use crate::ui::appbar::events::AppBarEvent;
 use crate::ui::appbar::events::SwitchButtonStatusChangedEvent;
 use crate::utils::Caption;
 
-/// A symbol that will be displayed on the switch button.
-/// - `SwitchButtonSymbol::None` - no symbol will be displayed.
-/// - `SwitchButtonSymbol::CheckMark` - a check mark ('✓') will be displayed if the switch button is selected, otherwise a space will be displayed.
-/// - `SwitchButtonSymbol::CheckBox` - a checked box ('🗹') will be displayed if the switch button is selected, otherwise an unchecked box ('☐') will be displayed.
+/// Symbol drawn to the left of a [`SwitchButton`] caption.
+///
+/// [`None`](Self::None) adds no width. The other variants reserve two cells.
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SwitchButtonSymbol {
+    /// No symbol is drawn.
     None,
+    /// `'✓'` when the button is selected, otherwise a space.
     CheckMark,
+    /// `'🗹'` when the button is selected, otherwise `'☐'`.
     CheckBox,
 }
 
@@ -33,13 +42,21 @@ impl SwitchButtonSymbol {
     }
 }
 
-/// A switch button in the app bar. A switch button is a button that toggles between two states.
-/// 
-/// # Examples
-/// 
+/// An app bar button that switches between two captions.
+///
+/// The selected caption is shown while the button is selected, and the
+/// unselected caption otherwise. Items are laid out by `order` (lower first)
+/// from [`Side::Left`] or [`Side::Right`].
+///
+/// A caption may mark a hotkey with `&` before a letter or digit. `"&Save"`
+/// uses `Alt+S`. Only the caption of the current state provides the hotkey.
+/// Clicking the button or pressing that hotkey toggles the state and raises
+/// [`AppBarEvents::on_switchbutton_state_changed`](super::events::AppBarEvents::on_switchbutton_state_changed).
+///
+/// # Example
 /// ```rust, no_run
 /// use appcui::prelude::*;
-/// 
+///
 /// let switch_button = appbar::SwitchButton::new("State-1", "State-2", false, 0, appbar::Side::Left);
 /// ```
 pub struct SwitchButton {
@@ -53,86 +70,55 @@ pub struct SwitchButton {
 }
 
 impl SwitchButton {
-    /// Creates a new switch button with the specified selected and unselected captions, selected state, order and position.
-    /// 
-    /// # Parameters
-    /// 
-    /// * `selected_caption` - The caption of the selected state.
-    /// * `unselected_caption` - The caption of the unselected state.
-    /// * `selected` - The initial selected state.
-    /// * `order` - The order of the switch button (a number that determines the order of the switch button in the app bar - lower numbers are displayed first from either **left** or **right** depending on the **pos** parameter)
-    /// * `pos` - The position of the switch button (`Left` or `Right`)
-    /// 
-    /// **Remark:** 
-    /// 1. If the captions contain the `&` character, the next character (if it is a letter or number) will be set as a hot-key for the button. For example, `"&Save"` will set the hot-key to `Alt+S`.
-    /// 2. This method will default the symbol to `SwitchButtonSymbol::None`.
-    /// 
+    /// Creates a switch button with no symbol and an empty tooltip.
+    ///
+    /// `selected` is the initial state. `order` places the button among items
+    /// on `pos` (lower values come first). See [`SwitchButton`] for captions and hotkeys.
+    ///
     /// # Example
-    /// 
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let switch_button = appbar::SwitchButton::new("State-1", "State-2", false, 0, appbar::Side::Left);
     /// ```
     pub fn new(selected_caption: &str, unselected_caption: &str, selected: bool, order: u8, pos: Side) -> Self {
         Self::with_tooltip(selected_caption, unselected_caption, SwitchButtonSymbol::None, "", selected, order, pos)
     }
 
-    /// Creates a new switch button with the specified selected and unselected captions, symbol, selected state, order and position.
-    /// 
-    /// # Parameters
-    /// 
-    /// * `selected_caption` - The caption of the selected state.
-    /// * `unselected_caption` - The caption of the unselected state.
-    /// * `symbol` - The symbol of the switch button.
-    /// * `selected` - The initial selected state.
-    /// * `order` - The order of the switch button (a number that determines the order of the switch button in the app bar - lower numbers are displayed first from either **left** or **right** depending on the **pos** parameter)
-    /// * `pos` - The position of the switch button (`Left` or `Right`)
-    /// 
-    /// **Remark:** If the captions contain the `&` character, the next character (if it is a letter or number) will be set as a hot-key for the button. For example, `"&Save"` will set the hot-key to `Alt+S`.
-    /// 
+    /// Creates a switch button with `symbol` and an empty tooltip.
+    ///
     /// # Example
-    /// 
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let switch_button = appbar::SwitchButton::with_symbol(
-    ///             "State-1", "State-2", 
-    ///             appbar::SwitchButtonSymbol::CheckBox, 
-    ///             false, 
-    ///             0, 
-    ///             appbar::Side::Left);
+    ///     "State-1",
+    ///     "State-2",
+    ///     appbar::SwitchButtonSymbol::CheckBox,
+    ///     false,
+    ///     0,
+    ///     appbar::Side::Left,
+    /// );
     /// ```
     pub fn with_symbol(selected_caption: &str, unselected_caption: &str, symbol: SwitchButtonSymbol, selected: bool, order: u8, pos: Side) -> Self {
         Self::with_tooltip(selected_caption, unselected_caption, symbol, "", selected, order, pos)
     }
 
-    /// Creates a new switch button with the specified selected and unselected captions, symbol, tooltip, selected state, order and position.
-    /// 
-    /// # Parameters
-    /// 
-    /// * `selected_caption` - The caption of the selected state.
-    /// * `unselected_caption` - The caption of the unselected state.
-    /// * `symbol` - The symbol of the switch button.
-    /// * `tooltip` - The tooltip of the switch button.
-    /// * `selected` - The initial selected state.
-    /// * `order` - The order of the switch button (a number that determines the order of the switch button in the app bar - lower numbers are displayed first from either **left** or **right** depending on the **pos** parameter)
-    /// * `pos` - The position of the switch button (`Left` or `Right`)
-    /// 
-    /// **Remark:** If the captions contain the `&` character, the next character (if it is a letter or number) will be set as a hot-key for the button. For example, `"&Save"` will set the hot-key to `Alt+S`.
-    /// 
+    /// Creates a switch button with `symbol` and `tooltip`.
+    ///
     /// # Example
-    /// 
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let switch_button = appbar::SwitchButton::with_tooltip(
-    ///             "State-1", "State-2", 
-    ///             appbar::SwitchButtonSymbol::CheckBox, 
-    ///             "Tooltip for switch button", 
-    ///             false, 
-    ///             0, 
-    ///             appbar::Side::Left);
+    ///     "State-1",
+    ///     "State-2",
+    ///     appbar::SwitchButtonSymbol::CheckBox,
+    ///     "Tooltip for switch button",
+    ///     false,
+    ///     0,
+    ///     appbar::Side::Left,
+    /// );
     /// ```
     pub fn with_tooltip(
         selected_caption: &str,
@@ -157,25 +143,28 @@ impl SwitchButton {
         }
     }
 
-    /// Returns **true** if the switch button is enabled, **false** otherwise.
+    /// Returns `true` when the button can be activated.
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         self.base.is_enabled()
     }
 
-    /// Enables or disables the switch button.
+    /// Enables or disables the button.
+    ///
+    /// A disabled button is drawn in the inactive color and does not toggle
+    /// when clicked or when its hotkey is pressed.
     #[inline(always)]
     pub fn set_enabled(&mut self, enabled: bool) {
         self.base.set_enabled(enabled);
     }
 
-    /// Returns **true** if the switch button is selected, **false** otherwise.
+    /// Returns `true` when the selected caption is showing.
     #[inline(always)]
     pub fn is_selected(&self) -> bool {
         self.selected
     }
 
-    /// Sets the selected state of the switch button.
+    /// Sets the selected state without raising a status-changed event.
     #[inline(always)]
     pub fn set_selected(&mut self, value: bool) {
         self.selected = value;
@@ -222,13 +211,13 @@ impl SwitchButton {
         }
     }
 
-    /// Returns the tooltip of the switch button.
+    /// Returns the tooltip, or an empty string when none is set.
     #[inline(always)]
     pub fn tooltip(&self) -> &str {
         &self.tooltip
     }
 
-    /// Sets the tooltip of the switch button.
+    /// Sets the tooltip shown when the pointer rests on the button.
     #[inline(always)]
     pub fn set_tooltip(&mut self, text: &str) {
         if self.tooltip != text {

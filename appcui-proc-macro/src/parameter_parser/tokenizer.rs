@@ -175,12 +175,63 @@ impl Tokenizer {
             while (pos < len) && (buf[pos] != ch) {
                 pos += 1;
             }
-            if buf[pos] == ch {
+            if (pos < len) && (buf[pos] == ch) {
                 return (pos, 1);
             }
             // incomplete string
             (0, 0)
         }
+    }
+    // A word followed by '(' is one value through the matching ')'.
+    // Quotes, commas and colons inside the call stay part of that word.
+    fn extend_call(buf: &[u8], start: usize, word_end: usize) -> Result<Option<usize>, (&'static str, usize)> {
+        let len = buf.len();
+        let mut depth = 0i32;
+        let mut i = start;
+        while i < word_end {
+            match buf[i] {
+                b'(' => depth += 1,
+                b')' => depth -= 1,
+                _ => {}
+            }
+            i += 1;
+        }
+        if depth <= 0 {
+            let mut j = word_end;
+            while (j < len) && matches!(buf[j], b' ' | b'\t' | b'\n' | b'\r') {
+                j += 1;
+            }
+            if (j >= len) || (buf[j] != b'(') {
+                return Ok(None);
+            }
+            depth = 1;
+            i = j + 1;
+        }
+        let open_at = start;
+        while (i < len) && (depth > 0) {
+            match buf[i] {
+                b'\'' | b'"' => {
+                    let (end, kind) = Tokenizer::skip_string(buf, i);
+                    if kind == 0 {
+                        return Err(("Incomplete string (you should add string terminator)", i));
+                    }
+                    i = end + kind as usize;
+                }
+                b'(' => {
+                    depth += 1;
+                    i += 1;
+                }
+                b')' => {
+                    depth -= 1;
+                    i += 1;
+                }
+                _ => i += 1,
+            }
+        }
+        if depth != 0 {
+            return Err(("Un-closed parenthesis: '('. Have you forgot to add an ')' ?", open_at));
+        }
+        Ok(Some(i))
     }
     pub(super) fn new(text: &str) -> Result<Self, Error> {
         let buf = text.as_bytes();
@@ -196,7 +247,14 @@ impl Tokenizer {
             let ctype = CharType::from(buf[pos]);
             match ctype {
                 CharType::Word => {
-                    let next = Tokenizer::skip(buf, pos);
+                    let mut next = Tokenizer::skip(buf, pos);
+                    match Tokenizer::extend_call(buf, pos, next) {
+                        Ok(Some(end)) => next = end,
+                        Ok(None) => {}
+                        Err((message, at)) => {
+                            return Err(Error::new(text, message, at, at + 1));
+                        }
+                    }
                     t.tokens.push(Token::new(pos, next, TokenType::Word));
                     pos = next;
                 }

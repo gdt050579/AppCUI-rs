@@ -12,6 +12,9 @@ pub(crate) mod control_manager;
 pub(crate) mod number;
 pub(crate) mod number_format;
 
+#[cfg(test)]
+mod tests;
+
 pub(crate) use control_char_attributes_state::ControlCharAttributesState;
 pub(crate) use control_event_wrapper::ControlEvent;
 pub(crate) use control_event_wrapper::ControlEventData;
