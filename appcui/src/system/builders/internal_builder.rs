@@ -18,7 +18,6 @@ pub struct InternalBuilder {
     pub(crate) max_timer_count: u8,
     pub(crate) log_file: Option<String>,
     pub(crate) log_append: bool,
-    //pub(crate) use_color_schema: bool,
     pub(crate) restore_screen: bool,
     pub(crate) palette: Palette,
     pub(crate) use_rgb_for_palette: bool,
@@ -40,7 +39,6 @@ impl InternalBuilder {
             theme: Theme::new(Themes::Default),
             log_file: None,
             log_append: false,
-            //use_color_schema: true,
             restore_screen: true,
             palette: Palette::Terminal,
             use_rgb_for_palette: false,
@@ -110,10 +108,6 @@ impl InternalBuilder {
         self.log_file = Some(String::from(name));
         self.log_append = append;
     }
-    // #[inline(always)]
-    // pub(crate) fn color_schema(&mut self, enabled: bool) {
-    //     self.use_color_schema = enabled;
-    // }
     #[inline(always)]
     pub(crate) fn restore_screen(&mut self, enable: bool) {
         self.restore_screen = enable;
