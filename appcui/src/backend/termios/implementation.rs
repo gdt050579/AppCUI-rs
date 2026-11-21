@@ -79,7 +79,7 @@ impl TermiosTerminal {
                 t.size = size;
             }
         }
-        t.palette_changed = !matches!(builder.palette, Palette::Terminal) && !builder.use_rgb_for_palette;
+        t.palette_changed = builder.is_palette_changed();
         t.ansi_buffer.clear();
         t.ansi_buffer.enable_mouse_events();
         t.ansi_buffer.set_palette(builder.palette);

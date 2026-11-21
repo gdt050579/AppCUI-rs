@@ -69,6 +69,10 @@ impl InternalBuilder {
         }
     }
     #[inline(always)]
+    pub(crate) fn is_palette_changed(&self) -> bool {
+        !(matches!(self.palette, Palette::Terminal)) && !self.use_rgb_for_palette
+    }
+    #[inline(always)]
     pub(crate) fn size(&mut self, terminal_size: Size) {
         self.size = Some(terminal_size);
     }
