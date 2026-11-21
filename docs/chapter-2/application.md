@@ -111,7 +111,7 @@ This method chooses **which** RGB values the 16 named colors have.
 
 On Windows Console, `BuiltIn` and `Custom` replace the console color table for the lifetime of the application. The previous table is restored when the application ends. On Windows VT, the same values are used for the colors the backend paints. Other backends may ignore the palette.
 
-A custom table lists only the colors you want to change. Each entry is `(color, red, green, blue)`. A color you leave out stays black `(0, 0, 0)`. A later entry for the same color replaces the earlier one. `Color::Transparent` has no slot and panics.
+A custom table lists only the colors you want to change. Each entry is `(color, red, green, blue)`. The table starts from the built-in AppCUI colors above, so a color you leave out keeps that value. A later entry for the same color replaces the earlier one. `Color::Transparent` has no slot and panics.
 
 ```rs
 use appcui::backend::{ColorPalette, Palette};

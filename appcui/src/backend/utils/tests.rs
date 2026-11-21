@@ -316,10 +316,10 @@ fn check_custom_palette_truecolor() {
     a.clear();
     a.set_foreground_color(Color::White);
     assert_eq!(a.text(), "\x1b[38;2;255;255;255m");
-    // Colors omitted from the pair list stay black.
+    // Colors omitted from the pair list keep the built-in value. Green is (0, 255, 0).
     a.clear();
     a.set_background_color(Color::Green);
-    assert_eq!(a.text(), "\x1b[48;2;0;0;0m");
+    assert_eq!(a.text(), "\x1b[48;2;0;255;0m");
     // Transparent is not a palette slot.
     a.clear();
     a.set_foreground_color(Color::Transparent);
@@ -364,9 +364,10 @@ fn check_16color_palette_osc() {
     ])));
     let text = a.text();
     // Red is AppCUI index 12 and ANSI slot 9. DarkBlue is ANSI slot 4.
+    // Blue (ANSI slot 12) was omitted, so it keeps the built-in value (0, 0, 255).
     assert!(text.contains("\x1b]4;9;rgb:01/02/0f\x1b\\"));
     assert!(text.contains("\x1b]4;4;rgb:ff/00/0a\x1b\\"));
-    assert!(text.contains("\x1b]4;12;rgb:00/00/00\x1b\\"));
+    assert!(text.contains("\x1b]4;12;rgb:00/00/ff\x1b\\"));
     assert!(!text.contains("\x1b]4;12;rgb:01/02/0f\x1b\\"));
 
     // Indexed SGR codes stay the same; the terminal palette carries the RGB.

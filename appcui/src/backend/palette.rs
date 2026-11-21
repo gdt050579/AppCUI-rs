@@ -30,7 +30,7 @@
 //! App::new().palette(appcui::backend::Palette::BuiltIn);
 //! ```
 //!
-//! A custom table. Colors you leave out stay black `(0, 0, 0)`:
+//! A custom table. Colors you leave out keep the built-in AppCUI values:
 //!
 //! ```rust, no_run
 //! use appcui::backend::{ColorPalette, Palette};
@@ -147,9 +147,9 @@ impl ColorPalette {
 
     /// Builds a palette from `(color, red, green, blue)` entries.
     ///
-    /// Every slot starts at black `(0, 0, 0)`. Each pair replaces the slot of that named
-    /// color, and a later pair for the same color replaces the earlier one. Colors you
-    /// leave out stay black.
+    /// Every slot starts at the built-in AppCUI color from [`Self::built_in`]. Each pair
+    /// replaces the slot of that named color, and a later pair for the same color
+    /// replaces the earlier one. Colors you leave out keep those built-in values.
     ///
     /// `color` must be one of the 16 named colors (`Black` through `White`).
     /// [`Transparent`](crate::graphics::Color::Transparent) has no slot.
@@ -173,12 +173,12 @@ impl ColorPalette {
     ///
     /// Panics if `color` is [`Transparent`](crate::graphics::Color::Transparent).
     pub fn from_pairs(pairs: &[(Color, u8, u8, u8)]) -> Self {
-        let mut colors = [(0, 0, 0); 16];
+        let mut me = Self::built_in();
         for (color, r, g, b) in pairs {
             let index = color.as_color_index();
             assert!(index < 16, "You can only use the first 16 colors in a palette (Black, DarkBlue, DarkGreen, Teal, DarkRed, Magenta, Olive, Silver, Gray, Blue, Green, Aqua, Red, Pink, Yellow, White) !");
-            colors[index as usize] = (*r, *g, *b);
+            me.colors[index as usize] = (*r, *g, *b);
         }
-        Self { colors }
+        me
     }
 }
