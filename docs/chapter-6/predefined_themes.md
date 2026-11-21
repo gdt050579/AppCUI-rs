@@ -15,3 +15,5 @@ AppCUI comes with a set of predefined themes that can be used out of the box via
     <img src="img/light_theme.png" width=500/>
 
 4. **HighContrast** - a high-contrast theme: black surfaces with white text, and yellow and aqua accents for focus, hot keys, hover and selection.
+
+    <img src="img/highcontrast_theme.png" width=500/>
