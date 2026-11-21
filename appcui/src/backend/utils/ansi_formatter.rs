@@ -95,6 +95,7 @@ impl AnsiFormatter {
                 self.text.push_str("\x1b\\");
             }
             self.text.push_str("\x1b]104\x1b\\");
+            self.palette_changed = false;
         }
     }
 
