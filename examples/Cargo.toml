@@ -438,6 +438,10 @@ name = "palette"
 path = "palette/main.rs"
 
 [[example]]
+name = "palette_gray"
+path = "palette_gray/main.rs"
+
+[[example]]
 name = "panels_3d"
 path = "panels_3d/main.rs"
 
