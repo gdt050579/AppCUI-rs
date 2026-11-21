@@ -25,7 +25,7 @@ use copypasta::ClipboardProvider;
 
 pub(crate) struct CrossTerm {
     size: Size,
-    use_color_schema: bool,
+    use_rgb_for_palette: bool,
     screen_chars: Vec<Character> // Contains characters painted on screen
 }
 
@@ -55,7 +55,7 @@ impl CrossTerm {
 
         let mut term = CrossTerm {
             size: Size::new(width as u32, height as u32),
-            use_color_schema: builder.use_color_schema,
+            use_rgb_for_palette: builder.use_rgb_for_palette,
             screen_chars: Vec::new()
         };
         
@@ -80,7 +80,7 @@ impl CrossTerm {
     }
 
     fn convert_color(&self, color: Color) -> CrosstermColor {
-        if self.use_color_schema {
+        if !self.use_rgb_for_palette {
             match color {
                 Color::Black => CrosstermColor::Black,
                 Color::DarkRed => CrosstermColor::DarkRed,
@@ -103,6 +103,7 @@ impl CrossTerm {
                 Color::RGB(r, g, b) => CrosstermColor::Rgb { r, g, b },
             }
         } else {
+            // GDT --> trebuie schimbat ca sa aiba si paleta prepopulata
             match color {
                 Color::Black => CrosstermColor::Rgb { r: 0, g: 0, b: 0 },
                 Color::DarkRed => CrosstermColor::Rgb { r: 128, g: 0, b: 0 },
