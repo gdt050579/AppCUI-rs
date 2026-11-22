@@ -2376,7 +2376,7 @@ fn check_borderless_window_flags_none() {
 #[test]
 fn check_borderless_window_flags_sizeable() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Borderless: Flags = Sizeable')
         CheckHash(0x11F1929DD34CA9D6)
     ";
@@ -2399,9 +2399,9 @@ fn check_borderless_window_flags_sizeable() {
 #[test]
 fn check_borderless_window_flags_all() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Borderless: Flags = Sizeable')
-        CheckHash(0xF217668D19825C7D)
+        CheckHash(0x75D99A6622AC8A35)
     ";
     App::new()
         .size(Size::new(60, 14))

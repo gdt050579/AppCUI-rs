@@ -279,7 +279,12 @@ impl Window {
         win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new(wtype));
 
         // tag
-        let g = win.toolbar.create_group(GroupPosition::TopLeft);
+        let g = win.toolbar.create_group(match wtype {
+            Type::Classic => GroupPosition::TopLeft,
+            Type::Rounded => GroupPosition::TopLeft,
+            Type::Panel => GroupPosition::TopLeft,
+            Type::Borderless => GroupPosition::TopRight,
+        });
         win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(wtype));
 
         win
