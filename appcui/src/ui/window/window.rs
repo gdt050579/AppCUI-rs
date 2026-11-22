@@ -183,7 +183,7 @@ impl Window {
     }
 
     /// Creates a new window with the specified title, layout, flags, type, and background.
-    /// The type parameter determines the visual style of the window (e.g., Classic, Rounded, Panel).
+    /// The type parameter determines the visual style of the window (`Classic`, `Rounded`, `Panel`, or `Borderless`).
     /// The background parameter sets the window's background color scheme.
     ///
     /// # Parameters

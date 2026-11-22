@@ -12,7 +12,7 @@ pub enum Flags {
     NoCloseButton = 0x0002,
     /// Prevent the user from dragging the window to a new position.
     FixedPosition = 0x0004,
-    /// Hide the title bar (this option will not display the title)
+    /// Hide the title text. The frame, close button, tag, and hotkey stay visible.
     NoTitle = 0x0008,
 }
 #[repr(u8)]
@@ -20,16 +20,18 @@ pub enum Flags {
 /// Border style of a [`struct@super::Window`].
 ///
 /// `Classic` uses a standard frame, `Rounded` uses rounded corners, and `Panel`
-/// looks like a borderless panel.
+/// is a title bar without a surrounding frame. `Borderless` draws no frame and
+/// has no inner margin. `Classic`, `Rounded`, and `Panel` center the title.
+/// `Borderless` left-aligns it and places the tag on the right.
 pub enum Type {
     /// Standard square corners, for example `┌────┐`. The title is centered.
     #[default]
     Classic,
     /// Rounded corners, for example `╭────╮`. The title is centered.
     Rounded,
-    /// Borderless panel look without window chrome. The title is centered.
+    /// Title bar with no surrounding frame. The title is centered.
     Panel,
-    /// Borderless window without the title bar. The title, when shown, is left-aligned.
+    /// No frame and no inner margin. The title, when shown, is left-aligned, and the tag is placed on the right.
     Borderless,
 }
 

@@ -6,6 +6,7 @@ fn main() -> Result<(), appcui::system::Error> {
         "classic" => ("Classic", window::Type::Classic, window::Background::Normal, window::Flags::None),
         "rounded" => ("Rounded", window::Type::Rounded, window::Background::Normal, window::Flags::None),
         "panel" => ("Panel", window::Type::Panel, window::Background::Normal, window::Flags::None),
+        "borderless" => ("Borderless", window::Type::Borderless, window::Background::Normal, window::Flags::None),
         "error" => ("Error", window::Type::Classic, window::Background::Error, window::Flags::None),
         "warning" => ("Warning", window::Type::Classic, window::Background::Warning, window::Flags::None),
         "notification" => (
@@ -21,6 +22,7 @@ fn main() -> Result<(), appcui::system::Error> {
             window::Background::Normal,
             window::Flags::NoCloseButton,
         ),
+        "no-title" => ("NoTitle", window::Type::Classic, window::Background::Normal, window::Flags::NoTitle),
         "fixed-position" => (
             "FixedPosition",
             window::Type::Classic,
@@ -28,7 +30,9 @@ fn main() -> Result<(), appcui::system::Error> {
             window::Flags::FixedPosition,
         ),
         _ => {
-            eprintln!("Choose classic, rounded, panel, error, warning, notification, sizeable, no-close, or fixed-position.");
+            eprintln!(
+                "Choose classic, rounded, panel, borderless, error, warning, notification, sizeable, no-close, no-title, or fixed-position."
+            );
             std::process::exit(2);
         }
     };

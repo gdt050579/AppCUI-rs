@@ -82,7 +82,7 @@ impl<T> ModalWindow<T> {
     }
 
     /// Creates a new Modal Window with the specified title, layout, flags, window type and background.
-    /// The window type can be one of `Classic`, `Rounded` or `Panel`.
+    /// The window type can be one of `Classic`, `Rounded`, `Panel`, or `Borderless`.
     /// The background can be one of `Normal`, `Error`, `Warning` or `Notification`.
     ///
     /// A Modal Window does not have an implicit close button
@@ -92,7 +92,7 @@ impl<T> ModalWindow<T> {
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window (position and size)
     /// * `flags` - The initialization flags for the window
-    /// * `window_type` - The type of the window (Classic, Rounded, Panel)
+    /// * `window_type` - The type of the window (Classic, Rounded, Panel, Borderless)
     /// * `background` - The background of the window (Normal, Error, Warning, Notification)
     pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: window::Type, background: window::Background) -> Self {
         // a Modal Window does not have an implicit close button
