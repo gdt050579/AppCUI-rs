@@ -27,6 +27,8 @@ pub enum Type {
     Rounded,
     /// Borderless panel look without window chrome.
     Panel,
+    /// Borderless window without the title bar
+    Borderless
 }
 
 

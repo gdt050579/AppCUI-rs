@@ -74,6 +74,7 @@ impl Border {
             Type::Classic => self.paint_classical(surface, theme, status, has_focus),
             Type::Rounded => self.paint_round(surface, theme, status, has_focus),
             Type::Panel => self.paint_panel(surface, theme, status, has_focus),
+            Type::Borderless => {}
         }
     }
 }

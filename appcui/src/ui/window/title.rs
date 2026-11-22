@@ -133,6 +133,7 @@ impl Title {
                     theme.window.bar.normal
                 }
             }
+            Type::Borderless => return,
         };
 
         match self.draw_mode {

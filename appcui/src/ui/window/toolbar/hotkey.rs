@@ -20,6 +20,7 @@ impl HotKey {
             Type::Classic => ItemBase::new(window_type, false),
             Type::Rounded => ItemBase::new(window_type, false),
             Type::Panel => ItemBase::with_width(2, "", window_type, false),
+            Type::Borderless => ItemBase::with_width(2, "", window_type, false),
         };
         Self {
             base,
@@ -48,7 +49,7 @@ impl HotKey {
                 };
                 surface.write_string(x, y, self.key.code.name(), attr, false);
             }
-            Type::Panel => {
+            Type::Panel | Type::Borderless => {
                 let attr = match data.focused {
                     true => theme.window.bar.hotkey,
                     false => theme.window.bar.normal,

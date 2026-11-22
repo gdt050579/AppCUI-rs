@@ -43,7 +43,7 @@ impl Tag {
                 true => theme.text.enphasized_2,
                 false => theme.text.inactive,
             },
-            Type::Panel => match data.focused {
+            Type::Panel | Type::Borderless => match data.focused {
                 true => theme.window.bar.tag,
                 false => theme.window.bar.normal,
             },
