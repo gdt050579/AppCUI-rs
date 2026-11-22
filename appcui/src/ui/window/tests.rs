@@ -2353,7 +2353,7 @@ fn check_window_type_panel_background_error() {
 #[test]
 fn check_borderless_window_flags_none() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Borderless: Flags = None')
         CheckHash(0xD97439E9F2EF20D1)
     ";
@@ -2417,6 +2417,79 @@ fn check_borderless_window_flags_all() {
             w.set_tag("XYZ");
             w.set_hotkey(key!("Alt+1"));
             w
+        })
+        .run()
+        .unwrap();
+}
+
+
+#[test]
+fn check_borderless_window_flags_no_title() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Borderless: Flags = NoTitle')
+        CheckHash(0xADA07D7741AA6CAE)
+    ";
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| {
+            Window::with_type(
+                "Title",
+                layout!("a:c,w:30,h:8"),
+                window::Flags::NoTitle,
+                window::Type::Borderless,
+                window::Background::Normal,
+            )
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_classic_window_flags_no_title() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Classic: Flags = NoTitle')
+        CheckHash(0x601AC56F34270AAB)
+    ";
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| {
+            Window::with_type(
+                "Title",
+                layout!("a:c,w:30,h:8"),
+                window::Flags::NoTitle,
+                window::Type::Classic,
+                window::Background::Normal,
+            )
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_borderless_window_flags_no_title_no_close_button() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Borderless: Flags = NoTitle + NoCloseButton')
+        CheckHash(0xF7AD33F1B77AE5D5)
+        Mouse.Drag(30,8,20,4)
+        Paint('2. Drag window')
+        CheckHash(0xF521F4F098FA9DE9)
+    ";
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| {
+            Window::with_type(
+                "Title",
+                layout!("a:c,w:30,h:8"),
+                window::Flags::NoTitle | window::Flags::NoCloseButton,
+                window::Type::Borderless,
+                window::Background::Normal,
+            )
         })
         .run()
         .unwrap();
