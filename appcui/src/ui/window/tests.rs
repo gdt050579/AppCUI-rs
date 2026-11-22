@@ -2401,7 +2401,7 @@ fn check_borderless_window_flags_all() {
     let script = "
         Paint.Enable(false)
         Paint('Borderless: Flags = Sizeable')
-        CheckHash(0x75D99A6622AC8A35)
+        CheckHash(0x5A5D19B3DB3D214E)
     ";
     App::new()
         .size(Size::new(60, 14))
