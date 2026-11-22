@@ -423,12 +423,7 @@ fn check_window_toolbar_title_pos_recompute() {
         Paint('after click on button --> title move to right (MOUSE is OVER)')
         CheckHash(0x2524C7C64CAF6368)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -520,7 +515,7 @@ fn check_window_resize() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| { Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::Sizeable) })
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::Sizeable))
         .run()
         .unwrap();
 }
@@ -632,12 +627,7 @@ fn check_window_on_layout_changed() {
         Paint('Move to 8,1 with 42x8 size')
         CheckHash(0xA79AF7FBE4808C6A)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -838,12 +828,7 @@ fn check_window_toolbar_button_click() {
         Paint('value = 11')
         CheckHash(0xD5FB8878CC6A03E3)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -926,12 +911,7 @@ fn check_window_toolbar_button_events() {
         Paint('Run button pressed (with hotkey) - mouse outside window')
         CheckHash(0xAED6AA2070247D44)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1024,12 +1004,7 @@ fn check_window_toolbar_checkbox_events() {
         Paint('checkbox = Not checked (via Alt+N), NOT hovered')
         CheckHash(0x4BEB73AE53479ABF)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1142,12 +1117,7 @@ fn check_window_toolbar_singlechoice_events() {
         Paint('Opt 2 selected => Opt B selected as a result')
         CheckHash(0xDD22A81F2349BD90)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1301,12 +1271,7 @@ fn check_window_toolbar_item_visibility() {
         Paint('All are visible')
         CheckHash(0x38A45512A58B0DE5)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1678,12 +1643,7 @@ fn check_window_on_cancel_callback() {
         Paint('Windows is closed')
         CheckHash(0x734FECAF52FDE955)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1720,12 +1680,7 @@ fn check_window_enter_resize_mode() {
         Paint('Normal mode again')
         CheckHash(0xC394FEBC8D729121)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1811,12 +1766,7 @@ fn check_window_keybeforechildren() {
         Paint('Key = Left')
         CheckHash(0x8A6D6218FD2656D0)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1872,12 +1822,7 @@ fn check_window_close() {
         Paint('window is closed - empty desktop')
         CheckHash(0x734FECAF52FDE955)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1950,12 +1895,7 @@ fn check_modal_window_close() {
         Paint('back initial state')
         CheckHash(0xF724A64E6A51AC9E)
     ";
-    App::new()
-        .size(Size::new(60, 10))
-        .debug_script(script)
-        .window(MyWin::new)
-        .run()
-        .unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2126,7 +2066,6 @@ fn check_single_window_with_menu_and_command_bar() {
         .run()
         .unwrap();
 }
-
 
 #[test]
 #[should_panic(
@@ -2398,7 +2337,15 @@ fn check_borderless_window_flags_none() {
     App::new()
         .size(Size::new(60, 14))
         .debug_script(script)
-        .window(|| Window::with_type("Title", layout!("a:c,w:30,h:8"), window::Flags::None, window::Type::Borderless, window::Background::Normal))
+        .window(|| {
+            Window::with_type(
+                "Title",
+                layout!("a:c,w:30,h:8"),
+                window::Flags::None,
+                window::Type::Borderless,
+                window::Background::Normal,
+            )
+        })
         .run()
         .unwrap();
 }
@@ -2413,7 +2360,41 @@ fn check_borderless_window_flags_sizeable() {
     App::new()
         .size(Size::new(60, 14))
         .debug_script(script)
-        .window(|| Window::with_type("Title", layout!("a:c,w:30,h:8"), window::Flags::Sizeable, window::Type::Borderless, window::Background::Normal))
+        .window(|| {
+            Window::with_type(
+                "Title",
+                layout!("a:c,w:30,h:8"),
+                window::Flags::Sizeable,
+                window::Type::Borderless,
+                window::Background::Normal,
+            )
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_borderless_window_flags_all() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('Borderless: Flags = Sizeable')
+        CheckHash(0x2E7E844E0D72091)
+    ";
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::with_type(
+                "Title",
+                layout!("a:c,w:30,h:8"),
+                window::Flags::Sizeable,
+                window::Type::Borderless,
+                window::Background::Normal,
+            );
+            w.set_tag("XYZ");
+            w.set_hotkey(key!("Alt+1"));
+            w
+        })
         .run()
         .unwrap();
 }
