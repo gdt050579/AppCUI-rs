@@ -1,10 +1,12 @@
 use super::events::*;
 use super::{CharClass, Document, Flags, Line, LineCharIndex, Selection, ViewPort};
 use crate::prelude::*;
+use crate::system::Clipboard;
 use std::time::{Duration, Instant};
 
 const WHEEL_SCROLL_ROWS: i32 = 3;
 const TRIPLE_CLICK_TIME: Duration = Duration::from_millis(500);
+const GUIDE_SEARCH_LINES: u32 = 64;
 
 #[derive(Default)]
 struct MarginSize {
@@ -91,6 +93,7 @@ pub struct Editor {
     /// Last mouse position during a drag: the wheel event has no coordinates.
     drag_pos: (i32, i32),
     last_double_click: Option<(Instant, i32, i32)>,
+    overwrite: bool,
 }
 
 impl Editor {
@@ -122,6 +125,7 @@ impl Editor {
             mouse_drag: MouseDrag::None,
             drag_pos: (0, 0),
             last_double_click: None,
+            overwrite: false,
         };
         editor.set_text(text);
         editor
@@ -427,8 +431,8 @@ impl Editor {
 
     fn motion_target(&mut self, pos: usize, sticky: u32, motion: Motion) -> (usize, Option<u32>) {
         match motion {
-            Motion::Left => (pos.saturating_sub(1), None),
-            Motion::Right => ((pos + 1).min(self.document.chars_count()), None),
+            Motion::Left => (self.previous_char_pos(pos), None),
+            Motion::Right => (self.next_char_pos(pos), None),
             Motion::Rows(delta) => (self.pos_after_rows(pos, sticky, delta), Some(sticky)),
             Motion::WordLeft => (self.previous_word_pos(pos), None),
             Motion::WordRight => (self.next_word_pos(pos), None),
@@ -449,7 +453,8 @@ impl Editor {
                 self.document.line_to_char(line)
             };
         }
-
+        // VSCode-like: Home/End go to the start/end of the visual row when wrapped.
+        // For End pass a huge col_in_row, Line clamps it.
         let lci = {
             let line_layout = self.line_layout(line);
             let row = line_layout.line_char_index_to_visual(info.line_char_index).row;
@@ -466,6 +471,7 @@ impl Editor {
         let info = self.document.char_to_pos_info(pos);
 
         if !self.view.is_word_wrap_enabled() {
+            // No wrap: visual rows == visible logical lines. Use fold-aware navigation.
             let new_line = if delta >= 0 {
                 let target = self.document.folds().next_visible_nth_line(info.line_index, delta as u32);
                 target.min(lines_count - 1)
@@ -766,6 +772,79 @@ impl Editor {
         }
     }
 
+    // ShowSpaces / ShowTabs
+    fn paint_whitespace(&self, surface: &mut Surface, line: &Line, row_in_line: u32, x: i32, y: i32, back: Color) {
+        let show_spaces = self.flags.contains(Flags::ShowSpaces);
+        let show_tabs = self.flags.contains(Flags::ShowTabs);
+        let width = self.view.size().width;
+        let (row_start, row_end) = if self.view.is_word_wrap_enabled() {
+            let start = line.visual_to_unwrapped_col(row_in_line, 0).unwrap_or(0);
+            let end = line.visual_to_unwrapped_col(row_in_line, u32::MAX).unwrap_or(start);
+            let is_last = row_in_line + 1 >= line.visual_row_count();
+            (start, if is_last { start + width } else { end })
+        } else {
+            (self.horizontal_scroll, self.horizontal_scroll + width)
+        };
+        let tab = (self.tab_align as u32).max(1);
+        let text = self.document.line(line.line_number());
+        let len = line.logical_len();
+        let indent_len = text.chars().take_while(|&c| c == ' ' || c == '\t').count() as u32;
+
+        let indent_cols = if !show_tabs {
+            0
+        } else if indent_len >= len {
+            line.line_char_index_to_unwrapped_col(LineCharIndex::new(len))
+                .max(self.blank_line_indent(line.line_number()))
+        } else {
+            line.line_char_index_to_unwrapped_col(LineCharIndex::new(indent_len))
+        };
+        let mark = |surface: &mut Surface, col: u32, code: char| {
+            if col >= row_start && col < row_end {
+                surface.write_char(x + (col - row_start) as i32, y, Character::new(code, Color::Gray, back, CharFlags::None));
+            }
+        };
+
+        let start = line.unwrapped_col_to_line_char_index(row_start).get();
+        for (i, c) in (start..len).zip(text.chars_at(start as usize)) {
+            let col = line.line_char_index_to_unwrapped_col(LineCharIndex::new(i));
+            if col >= row_end {
+                break;
+            }
+            match c {
+                ' ' if show_spaces => mark(surface, col, '·'),
+                '\t' if show_tabs && i >= indent_len => mark(surface, col, '→'),
+                _ => {}
+            }
+        }
+
+        for col in (0..indent_cols).step_by(tab as usize) {
+            mark(surface, col, '│');
+        }
+    }
+
+    /// Indentation width (in columns, tabs expanded) of a line; `None` when the line is blank.
+    fn indent_columns(&self, line: u32) -> Option<u32> {
+        let tab = (self.tab_align as u32).max(1);
+        let mut cols = 0;
+        for c in self.document.line(line).chars() {
+            match c {
+                '\t' => cols += tab - cols % tab,
+                ' ' => cols += 1,
+                '\n' | '\r' => return None,
+                _ => return Some(cols),
+            }
+        }
+        None
+    }
+
+    /// Bands of a blank line: the smaller indentation of the closest non-blank lines above and below.
+    fn blank_line_indent(&self, line: u32) -> u32 {
+        let lines_count = self.document.lines_count() as u32;
+        let up = (line.saturating_sub(GUIDE_SEARCH_LINES)..line).rev().find_map(|l| self.indent_columns(l));
+        let down = (line + 1..(line + 1 + GUIDE_SEARCH_LINES).min(lines_count)).find_map(|l| self.indent_columns(l));
+        up.unwrap_or(0).min(down.unwrap_or(0))
+    }
+
     /// A non-primary caret is painted as an inverted cell (the terminal has a single cursor).
     fn paint_secondary_caret(surface: &mut Surface, x: i32, y: i32) {
         if let Some(ch) = surface.char(x, y).copied() {
@@ -950,6 +1029,297 @@ impl Editor {
         }
     }
 
+    fn previous_char_pos(&self, pos: usize) -> usize {
+        if pos >= 2 && self.document.char(pos - 1) == Some('\n') && self.document.char(pos - 2) == Some('\r') {
+            pos - 2
+        } else {
+            pos.saturating_sub(1)
+        }
+    }
+
+    fn next_char_pos(&self, pos: usize) -> usize {
+        if self.document.char(pos) == Some('\r') && self.document.char(pos + 1) == Some('\n') {
+            pos + 2
+        } else {
+            (pos + 1).min(self.document.chars_count())
+        }
+    }
+
+    fn edit_carets(&mut self, texts: &[&str], range: impl Fn(&Self, usize) -> (usize, usize)) {
+        if texts.is_empty() {
+            return;
+        }
+        self.edit_carets_with(|_, i, _| texts[i % texts.len()].to_string(), range);
+    }
+
+    fn edit_carets_with(&mut self, text: impl Fn(&Self, usize, usize) -> String, range: impl Fn(&Self, usize) -> (usize, usize)) {
+        if self.flags.contains(Flags::ReadOnly) {
+            return;
+        }
+        let mut offset = 0isize;
+        let mut min_start = 0usize;
+        let mut first_line = u32::MAX;
+        let mut last_line = 0u32;
+        let mut lines_changed = false;
+        for i in 0..self.cursors.len() {
+            let shift = |p: usize| p.saturating_add_signed(offset);
+            let cursor = &mut self.cursors[i];
+            cursor.pos = shift(cursor.pos);
+            cursor.selection.map(shift);
+            let cursor = self.cursors[i];
+            let (start, end) = if cursor.selection.is_empty() {
+                range(self, cursor.pos)
+            } else {
+                (cursor.selection.start(), cursor.selection.end())
+            };
+            // overlapping selections: never touch the text already edited for a previous caret
+            let start = start.max(min_start);
+            let end = end.max(start);
+            let text = text(self, i, start);
+            let text = text.as_str();
+            if start == end && text.is_empty() {
+                continue;
+            }
+            let start_line = self.document.position_to_line(start);
+            lines_changed |= start_line != self.document.position_to_line(end) || text.contains(['\n', '\r']);
+            first_line = first_line.min(start_line);
+            last_line = last_line.max(start_line);
+            self.document.remove(start, end);
+            self.document.insert(start, text);
+            let inserted = text.chars().count();
+            offset += inserted as isize - (end - start) as isize;
+            let cursor = &mut self.cursors[i];
+            cursor.pos = start + inserted;
+            cursor.selection.clear();
+            min_start = cursor.pos;
+        }
+        if first_line != u32::MAX {
+            self.after_edit(first_line, if lines_changed { u32::MAX } else { last_line });
+        }
+    }
+
+    /// After the text changed on lines `first_line..=last_line` (`u32::MAX` = to the end).
+    fn after_edit(&mut self, first_line: u32, last_line: u32) {
+        self.view.invalidate_lines(first_line, last_line);
+        self.normalize_carets();
+        // the line count can gain / lose a digit => the margin and the text area change width
+        let (width, visible) = (self.margin.width, self.margin.visible);
+        self.update_margin();
+        if self.margin.width != width {
+            self.resize_view(self.size());
+        } else {
+            self.margin.visible = visible;
+        }
+        self.update_view();
+        self.follow_primary();
+        self.refresh_sticky_cols();
+        self.notify_document_changed();
+    }
+
+    fn type_char(&mut self, ch: char) {
+        let mut buf = [0u8; 4];
+        let text: &str = ch.encode_utf8(&mut buf);
+        let overwrite = self.overwrite;
+        self.edit_carets(&[text], |ed, pos| match ed.document.char(pos) {
+            Some(c) if overwrite && c != '\n' && c != '\r' => (pos, pos + 1),
+            _ => (pos, pos),
+        });
+    }
+
+    /// Tab: spaces up to the next tab stop (every `tab_align` columns), like Zed with `hard_tabs: false`.
+    fn insert_soft_tab(&mut self) {
+        self.edit_carets_with(
+            |ed, _, start| {
+                let tab = (ed.tab_align as usize).max(1);
+                " ".repeat(tab - ed.column_of(start) % tab)
+            },
+            |_, pos| (pos, pos),
+        );
+    }
+
+    /// Column of a position in its line, with the tabs expanded.
+    fn column_of(&self, pos: usize) -> usize {
+        let tab = (self.tab_align as usize).max(1);
+        let line_start = self.document.line_to_char(self.document.position_to_line(pos));
+        self.document
+            .chars_iter(line_start)
+            .take(pos - line_start)
+            .fold(0, |col, c| if c == '\t' { col + tab - col % tab } else { col + 1 })
+    }
+
+    fn selection_spans_lines(&self) -> bool {
+        self.cursors.iter().any(|c| {
+            !c.selection.is_empty() && self.document.position_to_line(c.selection.start()) != self.document.position_to_line(c.selection.end())
+        })
+    }
+
+    /// Lines touched by the carets and their selections, sorted and unique.
+    /// A selection ending at the start of a line does not include that line.
+    fn caret_lines(&self) -> Vec<u32> {
+        let mut lines = Vec::new();
+        for c in &self.cursors {
+            let (first, last) = if c.selection.is_empty() {
+                let l = self.document.position_to_line(c.pos);
+                (l, l)
+            } else {
+                let first = self.document.position_to_line(c.selection.start());
+                let mut last = self.document.position_to_line(c.selection.end());
+                if last > first && self.document.line_to_char(last) == c.selection.end() {
+                    last -= 1;
+                }
+                (first, last)
+            };
+            lines.extend(first..=last);
+        }
+        lines.sort_unstable();
+        lines.dedup();
+        lines
+    }
+
+    fn indent_lines(&mut self, outdent: bool) {
+        if self.flags.contains(Flags::ReadOnly) {
+            return;
+        }
+        let lines = self.caret_lines();
+        let mut changed = false;
+        // bottom-up: an edit never moves the lines that are still to be processed
+        for &line in lines.iter().rev() {
+            let start = self.document.line_to_char(line);
+            if outdent {
+                let removed = self.indent_width(start);
+                if removed == 0 {
+                    continue;
+                }
+                self.document.remove(start, start + removed);
+                let map = |p: usize| if p >= start + removed { p - removed } else { p.min(start) };
+                for c in self.cursors.iter_mut() {
+                    c.pos = map(c.pos);
+                    c.selection.map(map);
+                }
+            } else {
+                // spaces, not a tab (like Tab in the text)
+                let added = (self.tab_align as usize).max(1);
+                self.document.insert(start, &" ".repeat(added));
+                for c in self.cursors.iter_mut() {
+                    // a caret at the line start moves after the spaces, a selection starting there grows
+                    if c.pos > start || (c.pos == start && c.selection.is_empty()) {
+                        c.pos += added;
+                    }
+                    c.selection.map(|p| if p > start { p + added } else { p });
+                }
+            }
+            changed = true;
+        }
+        if changed {
+            self.after_edit(lines[0], lines[lines.len() - 1]);
+        }
+    }
+
+    /// Indentation removed by Shift+Tab from the line starting at `start`.
+    fn indent_width(&self, start: usize) -> usize {
+        let mut it = self.document.chars_iter(start);
+        if it.next() == Some('\t') {
+            return 1;
+        }
+        let mut it = self.document.chars_iter(start);
+        let mut n = 0;
+        while n < self.tab_align as usize && it.next() == Some(' ') {
+            n += 1;
+        }
+        n
+    }
+
+    fn copy_to_clipboard(&self) -> bool {
+        let has_selection = self.cursors.iter().any(|c| !c.selection.is_empty());
+        let line_break = self.document.line_break();
+        let mut text = String::new();
+        let mut last_line = u32::MAX;
+        for c in &self.cursors {
+            let (start, end) = if has_selection {
+                if c.selection.is_empty() {
+                    continue;
+                }
+                if !text.is_empty() {
+                    text.push_str(line_break);
+                }
+                (c.selection.start(), c.selection.end())
+            } else {
+                let line = self.document.position_to_line(c.pos);
+                if line == last_line {
+                    continue;
+                }
+                last_line = line;
+                self.line_range(c.pos)
+            };
+            for chunk in self.document.slice(start, end).chunks() {
+                text.push_str(chunk);
+            }
+            if !has_selection && !text.ends_with(['\n', '\r']) {
+                text.push_str(line_break);
+            }
+        }
+        Clipboard::set_text(&text);
+        has_selection
+    }
+
+    fn cut(&mut self) {
+        if self.copy_to_clipboard() {
+            self.edit_carets(&[""], |_, pos| (pos, pos));
+            return;
+        }
+        self.keep_one_caret_per_line();
+        self.edit_carets(&[""], |ed, pos| {
+            let (start, end) = ed.line_range(pos);
+            let line = ed.document.position_to_line(pos);
+            if line > 0 && line as usize + 1 == ed.document.lines_count() {
+                (ed.document.line_end_position(line - 1), end)
+            } else {
+                (start, end)
+            }
+        });
+    }
+
+    fn keep_one_caret_per_line(&mut self) {
+        let primary = *self.primary_cursor();
+        let doc = &self.document;
+        let primary_line = doc.position_to_line(primary.pos);
+        self.cursors.retain(|c| doc.position_to_line(c.pos) != primary_line);
+        self.cursors.dedup_by_key(|c| doc.position_to_line(c.pos));
+        self.primary = self.cursors.partition_point(|c| c.pos < primary.pos);
+        self.cursors.insert(self.primary, primary);
+    }
+
+    fn paste(&mut self) {
+        let Some(text) = Clipboard::text() else {
+            return;
+        };
+        if text.is_empty() {
+            return;
+        }
+        let line_break = self.document.line_break();
+        let text = text.replace("\r\n", "\n");
+        let text = if line_break == "\n" { text } else { text.replace('\n', line_break) };
+        if self.cursors.len() > 1 {
+            let lines: Vec<&str> = text.strip_suffix(line_break).unwrap_or(&text).split(line_break).collect();
+            if lines.len() == self.cursors.len() {
+                self.edit_carets(&lines, |_, pos| (pos, pos));
+                return;
+            }
+        }
+        self.edit_carets(&[&text], |_, pos| (pos, pos));
+    }
+
+    fn resize_view(&mut self, size: Size) {
+        if size.width <= self.margin.width as u32 {
+            self.margin.visible = false;
+            self.view.resize(size);
+        } else {
+            self.margin.visible = self.flags.contains(Flags::ShowLineNumbers);
+            self.view
+                .resize(Size::new(size.width.saturating_sub(self.margin.width as u32), size.height));
+        }
+    }
+
     fn notify_document_changed(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
@@ -978,6 +1348,7 @@ impl OnPaint for Editor {
         let paint_carets = self.has_focus() && self.cursors.len() > 1;
         let has_selection = self.cursors.iter().any(|c| !c.selection.is_empty());
         let attr_selection = theme.editor.pressed_or_selected;
+        let show_whitespace = self.flags.contains(Flags::ShowSpaces) || self.flags.contains(Flags::ShowTabs);
         let mut next_caret = 0usize;
         let mut pending: Option<(u32, LineCharIndex)> = None;
 
@@ -998,7 +1369,14 @@ impl OnPaint for Editor {
             } else {
                 row.line.unwrapped_chars(self.horizontal_scroll, self.horizontal_scroll + w)
             };
-            surface.write_chars(x, y, chars);
+            // Surface::write_chars paints nothing for a single cell
+            match chars {
+                [c] => surface.write_char(x, y, *c),
+                _ => surface.write_chars(x, y, chars),
+            }
+            if show_whitespace {
+                self.paint_whitespace(surface, row.line, row.row_in_line, x, y, theme.editor.normal.background);
+            }
 
             if has_selection {
                 let line_start = self.document.line_to_char(line_number);
@@ -1067,7 +1445,7 @@ impl Editor {
 }
 
 impl OnKeyPressed for Editor {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         let select = key.modifier.contains(KeyModifier::Shift);
         let page = self.view.size().height as i32;
         let motion = match key.value() {
@@ -1114,7 +1492,80 @@ impl OnKeyPressed for Editor {
                 self.keep_only_primary();
                 return EventProcessStatus::Processed;
             }
-            _ => return EventProcessStatus::Ignored,
+
+            key!("Enter") => {
+                let line_break = self.document.line_break();
+                self.edit_carets(&[line_break], |_, pos| (pos, pos));
+                return EventProcessStatus::Processed;
+            }
+            key!("Tab") => {
+                if self.selection_spans_lines() {
+                    self.indent_lines(false);
+                } else {
+                    self.insert_soft_tab();
+                }
+                return EventProcessStatus::Processed;
+            }
+            key!("Shift+Tab") => {
+                self.indent_lines(true);
+                return EventProcessStatus::Processed;
+            }
+            key!("Backspace") => {
+                self.edit_carets(&[""], |ed, pos| (ed.previous_char_pos(pos), pos));
+                return EventProcessStatus::Processed;
+            }
+            key!("Delete") => {
+                self.edit_carets(&[""], |ed, pos| (pos, ed.next_char_pos(pos)));
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Backspace") => {
+                self.edit_carets(&[""], |ed, pos| (ed.previous_word_pos(pos), pos));
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Delete") => {
+                self.edit_carets(&[""], |ed, pos| (pos, ed.next_word_pos(pos)));
+                return EventProcessStatus::Processed;
+            }
+            key!("Insert") => {
+                self.overwrite = !self.overwrite;
+                return EventProcessStatus::Processed;
+            }
+
+            // Ctrl+Insert / Shift+Delete / Shift+Insert: the same keys as the other AppCUI text controls
+            key!("Ctrl+C") | key!("Ctrl+Insert") => {
+                self.copy_to_clipboard();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+X") | key!("Shift+Delete") => {
+                self.cut();
+                return EventProcessStatus::Processed;
+            }
+
+            key!("Ctrl+V") | key!("Ctrl+Shift+V") | key!("Shift+Insert") => {
+                self.paste();
+                return EventProcessStatus::Processed;
+            }
+
+            _ => {
+                let ctrl_only = key.modifier.contains(KeyModifier::Ctrl) && !key.modifier.contains(KeyModifier::Alt);
+                if character as u32 >= 32 && !ctrl_only {
+                    self.type_char(character);
+                    return EventProcessStatus::Processed;
+                }
+
+                if key.code == KeyCode::Tab && key.modifier.contains(KeyModifier::Ctrl) {
+                    return EventProcessStatus::Ignored;
+                }
+
+                for m in [KeyModifier::Alt, KeyModifier::Shift, KeyModifier::Ctrl] {
+                    if key.modifier.contains(m) {
+                        let mut modifier = key.modifier;
+                        modifier.remove(m);
+                        return self.on_key_pressed(Key::new(key.code, modifier), '\0');
+                    }
+                }
+                return EventProcessStatus::Ignored;
+            }
         };
         self.move_carets(motion, select);
         EventProcessStatus::Processed
@@ -1164,14 +1615,7 @@ impl OnResize for Editor {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.scrollbars
             .resize(self.view.max_columns() as u64, self.document.lines_count() as u64, &self.base);
-        if new_size.width <= self.margin.width as u32 {
-            self.margin.visible = false;
-            self.view.resize(new_size);
-        } else {
-            self.margin.visible = self.flags.contains(Flags::ShowLineNumbers);
-            self.view
-                .resize(Size::new(new_size.width.saturating_sub(self.margin.width as u32), new_size.height));
-        }
+        self.resize_view(new_size);
         self.update_view();
         // Re-anchor cursor so column/row_in_line and scroll offsets stay consistent.
         let pos = self.primary_cursor().pos;

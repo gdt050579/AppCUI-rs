@@ -32,19 +32,27 @@
 - [x] `Ctrl+A` → select all
 
 ## Text Editing
-- [ ] `Backspace` → delete character before cursor (or delete selection)
-- [ ] `Delete` → delete character after cursor (or delete selection)
-- [ ] `Ctrl+Backspace` → delete word before cursor
-- [ ] `Ctrl+Delete` → delete word after cursor
-- [ ] `Enter` → insert newline
-- [ ] `Tab` → insert tab (or indent selected lines)
-- [ ] `Shift+Tab` → outdent line (or selected lines)
-- [ ] `Insert` → toggle insert/overwrite mode
+- [x] `Regular edit`
+- [x] `Enter` → insert newline
+- [x] `Tab insert` → insert tab
+- [x] `Shift+Tab` → sterge tabul
+- [x] `Backspace` → delete character before cursor (or delete selection)
+- [x] `Delete` → delete character after cursor (or delete selection)
+- [x] `Ctrl+Delete` → delete word after cursor
+- [x] `Ctrl+Backspace` → delete word before cursor
+- [x] `Tab selectie` → indent selected lines
+- [x] `Shift+Tab` → outline 
+- [x] `` (metoda vizuala de vazut taburile) (flag) → `Flags::ShowTabs`, `Flags::ShowSpaces`
+- [x] `Insert` → toggle insert/overwrite mode
 
 ## Clipboard & History
-- [ ] `Ctrl+C` → copy selection (or current line if no selection)
-- [ ] `Ctrl+X` → cut selection (or current line if no selection)
-- [ ] `Ctrl+V` → paste
+- [x] `Ctrl+C` → copy selection (or current line if no selection)
+- [x] `Ctrl+X` → cut selection (or current line if no selection)
+- [x] `Ctrl+V` → paste, de gandit logica (paste formatat sau nu) → momentan la fel ca `Ctrl+Shift+V` (text simplu)
+- [ ] `Tipuri de copiere` (UTF8, UNICODE, HTML, cu tot cu culoarea textului,)
+- [x] `Ctrl+Shift+V` paste text only
+
+## Undo/Redo
 - [ ] `Ctrl+Z` → undo
 - [ ] `Ctrl+Y` → redo
 - [ ] `Ctrl+Shift+Z` → redo (alternative)

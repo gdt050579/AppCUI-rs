@@ -36,7 +36,7 @@ impl Selection {
     }
     #[inline(always)]
     pub(crate) fn set(&mut self, start: usize, end: usize) {
-        if start<end {
+        if start < end {
             self.start = start;
             self.origin = start;
             self.end = end;
@@ -51,6 +51,18 @@ impl Selection {
     #[inline(always)]
     pub(crate) fn end(&self) -> usize {
         self.end
+    }
+
+    #[inline(always)]
+    pub(crate) fn map(&mut self, f: impl Fn(usize) -> usize) {
+        if !self.is_empty() {
+            self.start = f(self.start);
+            self.end = f(self.end);
+            self.origin = f(self.origin);
+            if self.start >= self.end {
+                self.clear();
+            }
+        }
     }
     #[inline(always)]
     pub(crate) fn contains(&self, pos: usize) -> bool {

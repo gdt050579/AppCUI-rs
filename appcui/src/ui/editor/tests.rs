@@ -1,4 +1,5 @@
-// all tests
+use crate::prelude::*;
+use crate::ui::editor::{Editor, Flags};
 
 mod folds_tests {
     use super::super::{Fold, Folds};
@@ -45,7 +46,11 @@ mod folds_tests {
     fn run_add_case(case: &AddCase) {
         let mut folds = Folds::new();
         for &(start, count) in case.existing {
-            assert!(folds.add(Fold::new(start, count, true).unwrap()), "{}: setup add ({start}, {count})", case.label);
+            assert!(
+                folds.add(Fold::new(start, count, true).unwrap()),
+                "{}: setup add ({start}, {count})",
+                case.label
+            );
             assert_folds_invariant(&folds);
         }
         let before = ranges(&folds);
@@ -364,7 +369,7 @@ mod folds_tests {
 }
 
 mod line_to_fold_tests {
-    use super::super::{Folds, Fold};
+    use super::super::{Fold, Folds};
 
     fn build_folds(ranges: &[(u32, u32)]) -> Folds {
         let mut folds = Folds::new();
@@ -597,7 +602,7 @@ mod line_to_fold_tests {
 }
 
 mod visible_lines_tests {
-    use super::super::{Folds, Fold};
+    use super::super::{Fold, Folds};
 
     fn build_folds(ranges: &[(u32, u32)]) -> Folds {
         let mut folds = Folds::new();
@@ -631,9 +636,7 @@ mod visible_lines_tests {
         );
         assert_eq!(
             visible_lines(&folds, 0, 20),
-            vec![
-                0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24
-            ],
+            vec![0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24],
             "take(20): through header 20, skip 21–23, resume at 24"
         );
     }
@@ -755,10 +758,7 @@ mod visible_lines_tests {
         assert_eq!(folds.next_visible_nth_line(12, 0), 15);
         // From a hidden line, `n` counts steps after the snap (see `n.saturating_sub(1)`).
         assert_eq!(folds.next_visible_nth_line(12, 3), 17);
-        assert_eq!(
-            folds.next_visible_nth_line(10, 0),
-            nth_visible_line(&folds, 10, 0)
-        );
+        assert_eq!(folds.next_visible_nth_line(10, 0), nth_visible_line(&folds, 10, 0));
     }
 
     /// Last visible line at or before `from` (by source line), then `n` steps earlier.
@@ -833,10 +833,7 @@ mod visible_lines_tests {
         assert_eq!(folds.previous_visible_nth_line(12, 0), 10);
         assert_eq!(folds.previous_visible_nth_line(12, 1), 10);
         assert_eq!(folds.previous_visible_nth_line(10, 1), 9);
-        assert_eq!(
-            folds.previous_visible_nth_line(10, 0),
-            nth_previous_visible_line(&folds, 10, 0)
-        );
+        assert_eq!(folds.previous_visible_nth_line(10, 0), nth_previous_visible_line(&folds, 10, 0));
     }
 
     #[test]
@@ -844,10 +841,7 @@ mod visible_lines_tests {
         let folds = example_folds();
         // Visible: 0..=5, 8..=19, 20, 24..  — one call must skip both folded bodies.
         assert_eq!(folds.previous_visible_nth_line(25, 2), 20);
-        assert_eq!(
-            folds.previous_visible_nth_line(25, 15),
-            nth_previous_visible_line(&folds, 25, 15)
-        );
+        assert_eq!(folds.previous_visible_nth_line(25, 15), nth_previous_visible_line(&folds, 25, 15));
         assert_eq!(folds.previous_visible_nth_line(25, 15), 5);
     }
 
@@ -893,4 +887,401 @@ mod visible_lines_tests {
         assert_eq!(folds.visible_lines_from(12).next(), Some(30));
         assert_eq!(visible_lines(&folds, 8, 4), vec![8, 9, 10, 30]);
     }
+}
+
+#[test]
+fn check_write_text() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.TypeText('XY')
+        Paint('XY typed before abc')
+        CheckHash(0x38F54E78C45F2DC2)
+        CheckCursor(4,2)
+        Key.Pressed(Enter)
+        Key.Pressed(Tab)
+        Key.TypeText('Z')
+        Paint('new line, tab, then Z before abc')
+        CheckHash(0x872BEE4789E488E4)
+        CheckCursor(7,3)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("abc\ndef", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_backspace_and_delete() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(End)
+        Key.Pressed(Backspace)
+        Paint('c deleted')
+        CheckHash(0xA0BA2C43220F049E)
+        CheckCursor(4,2)
+        Key.Pressed(Delete)
+        Paint('first two lines joined')
+        CheckHash(0xB6C8B2E587DB5C7E)
+        CheckCursor(4,2)
+        Key.Pressed(Down)
+        Key.Pressed(Home)
+        Key.Pressed(Backspace)
+        Paint('all lines joined')
+        CheckHash(0x91B19C4CD8EC24DE)
+        CheckCursor(7,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("abc\ndef\nghi", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_delete_words() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Ctrl+Right)
+        Key.Pressed(Ctrl+Delete)
+        Paint('two deleted')
+        CheckHash(0xD58702B0266D90F6)
+        CheckCursor(6,2)
+        Key.Pressed(End)
+        Key.Pressed(Ctrl+Backspace)
+        Paint('three deleted')
+        CheckHash(0x8A9F450308519AE4)
+        CheckCursor(6,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("one two three", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_crlf_line_break() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(End)
+        Key.Pressed(Delete)
+        Paint('the CRLF is deleted at once')
+        CheckHash(0x5422859A30D65624)
+        CheckCursor(4,2)
+        Key.Pressed(Enter)
+        Paint('Enter inserts a CRLF')
+        CheckHash(0x11A5B35C8EFD29E4)
+        CheckCursor(2,3)
+        Key.Pressed(Left)
+        Paint('one Left goes back over the CRLF')
+        CheckHash(0x11A5B35C8EFD29E4)
+        CheckCursor(4,2)
+        Key.Pressed(Right)
+        Key.Pressed(Backspace)
+        Paint('one Backspace removes the CRLF')
+        CheckHash(0x5422859A30D65624)
+        CheckCursor(4,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("ab\r\ncd", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_overwrite_and_replace_selection() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Shift+Ctrl+Right)
+        Key.TypeText('bye ')
+        Paint('selection replaced by bye')
+        CheckHash(0xD14AD9C96E3AEB0C)
+        CheckCursor(6,2)
+        Key.Pressed(Insert)
+        Key.TypeText('W')
+        Paint('overwrite: w replaced by W')
+        CheckHash(0xD1BFA590AE7E34EC)
+        CheckCursor(7,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("hello world", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_indent_and_outdent() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Shift+Down)
+        Key.Pressed(Shift+Right)
+        Key.Pressed(Tab)
+        Paint('first two lines indented, selection kept')
+        CheckHash(0xAC04AEFAA85DF507)
+        CheckCursor(7,3)
+        Key.Pressed(Shift+Tab)
+        Paint('back to no indentation')
+        CheckHash(0x6680168930FD4F57)
+        CheckCursor(3,3)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("a\nb\nc", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_copy_cut_paste() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Ctrl+C)
+        Key.Pressed(Ctrl+End)
+        Key.Pressed(Ctrl+Shift+V)
+        Paint('first line copied and pasted at the end')
+        CheckHash(0xED8FB3E70117A528)
+        CheckCursor(2,4)
+        Key.Pressed(Ctrl+Home)
+        Key.Pressed(Ctrl+X)
+        Paint('first line cut')
+        CheckHash(0xED98C9AD75534016)
+        CheckCursor(2,2)
+        Key.Pressed(Shift+End)
+        Key.Pressed(Ctrl+X)
+        Key.Pressed(Ctrl+End)
+        Key.Pressed(Ctrl+Shift+V)
+        Paint('selection cut and pasted on the second line')
+        CheckHash(0x249A6178AE8B43FE)
+        CheckCursor(13,3)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("first\nsecond", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_multiple_carets() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Right)
+        Key.Modifier(Alt)
+        Mouse.Click(3,3,left)
+        Mouse.Click(3,4,left)
+        Key.Modifier(None)
+        Key.TypeText('-')
+        Paint('- typed on every line')
+        CheckHash(0x86BDAA19FEA74175)
+        CheckCursor(4,4)
+        Key.Pressed(Ctrl+C)
+        Key.Pressed(Ctrl+Shift+V)
+        Paint('every caret pasted its own line')
+        CheckHash(0xFEBD8AC9F060B8D4)
+        CheckCursor(7,4)
+        Key.Pressed(Backspace,4)
+        Paint('back to the initial text')
+        CheckHash(0x7473547AB4FFDDD4)
+        CheckCursor(3,4)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("aa\nbb\ncc", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_show_spaces_and_tabs() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Down,2)
+        Key.Pressed(End)
+        Paint('dots for spaces, indentation guides for tabs and spaces, inner tab as arrow')
+        CheckHash(0xF6CB365041BAD7E1)
+        CheckCursor(16,4)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new(
+                "fn a {\n\tif x {\n        y = 1;\n\n\t\tz\t= 2;\n\t}\n}",
+                layout!("x:0,y:0,w:100%,h:100%"),
+                Flags::ShowSpaces | Flags::ShowTabs,
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_keys_without_shortcut() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(End)
+        Key.Pressed(Shift+Backspace)
+        Paint('Shift+Backspace works as Backspace')
+        CheckHash(0x6BF58166C16B3E5B)
+        CheckCursor(14,2)
+        Key.Pressed(Ctrl+Shift+Backspace)
+        Paint('Ctrl+Shift+Backspace works as Ctrl+Backspace')
+        CheckHash(0xAA243D0AFFB41EC8)
+        CheckCursor(10,2)
+        Key.Pressed(Home)
+        Key.Pressed(Alt+Shift+Right)
+        Key.Pressed(Shift+Delete)
+        Paint('Alt+Shift+Right selected o, Shift+Delete cut it')
+        CheckHash(0xA447FEFE1E551D1F)
+        CheckCursor(2,2)
+        Key.Pressed(Shift+Insert)
+        Paint('Shift+Insert pasted o back')
+        CheckHash(0xAA243D0AFFB41EC8)
+        CheckCursor(3,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("one two three", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_tab_inserts_spaces() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(End)
+        Key.Pressed(Tab)
+        Paint('two spaces up to the tab stop')
+        CheckHash(0x7CAC6907CC7787FB)
+        CheckCursor(6,2)
+        Key.Pressed(Backspace)
+        Paint('one space deleted')
+        CheckHash(0x91159EC9C5557473)
+        CheckCursor(5,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("ab", layout!("x:0,y:0,w:100%,h:100%"), Flags::ShowSpaces));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_ctrl_v_paste() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Clipboard.SetText('xyz')
+        Key.Pressed(End)
+        Key.Pressed(Ctrl+V)
+        Paint('xyz pasted at once')
+        CheckHash(0x32B94048051672F8)
+        CheckCursor(7,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new("ab", layout!("x:0,y:0,w:100%,h:100%"), Flags::None));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_blank_line_guides_with_word_wrap() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Alt+Z)
+        Paint('the blank line keeps the guide with word wrap')
+        CheckHash(0x14433BA685E1086C)
+        CheckCursor(2,2)
+    ";
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:38,h:8");
+            w.add(Editor::new(
+                "def func(x, y):
+    x = t
+
+    x = u",
+                layout!("x:0,y:0,w:100%,h:100%"),
+                Flags::ShowSpaces | Flags::ShowTabs,
+            ));
+            w
+        })
+        .run()
+        .unwrap();
 }

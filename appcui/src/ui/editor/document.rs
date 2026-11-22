@@ -1,4 +1,4 @@
-use super::{LineCharIndex, Folds};
+use super::{Folds, LineCharIndex};
 use ropey::iter::Chars;
 use ropey::{Rope, RopeSlice};
 
@@ -9,14 +9,37 @@ pub(super) struct PosInfo {
 pub(super) struct Document {
     rope: ropey::Rope,
     folds: Folds,
+    line_break: &'static str,
 }
 
 impl Document {
     pub(super) fn new(text: &str) -> Self {
+        let line_break = match text.find('\n') {
+            Some(i) if i > 0 && text.as_bytes()[i - 1] == b'\r' => "\r\n",
+            _ => "\n",
+        };
         Self {
             rope: Rope::from(text),
             folds: Folds::new(),
+            line_break,
         }
+    }
+    #[inline(always)]
+    pub(super) fn line_break(&self) -> &'static str {
+        self.line_break
+    }
+    pub(super) fn insert(&mut self, pos: usize, text: &str) {
+        if !text.is_empty() {
+            self.rope.insert(pos, text);
+        }
+    }
+    pub(super) fn remove(&mut self, start: usize, end: usize) {
+        if start < end {
+            self.rope.remove(start..end);
+        }
+    }
+    pub(super) fn slice(&self, start: usize, end: usize) -> RopeSlice<'_> {
+        self.rope.slice(start..end)
     }
     pub(super) fn lines_count(&self) -> usize {
         self.rope.len_lines()

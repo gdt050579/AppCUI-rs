@@ -115,7 +115,7 @@ impl ViewPort {
         let capacity = self.lines.len() as u32;
         let folds = doc.folds();
         let cur_count = self.count as usize;
-    
+
         // Pass 1: find target[0] (the first visible line) and locate it in the current cache.
         let first_target = {
             let mut it = folds.visible_lines_from(start_line);
@@ -131,13 +131,14 @@ impl ViewPort {
             self.count = 0;
             return;
         };
-    
+
         let reuse = if let Some(k) = (0..cur_count).find(|&i| self.lines[i].line_number() == first_target) {
             if k > 0 {
                 self.lines[..cur_count].rotate_left(k);
             }
             0..cur_count - k
         } else if let Some(k) = self.scrolled_up_by(first_target, folds) {
+            // Scrolled up by k visible lines: the old first line moves to slot k.
             self.lines.rotate_right(k);
             k..(cur_count + k).min(capacity as usize)
         } else {
@@ -148,8 +149,12 @@ impl ViewPort {
         let mut it = folds.visible_lines_from(start_line);
         let mut i = 0u32;
         while i < capacity {
-            let Some(ln) = it.next() else { break; };
-            if ln >= total_lines { break; }
+            let Some(ln) = it.next() else {
+                break;
+            };
+            if ln >= total_lines {
+                break;
+            }
             let slot = i as usize;
             let line = &mut self.lines[slot];
             if !reuse.contains(&slot) || line.line_number() != ln || line.is_modified() {
@@ -161,6 +166,14 @@ impl ViewPort {
             i += 1;
         }
         self.count = i;
+    }
+
+    pub(super) fn invalidate_lines(&mut self, from: u32, to: u32) {
+        for line in &mut self.lines[..self.count as usize] {
+            if (from..=to).contains(&line.line_number()) {
+                line.mark_modified();
+            }
+        }
     }
 
     fn scrolled_up_by(&self, new_first: u32, folds: &Folds) -> Option<usize> {
@@ -185,12 +198,21 @@ impl ViewPort {
 
     #[inline(always)]
     pub(super) fn update_max_columns(&mut self) {
-        self.max_columns = self.lines[..self.count as usize].iter().map(|line| line.columns_count()).max().unwrap_or(0);
+        // only the valid lines (slots past `count` hold stale content)
+        self.max_columns = self.lines[..self.count as usize]
+            .iter()
+            .map(|line| line.columns_count())
+            .max()
+            .unwrap_or(0);
     }
 
     #[inline(always)]
     pub(super) fn max_columns(&self) -> u32 {
-        if self.word_wrap { 0 } else { self.max_columns }
+        if self.word_wrap {
+            0
+        } else {
+            self.max_columns
+        }
     }
 
     pub(super) fn line_number_to_index(&self, line_number: u32) -> Option<u32> {
@@ -203,10 +225,7 @@ impl ViewPort {
         if offset < lines.len() && lines[offset].line_number() == line_number {
             return Some(offset as u32);
         }
-        lines
-            .binary_search_by_key(&line_number, |l| l.line_number())
-            .ok()
-            .map(|i| i as u32)
+        lines.binary_search_by_key(&line_number, |l| l.line_number()).ok().map(|i| i as u32)
     }
 
     // --- Unwrapped column queries (kept for selection painting, internal use) ---
@@ -226,7 +245,7 @@ impl ViewPort {
     /// Visual position of a logical char within its line (row + col_in_row).
     pub(super) fn visual_pos(&self, line_number: u32, char_index: LineCharIndex) -> Option<VisualPos> {
         let idx = self.line_number_to_index(line_number)?;
-        Some(self.lines[idx as usize].line_char_index_to_visual(char_index))    
+        Some(self.lines[idx as usize].line_char_index_to_visual(char_index))
     }
 
     /// Map a visual position within a logical line to a logical char index.

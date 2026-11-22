@@ -6,4 +6,6 @@ pub enum Flags {
     ReadOnly = 0x0002,
     ShowLineNumbers = 0x0004,
     ShowFoldMarkers = 0x0008,
+    ShowSpaces = 0x0010,
+    ShowTabs = 0x0020,
 }
