@@ -133,7 +133,13 @@ impl Title {
                     theme.window.bar.normal
                 }
             }
-            Type::Borderless => return,
+            Type::Borderless => {
+                if has_focus {
+                    theme.text.focused
+                } else {
+                    theme.text.normal
+                }
+            }
         };
 
         match self.draw_mode {

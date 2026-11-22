@@ -1020,7 +1020,9 @@ impl OnPaint for Window {
         self.toolbar.paint(surface, theme, has_focus, self.maximized);
 
         // paint title
-        self.title.paint(surface, theme, self.rm_status, has_focus);
+        if !self.flags.contains(Flags::NoTitle) {
+            self.title.paint(surface, theme, self.rm_status, has_focus);
+        }
     }
 }
 

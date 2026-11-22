@@ -12,6 +12,8 @@ pub enum Flags {
     NoCloseButton = 0x0002,
     /// Prevent the user from dragging the window to a new position.
     FixedPosition = 0x0004,
+    /// Hide the title bar (this option will not display the title)
+    NoTitle       = 0x0008,
 }
 #[repr(u8)]
 #[derive(Copy,Clone,PartialEq,Eq,Default)]
