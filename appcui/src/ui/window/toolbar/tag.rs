@@ -39,11 +39,11 @@ impl Tag {
         let x = self.base.left();
         let y = self.base.y();
         let attr = match self.base.window_type() {
-            Type::Classic | Type::Rounded => match data.focused {
+            Type::Classic | Type::Rounded | Type::Borderless => match data.focused {
                 true => theme.text.enphasized_2,
                 false => theme.text.inactive,
             },
-            Type::Panel | Type::Borderless => match data.focused {
+            Type::Panel => match data.focused {
                 true => theme.window.bar.tag,
                 false => theme.window.bar.normal,
             },

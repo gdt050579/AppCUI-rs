@@ -22,10 +22,7 @@ impl HotKey {
             Type::Panel => ItemBase::with_width(2, "", window_type, false),
             Type::Borderless => ItemBase::with_width(2, "", window_type, false),
         };
-        Self {
-            base,
-            key: Key::None,
-        }
+        Self { base, key: Key::None }
     }
     pub fn set_key(&mut self, key: Key) {
         self.key = key;
@@ -41,19 +38,27 @@ impl HotKey {
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let x = self.base.left();
         let y = self.base.y();
+        let attr = match self.base.window_type() {
+            Type::Classic | Type::Rounded | Type::Borderless => {
+                if data.focused {
+                    theme.text.normal
+                } else {
+                    theme.text.inactive
+                }
+            }
+            Type::Panel => {
+                if data.focused {
+                    theme.window.bar.hotkey
+                } else {
+                    theme.window.bar.normal
+                }
+            }
+        };
         match self.base.window_type() {
             Type::Classic | Type::Rounded => {
-                let attr = match data.focused {
-                    true => theme.text.normal,
-                    false => theme.text.inactive,
-                };
                 surface.write_string(x, y, self.key.code.name(), attr, false);
             }
             Type::Panel | Type::Borderless => {
-                let attr = match data.focused {
-                    true => theme.window.bar.hotkey,
-                    false => theme.window.bar.normal,
-                };
                 let idx = self.key.code as u8;
                 const IDX_0: u8 = KeyCode::N0 as u8;
                 const IDX_1: u8 = KeyCode::N1 as u8;
