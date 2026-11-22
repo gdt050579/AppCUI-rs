@@ -2,6 +2,12 @@ use super::Type;
 use crate::graphics::{Character, SpecialChar, Surface};
 use crate::system::Theme;
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum TitleAlignment {
+    Center,
+    Left,
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 enum TitleDrawMode {
     #[default]
@@ -41,6 +47,12 @@ impl Title {
         t.set_text(text);
         t
     }
+    fn alignment(window_type: Type) -> TitleAlignment {
+        match window_type {
+            Type::Classic | Type::Rounded | Type::Panel => TitleAlignment::Center,
+            Type::Borderless => TitleAlignment::Left,
+        }
+    }
     pub(super) fn set_text(&mut self, text: &str) {
         self.text.clear();
         self.text.push_str(text);
@@ -74,16 +86,17 @@ impl Title {
             self.draw_mode = TitleDrawMode::None;
         } else {
             let width = (right - (left + 3)).min(self.count as i32);
+            self.left = match Self::alignment(self.wtype) {
+                TitleAlignment::Center => (left + right - width) / 2,
+                TitleAlignment::Left => left,
+            };
+            self.right = self.left + width + 1;
             if width == (self.count as i32) {
-                self.left = (left + right - width) / 2;
-                self.right = self.left + width + 1;
                 self.draw_mode = TitleDrawMode::Full;
             } else {
                 // we should split the string in the middle
                 // first part ... ending part
                 // this means that the size should be at least 5 characters (start,end, ...)
-                self.left = (left + right - width) / 2;
-                self.right = self.left + width + 1;
                 match width {
                     0 => self.draw_mode = TitleDrawMode::None,
                     1 => self.draw_mode = TitleDrawMode::None,

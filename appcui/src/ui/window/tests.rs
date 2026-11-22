@@ -58,6 +58,29 @@ fn check_window_pos_using_layout_builder() {
 }
 
 #[test]
+fn check_window_left_aligned_title() {
+    let script = "
+        Paint.Enable(false)
+        Paint('borderless title starts at the left')
+        CheckHash(0x83A4065E30EE721A)
+    ";
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            Window::with_type(
+                "123456",
+                layout!("a:c,w:20,h:10"),
+                window::Flags::NoCloseButton,
+                window::Type::Borderless,
+                window::Background::Normal,
+            )
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_window_just_large_title() {
     let script = "
         Paint.Enable(false)
@@ -2332,7 +2355,7 @@ fn check_borderless_window_flags_none() {
     let script = "
         //Paint.Enable(false)
         Paint('Borderless: Flags = None')
-        CheckHash(0x2E7E844E0D72091)
+        CheckHash(0xD97439E9F2EF20D1)
     ";
     App::new()
         .size(Size::new(60, 14))
@@ -2355,7 +2378,7 @@ fn check_borderless_window_flags_sizeable() {
     let script = "
         //Paint.Enable(false)
         Paint('Borderless: Flags = Sizeable')
-        CheckHash(0x2E7E844E0D72091)
+        CheckHash(0x11F1929DD34CA9D6)
     ";
     App::new()
         .size(Size::new(60, 14))
@@ -2378,7 +2401,7 @@ fn check_borderless_window_flags_all() {
     let script = "
         //Paint.Enable(false)
         Paint('Borderless: Flags = Sizeable')
-        CheckHash(0x2E7E844E0D72091)
+        CheckHash(0xF217668D19825C7D)
     ";
     App::new()
         .size(Size::new(60, 14))

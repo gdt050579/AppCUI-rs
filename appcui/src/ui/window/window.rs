@@ -160,48 +160,48 @@ impl Window {
         }
         Handle::None
     }
-    
+
     /// Creates a new window with the specified title, layout, and flags.
     /// The window will have default type associated with the current theme and background `Background::Normal`.
-    /// 
+    ///
     /// # Parameters
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window
     /// * `flags` - The flags for the window
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let mut win = Window::new("My Window", 
-    ///                           layout!("a:c,w:40,h:10"), 
+    ///
+    /// let mut win = Window::new("My Window",
+    ///                           layout!("a:c,w:40,h:10"),
     ///                           window::Flags::Sizeable);
     /// ```
     #[inline(always)]
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         Window::internal_create(title, layout, flags, None, Background::Normal, StatusFlags::ThemeType)
-    }   
+    }
 
     /// Creates a new window with the specified title, layout, flags, type, and background.
     /// The type parameter determines the visual style of the window (e.g., Classic, Rounded, Panel).
     /// The background parameter sets the window's background color scheme.
-    /// 
+    ///
     /// # Parameters
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window
     /// * `flags` - The flags for the window
     /// * `window_type` - The visual type of the window
     /// * `background` - The background color scheme of the window
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut win = Window::with_type("My Panel Window",
     ///                                 layout!("a:c,w:40,h:10"),
     ///                                 window::Flags::Sizeable,
     ///                                 window::Type::Panel,
-    ///                                 window::Background::Normal); 
+    ///                                 window::Background::Normal);
     /// ```
     #[inline(always)]
     pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type, background: Background) -> Self {
@@ -210,23 +210,23 @@ impl Window {
 
     /// Creates a new window with the specified title, layout, flags, and background.
     /// The window will have default type associated with the current theme.
-    /// 
+    ///
     /// # Parameters
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window
     /// * `flags` - The flags for the window
     /// * `background` - The background color scheme of the window
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut win = Window::with_background("My Themed Window",
     ///                                     layout!("a:c,w:40,h:10"),
     ///                                     window::Flags::Sizeable,
     ///                                     window::Background::Normal);
     /// ```
-    /// 
+    ///
     #[inline(always)]
     pub fn with_background(title: &str, layout: Layout, flags: Flags, background: Background) -> Self {
         Window::internal_create(title, layout, flags, None, background, StatusFlags::ThemeType)
