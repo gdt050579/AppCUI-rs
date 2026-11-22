@@ -2387,3 +2387,33 @@ fn check_window_type_panel_background_error() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_borderless_window_flags_none() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('Borderless: Flags = None')
+        CheckHash(0x2E7E844E0D72091)
+    ";
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| Window::with_type("Title", layout!("a:c,w:30,h:8"), window::Flags::None, window::Type::Borderless, window::Background::Normal))
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_borderless_window_flags_sizeable() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('Borderless: Flags = Sizeable')
+        CheckHash(0x2E7E844E0D72091)
+    ";
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| Window::with_type("Title", layout!("a:c,w:30,h:8"), window::Flags::Sizeable, window::Type::Borderless, window::Background::Normal))
+        .run()
+        .unwrap();
+}

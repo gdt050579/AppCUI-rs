@@ -18,7 +18,7 @@ impl ResizeGrip {
             Type::Classic => 2,
             Type::Rounded => 2,
             Type::Panel => 1,
-            Type::Borderless => 2,
+            Type::Borderless => 1,
         };
         Self {
             base: ItemBase::with_width(w, "Drag to resize this window", window_type, true),

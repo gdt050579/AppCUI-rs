@@ -39,13 +39,20 @@ impl MaximizeRestoreButton {
                 surface.write_char(x+1, y, Character::with_attributes(ch, st.attr(theme, theme.symbol.maximized)));
             }
 
-            Type::Panel | Type::Borderless => {
+            Type::Panel => {
                 let s = match data.maximized {
                     true => "🗗 ", // ⧉  ⮻  
                     false => "⏹ ", // 🗖 🗖 ⏹ ■ 🗖 🞏 🗔 📰 🖵
                 };
                 surface.write_string(x, y, s, st.window_bar_attr(theme, theme.window.bar.maximize_button), false);
             }
+            Type::Borderless => {
+                let s = match data.maximized {
+                    true => "🗗 ", // ⧉  ⮻  
+                    false => "⏹ ", // 🗖 🗖 ⏹ ■ 🗖 🞏 🗔 📰 🖵
+                };
+                surface.write_string(x, y, s, st.attr(theme, theme.symbol.maximized), false);
+            }            
         }
     }
 }

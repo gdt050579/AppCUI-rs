@@ -41,7 +41,7 @@ impl CloseButton {
                 surface.write_string(x, y, "✖ ", st.window_bar_attr(theme, theme.window.bar.close_button), false);
             }
             Type::Borderless => {
-                surface.write_string(x, y, "⨷ ", st.window_bar_attr(theme, theme.window.bar.close_button), false);
+                surface.write_string(x, y, "✖ ", st.window_bar_attr(theme, theme.window.bar.close_button), false);
             }
         }
     }
