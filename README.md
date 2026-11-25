@@ -173,30 +173,29 @@ More on the supported backends can be found [here](https://gdt050579.github.io/A
 
 ## 🎛️ Modes
 
-Every AppCUI program starts in one of four modes. The mode decides how the screen is built and when it is redrawn. Multi-window and main-window modes are retained: you place controls and the framework paints them. FrameApp and InputApp are immediate: you draw the surface yourself.
+Every AppCUI program starts in one of four modes. In the first two, you place controls and the framework paints them. In the last two, you paint the whole surface yourself.
 
-* **Multi-window** — `App::new()`. A desktop that hosts one or more windows. Windows can overlap, move, and resize. An application bar, a command bar, and a custom desktop are available. Closing a window leaves the application running. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/multi_window.html).
-* **Main window** — `App::main_window(...)`. One `MainWindow` (or a `#[MainWindow]` type) that fills the terminal. The window is borderless and fixed in place. The application bar and command bar are available, and closing the window ends the application. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/main_window.html).
-* **FrameApp** — `App::frame_app(...)`. Implement `FrameApp` and paint the full surface. `on_update` and `on_paint` run on a timer (`.fps`, default 30, range 1–120). Use it for games, animations, and simulations. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/frame_app.html).
-* **InputApp** — `App::input_app(...)`. Implement `InputApp` and paint the full surface. The surface is drawn at start, after a resize, and again when a key or mouse handler returns `EventProcessStatus::Processed`. Use it for editors, menus, and tools that wait for input. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/input_app.html).
+* **Multi-window** — `App::new()`. A desktop that hosts one or more windows that can overlap, move and resize. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/multi_window.html)
+* **Main window** — `App::main_window(...)`. A single `#[MainWindow]` that fills the terminal, with no title, border or buttons. Closing it ends the application. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/main_window.html)
+* **Frame app** — `App::frame_app(...)`. Implement `FrameApp` and paint every frame (30 FPS by default). Good for games and animations. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/frame_app.html)
+* **Input app** — `App::input_app(...)`. Implement `InputApp` and repaint only when input is processed. Good for editors and menus. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/input_app.html)
 
-|                                 | Multi-window                               | Main window                                                   | FrameApp                                         | InputApp                                                |
-| ------------------------------- | ------------------------------------------ | ------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------- |
-| Constructor                     | `App::new()`                               | `App::main_window(...)`                                       | `App::frame_app(...)`                            | `App::input_app(...)`                                   |
-| What you implement              | Windows and controls                       | One `MainWindow` and its controls                             | `FrameApp`                                       | `InputApp`                                              |
-| Who paints                      | The framework                              | The framework                                                 | Your `on_paint`                                  | Your `on_paint`                                         |
-| Windows                         | One or more; they can move and resize      | One, borderless, fills the desktop                            | None                                             | None                                                    |
-| Stock controls                  | Yes                                        | Yes                                                           | No                                               | No                                                      |
-| Usage of `ModalWindow`          | Yes                                        | Yes                                                           | Yes                                              | Yes                                                     |
-| Themes                          | Yes                                        | Yes                                                           | No                                               | No                                                      |
-| Application bar and command bar | Yes                                        | Yes                                                           | No                                               | No                                                      |
-| Custom desktop                  | Yes                                        | No                                                            | No                                               | No                                                      |
-| When the screen updates         | On UI events                               | On UI events                                                  | Every frame (default 30 FPS)                     | At start, on resize, and when input returns `Processed` |
-| Timers                          | Control timers (default 4)                 | Control timers (default 4)                                    | Frame clock via `.fps` (1–120)                   | None                                                    |
-| How it exits                    | `Escape` on the desktop, or `App::close()` | `Escape` through `WindowEvents::on_cancel`, or `App::close()` | `Escape` while `.auto_close` is on (the default) | `Escape` while `.auto_close` is on (the default)        |
-| Typical use                     | Several windows on one desktop             | A single full-screen tool                                     | Games, animations, clocks                        | Editors, menus, puzzles                                 |
+```rust
+App::main_window(MyWindow::new())?.run();   // one full-screen window
+```
 
+|                         | Multi-window            | Main window                  | Frame app          | Input app             |
+| ----------------------- | ----------------------- | ---------------------------- | ------------------ | --------------------- |
+| Who paints              | Framework               | Framework                    | You                | You                   |
+| Windows                 | Many, movable           | One, fixed, full screen      | None               | None                  |
+| Stock controls, themes  | Yes                     | Yes                          | No                 | No                    |
+| App bar, command bar    | Yes                     | Yes                          | No                 | No                    |
+| Custom desktop          | Yes                     | No                           | No                 | No                    |
+| Screen updates          | On UI events            | On UI events                 | Every frame        | On processed input    |
+| Exit                    | `Esc` or `App::close()` | `Esc` (`on_cancel`) or `App::close()` | `Esc` (`.auto_close`) | `Esc` (`.auto_close`) |
+| Typical use             | Several-window apps     | A single full-screen tool    | Games, animations  | Editors, menus        |
 
+`ModalWindow` dialogs work in every mode (in a ModalWindow you can use all existing UI controls)
 ## 🚀 Quick Start
 
 Add the following to your `Cargo.toml`:
