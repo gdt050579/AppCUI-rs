@@ -35,6 +35,9 @@ impl MainWindow {
     }
 }
 impl Control for MainWindow {}
+impl MainWindowControl for MainWindow {}
+impl NotModalWindow for MainWindow {}
+
 impl OnThemeChanged for MainWindow {}
 impl GenericMenuEvents for MainWindow {}
 impl AppBarEvents for MainWindow {}
@@ -143,4 +146,3 @@ impl OnWindowRegistered for MainWindow {
         self.base.on_registered();
     }
 }
-impl MainWindowControl for MainWindow {}

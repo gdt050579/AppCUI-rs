@@ -2037,7 +2037,8 @@ fn check_single_window() {
         Paint('initial state (full-screen)')
         CheckHash(0x8B0177987DEEAB59)
     ";
-    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    //App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    App::single_window(MainWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .run()
@@ -2051,7 +2052,8 @@ fn check_single_window_with_commandbar() {
         Paint('initial state (full-screen,command bar visible)')
         CheckHash(0x1250605ADBD5CC99)
     ";
-    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    //App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    App::single_window(MainWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .command_bar()
@@ -2066,7 +2068,8 @@ fn check_single_window_with_menubar() {
         Paint('initial state (full-screen,app bar visible)')
         CheckHash(0x4E4AA2CCB6734C99)
     ";
-    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    //App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    App::single_window(MainWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .app_bar()
@@ -2081,7 +2084,8 @@ fn check_single_window_with_menu_and_command_bar() {
         Paint('initial state (full-screen,menu and command bar visible)')
         CheckHash(0xA95AE2CA1B885CD9)
     ";
-    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    //App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+    App::single_window(MainWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .app_bar()
@@ -2101,7 +2105,8 @@ fn check_single_window_panic_on_sizeable_flags() {
         // this code will not be reached
         CheckHash(0x0)
     ";
-    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,flags:sizeable"))
+    //App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,flags:sizeable"))
+    App::single_window(MainWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .run()
