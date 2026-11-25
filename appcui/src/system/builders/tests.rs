@@ -61,10 +61,10 @@ fn check_single_window_app() {
     let script = "
         Paint.Enable(false)
         Paint('1. Single window fills the desktop')
-        CheckHash(0xD4BFFA61E71E1976)
+        CheckHash(0x9F379C6284FD168A)
         Key.Pressed(F1)
         Paint('2. Command bar action updated the label')
-        CheckHash(0x1ECCBC719BBB3D3E)
+        CheckHash(0xC80BD2A39DFC42BA)
     ";
     App::main_window(DemoWindow::new)
         .size(Size::new(40, 10))

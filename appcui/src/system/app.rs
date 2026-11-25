@@ -123,7 +123,7 @@ impl App {
     /// use appcui::prelude::*;
     ///
     /// fn main() -> Result<(), appcui::system::Error> {
-    ///     App::main_window(|| window!("title:'Demo',d:f"))
+    ///     App::main_window(MainWindow::new)
     ///         .size(Size::new(40, 10))
     ///         .run()
     /// }
@@ -134,8 +134,10 @@ impl App {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// fn demo_window() -> Window {
-    ///     window!("title:'Demo',d:f")
+    /// fn demo_window() -> MainWindow {
+    ///     let mut win = MainWindow::new();
+    ///     win.add(label!("'Hello World !',a:c,w:13,h:1"));
+    ///     win
     /// }
     ///
     /// fn main() -> Result<(), appcui::system::Error> {

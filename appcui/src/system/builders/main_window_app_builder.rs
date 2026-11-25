@@ -24,7 +24,8 @@ type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 /// use appcui::prelude::*;
 ///
 /// fn main() -> Result<(), appcui::system::Error> {
-///     App::main_window(|| window!("title:'Demo',d:f"))
+///     App::main_window(MainWindow::new)
+///         .title("Demo")
 ///         .size(Size::new(40, 10))
 ///         .run()
 /// }
