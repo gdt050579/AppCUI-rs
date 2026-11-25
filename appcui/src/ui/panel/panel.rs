@@ -45,7 +45,7 @@ impl Panel {
         Self::inner_create(caption, layout, panel_type, StatusFlags::None)
     }
 
-    pub fn inner_create(caption: &str, layout: Layout, panel_type: Type, status: StatusFlags) -> Self {
+    pub(crate) fn inner_create(caption: &str, layout: Layout, panel_type: Type, status: StatusFlags) -> Self {
         let mut panel = Panel {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | status),
             caption: Caption::new(caption, ExtractHotKeyMethod::NoHotKey),

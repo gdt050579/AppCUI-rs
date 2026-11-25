@@ -1,7 +1,7 @@
 use super::flappy_game::*;
 use appcui::prelude::*;
 
-#[Window(custom_events = FlappyGameEvents)]
+#[MainWindow(custom_events = FlappyGameEvents)]
 pub struct MyWin {
     game: Handle<FlappyGame>,
     score: Handle<toolbar::Label>,
@@ -10,7 +10,7 @@ pub struct MyWin {
 impl MyWin {
     pub fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Flappy Birds',a:c,w:60,h:20"),
+            base: MainWindow::new(),
             game: Handle::None,
             score: Handle::None,
         };

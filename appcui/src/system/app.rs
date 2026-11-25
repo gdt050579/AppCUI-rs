@@ -1,9 +1,7 @@
 use std::marker::PhantomData;
 use std::sync::Mutex;
 
-use crate::ui::common::traits::Control;
-use crate::ui::common::traits::NotModalWindow;
-use crate::ui::common::traits::WindowControl;
+use crate::ui::common::traits::{Control, MainWindowControl, NotModalWindow, WindowControl};
 
 use super::Error;
 use super::ErrorKind;
@@ -31,7 +29,7 @@ const WEBTERMINAL_END_MESSAGE_HTML: &str = "<h1>{} has ended</h1><p>To re-start 
 /// | Constructor | Builder | Use when |
 /// |-------------|---------|----------|
 /// | [`App::new`] | [`crate::system::MultiWindowAppBuilder`] | Classic desktop with one or more windows |
-/// | [`App::single_window`] | [`crate::system::SingleWindowAppBuilder`] | A single window that fills the desktop |
+/// | [`App::main_window`] | [`crate::system::MainWindowAppBuilder`] | A single window that fills the desktop |
 /// | [`App::frame_app`] | [`crate::system::FrameAppBuilder`] | Games or animations that update every frame |
 /// | [`App::input_app`] | [`crate::system::InputAppBuilder`] | Custom paint and input without window chrome |
 ///
@@ -105,9 +103,9 @@ impl App {
     /// and closing it ends the application.
     ///
     /// The factory can be a **closure** or a **function** (`FnOnce() -> T`):
-    /// * `App::single_window(|| window!("title:'Demo',d:f"))` — a closure, useful when
+    /// * `App::main_window(|| window!("title:'Demo',d:f"))` — a closure, useful when
     ///   you build the window inline or `new` takes arguments (`|| MyWin::new("Title")`).
-    /// * `App::single_window(MyWin::new)` — a constructor / function with no arguments.
+    /// * `App::main_window(MyWin::new)` — a constructor / function with no arguments.
     ///   Pass `MyWin::new` (no parentheses). Writing `MyWin::new()` would construct the
     ///   window immediately, before the runtime exists.
     ///
@@ -125,7 +123,7 @@ impl App {
     /// use appcui::prelude::*;
     ///
     /// fn main() -> Result<(), appcui::system::Error> {
-    ///     App::single_window(|| window!("title:'Demo',d:f"))
+    ///     App::main_window(MainWindow::new)
     ///         .size(Size::new(40, 10))
     ///         .run()
     /// }
@@ -136,21 +134,23 @@ impl App {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// fn demo_window() -> Window {
-    ///     window!("title:'Demo',d:f")
+    /// fn demo_window() -> MainWindow {
+    ///     let mut win = MainWindow::new();
+    ///     win.add(label!("'Hello World !',a:c,w:13,h:1"));
+    ///     win
     /// }
     ///
     /// fn main() -> Result<(), appcui::system::Error> {
-    ///     App::single_window(demo_window).size(Size::new(40, 10)).run()
+    ///     App::main_window(demo_window).size(Size::new(40, 10)).run()
     /// }
     /// ```
     #[allow(clippy::new_ret_no_self)]
-    pub fn single_window<F, T>(factory: F) -> crate::system::SingleWindowAppBuilder
+    pub fn main_window<F, T>(factory: F) -> crate::system::MainWindowAppBuilder
     where
         F: FnOnce() -> T + 'static,
-        T: Control + WindowControl + NotModalWindow + 'static,
+        T: Control + WindowControl + MainWindowControl + NotModalWindow + 'static,
     {
-        crate::system::SingleWindowAppBuilder::new(factory)
+        crate::system::MainWindowAppBuilder::new(factory)
     }
     /// Creates a builder for a frame-based application.
     ///

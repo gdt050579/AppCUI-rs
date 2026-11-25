@@ -171,6 +171,34 @@ AppCUI supports various backends depending on the operating system:
 More on the supported backends can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-2/backends.html)
 
 
+## 🎛️ Modes
+
+Every AppCUI program starts in one of four modes. In the first two, you place controls and the framework paints them. In the last two, you paint the whole surface yourself.
+
+* **Multi-window** — `App::new()`. A desktop that hosts one or more windows that can overlap, move and resize. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/multi_window.html)
+* **Main window** — `App::main_window(...)`. A single `#[MainWindow]` that fills the terminal, with no title, border or buttons. Closing it ends the application. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/main_window.html)
+* **Frame app** — `App::frame_app(...)`. Implement `FrameApp` and paint every frame (30 FPS by default). Good for games and animations. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/frame_app.html)
+* **Input app** — `App::input_app(...)`. Implement `InputApp` and repaint only when input is processed. Good for editors and menus. [Details](https://gdt050579.github.io/AppCUI-rs/chapter-2/input_app.html)
+
+```rust
+App::main_window(MyWindow::new())?.run();   // one full-screen window
+```
+
+|                        | Multi-window            | Main window                           | Frame app             | Input app             |
+| ---------------------- | ----------------------- | ------------------------------------- | --------------------- | --------------------- |
+| Constructor            | `App::new()`            | `App::main_window(...)`               | `App::frame_app(...)` | `App::input_app(...)` |
+| UI Model               | Retained                | Retained                              | Immediate             | Immediate             |
+| Who paints             | Framework               | Framework                             | You                   | You                   |
+| Windows                | Many, movable           | One, fixed, full screen               | None                  | None                  |
+| Stock controls, themes | Yes                     | Yes                                   | No                    | No                    |
+| App bar, command bar   | Yes                     | Yes                                   | No                    | No                    |
+| Custom desktop         | Yes                     | No                                    | No                    | No                    |
+| Screen updates         | On UI events            | On UI events                          | Every frame           | On processed input    |
+| Exit                   | `Esc` or `App::close()` | `Esc` (`on_cancel`) or `App::close()` | `Esc` (`.auto_close`) | `Esc` (`.auto_close`) |
+| Typical use            | Several-window apps     | A single full-screen tool             | Games, animations     | Editors, menus        |
+
+`ModalWindow` dialogs work in every mode (in a ModalWindow you can use all existing UI controls)
+
 ## 🚀 Quick Start
 
 Add the following to your `Cargo.toml`:

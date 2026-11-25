@@ -711,5 +711,5 @@ impl ListViewEvents<SliceItem> for PieChartEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(PieChartEditor::new).title("Pie chart editor").run()
+    App::new().window(PieChartEditor::new).title("Pie chart editor").run()
 }

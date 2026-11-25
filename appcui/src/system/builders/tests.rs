@@ -29,14 +29,14 @@ fn check_multi_window_app() {
 
 #[test]
 fn check_single_window_app() {
-    #[Window(events = CommandBarEvents, internal: true, commands: Ping)]
+    #[MainWindow(events = CommandBarEvents, internal: true, commands: Ping)]
     struct DemoWindow {
         info: Handle<Label>,
     }
     impl DemoWindow {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("title:'Single',d:f"),
+                base: MainWindow::new(),
                 info: Handle::None,
             };
             w.info = w.add(label!("'Press F1',a:c,w:16,h:1"));
@@ -61,15 +61,62 @@ fn check_single_window_app() {
     let script = "
         Paint.Enable(false)
         Paint('1. Single window fills the desktop')
-        CheckHash(0xD4BFFA61E71E1976)
+        CheckHash(0x9F379C6284FD168A)
         Key.Pressed(F1)
         Paint('2. Command bar action updated the label')
-        CheckHash(0x1ECCBC719BBB3D3E)
+        CheckHash(0xC80BD2A39DFC42BA)
     ";
-    App::single_window(DemoWindow::new)
+    App::main_window(DemoWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .command_bar()
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_main_window_on_cancel() {
+    #[MainWindow(events = WindowEvents, internal: true)]
+    struct DemoWindow {}
+    impl DemoWindow {
+        fn new() -> Self {
+            let mut w = Self {
+                base: MainWindow::new(),
+            };
+            w.add(label!("'Press Escape to exit',a:c,w:22,h:1"));
+            w
+        }
+    }
+    impl WindowEvents for DemoWindow {
+        fn on_cancel(&mut self) -> ActionRequest {
+            if dialogs::validate("Exit", "Close application ?") {
+                ActionRequest::Allow
+            } else {
+                ActionRequest::Deny
+            }
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial main window')
+        CheckHash(0xBFF76BD46D05AFA0)
+        Key.Pressed(Escape)
+        Paint('2. Exit question')
+        CheckHash(0xF2BE1C5B4F33C872)
+        Key.Pressed(Escape)
+        Paint('3. Dialog dismissed, app still running')
+        CheckHash(0xBFF76BD46D05AFA0)
+        Key.Pressed(Escape)
+        Paint('4. Exit question again')
+        CheckHash(0xF2BE1C5B4F33C872)
+        Key.Pressed(Alt+Y)
+        Paint('5. App should already be closed')
+        CheckHash(0x0)
+    ";
+    App::main_window(DemoWindow::new)
+        .size(Size::new(40, 10))
+        .debug_script(script)
         .run()
         .unwrap();
 }

@@ -7,6 +7,7 @@ mod border;
 pub mod events;
 mod initialization_flags;
 mod modal_window;
+mod main_window;
 mod resize_move_status;
 #[cfg(test)]
 mod tests;
@@ -19,6 +20,7 @@ pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::Type;
 use border::Border;
 pub use modal_window::ModalWindow;
+pub use main_window::MainWindow;
 use resize_move_status::ResizeMoveStatus;
 use title::Title;
 pub use window::Window;

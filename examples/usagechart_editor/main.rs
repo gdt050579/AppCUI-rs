@@ -679,5 +679,5 @@ impl ListViewEvents<SegmentItem> for UsageChartExample {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(UsageChartExample::new).title("Usage chart example").run()
+    App::new().window(UsageChartExample::new).title("Usage chart example").run()
 }

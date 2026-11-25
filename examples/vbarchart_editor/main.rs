@@ -1313,5 +1313,5 @@ impl CharPickerEvents for BarChartEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(BarChartEditor::new).title("Bar chart editor").run()
+    App::new().window(BarChartEditor::new).title("Bar chart editor").run()
 }

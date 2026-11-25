@@ -197,8 +197,8 @@ name = "custom_desktop"
 path = "custom_desktop/main.rs"
 
 [[example]]
-name = "single_window"
-path = "single_window/main.rs"
+name = "main_window"
+path = "main_window/main.rs"
 
 [[example]]
 name = "frame_app"

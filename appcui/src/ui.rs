@@ -149,6 +149,7 @@ pub use label::Label;
 pub use panel::Panel;
 pub use window::Window;
 pub use window::ModalWindow;
+pub use window::MainWindow;
 pub use button::Button;
 pub use tab::Tab;
 pub use accordion::Accordion;

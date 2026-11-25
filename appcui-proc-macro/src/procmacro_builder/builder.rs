@@ -389,7 +389,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     }
     if !a.custom_events.is_empty() {
         if config.get(AppCUITrait::CustomEvents) != TraitImplementation::Default {
-            panic!("Support for custom events (via 'custom_events' attribute) is only allowed for a Window or a ModalWindow !");
+            panic!("Support for custom events (via 'custom_events' attribute) is only allowed for a Window, a ModalWindow or a MainWindow !");
         } else {
             // we clear the custom event to avoid default implementation
             config.clear(AppCUITrait::CustomEvents);

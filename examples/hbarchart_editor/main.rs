@@ -1317,5 +1317,5 @@ impl CharPickerEvents for HBarChartEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(HBarChartEditor::new).title("Horizontal bar chart editor").run()
+    App::new().window(HBarChartEditor::new).title("Horizontal bar chart editor").run()
 }

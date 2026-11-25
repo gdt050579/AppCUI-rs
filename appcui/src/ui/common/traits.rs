@@ -282,6 +282,8 @@ pub trait Control:
 pub trait DesktopControl {}
 /// Marker implemented by [`struct@crate::ui::Window`].
 pub trait WindowControl {}
+/// Marker implemented by [`struct@crate::ui::MainWindow`].
+pub trait MainWindowControl {}
 /// Marker for controls that are not windows (used to restrict generic APIs).
 pub trait NotWindow {}
 /// Marker for controls that are not the desktop.

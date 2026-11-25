@@ -3,6 +3,7 @@ pub(crate) enum BaseControlType {
     Window,
     Desktop,
     ModalWindow,
+    MainWindow,
     CustomControl,
     CustomContainer,
 }
@@ -12,6 +13,7 @@ impl BaseControlType {
             BaseControlType::Window => "Window",
             BaseControlType::Desktop => "Desktop",
             BaseControlType::ModalWindow => "ModalWindow<()>",
+            BaseControlType::MainWindow => "MainWindow",
             BaseControlType::CustomControl => "ControlBase",
             BaseControlType::CustomContainer => "ContainerBase",
         })

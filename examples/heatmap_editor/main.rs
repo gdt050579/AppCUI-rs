@@ -1191,5 +1191,5 @@ impl ButtonEvents for HeatMapEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(HeatMapEditor::new).title("Heat map editor").run()
+    App::new().window(HeatMapEditor::new).title("Heat map editor").run()
 }

@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[Window(events = ButtonEvents+WindowEvents)]
+#[MainWindow(events = ButtonEvents+WindowEvents)]
 struct MyWindow {
     info: Handle<Label>,
     number: Handle<TextField>,
@@ -8,7 +8,7 @@ struct MyWindow {
 impl MyWindow {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("title:'Square root',d:f"),
+            base: MainWindow::new(),
             info: Handle::None,
             number: Handle::None,
         };
@@ -28,7 +28,7 @@ impl ButtonEvents for MyWindow {
         };
         let h = self.info;
         if let (Some(v), Some(i)) = (value, self.control_mut(h)) {
-            i.set_caption(format!("SQRT({})={}",v,v.sqrt()).as_str());
+            i.set_caption(format!("SQRT({})={}", v, v.sqrt()).as_str());
         }
         EventProcessStatus::Processed
     }
@@ -44,5 +44,5 @@ impl WindowEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(MyWindow::new).size(Size::new(40, 10)).run()
+    App::main_window(MyWindow::new).title("Square root").size(Size::new(40, 10)).run()
 }

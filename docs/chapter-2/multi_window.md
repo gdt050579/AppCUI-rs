@@ -70,13 +70,13 @@ To add windows after the application has started, use a custom desktop and call 
 
 ## Remarks
 
-* Multi-window mode is the opposite of [single-window mode](single_window.md). Here you can register several windows, use a custom desktop, and allow windows to move or resize.
+* Multi-window mode is the opposite of [main-window mode](main_window.md). Here you can register several windows, use a custom desktop, and allow windows to move or resize.
 * `.window(...)` is optional. A desktop-only application (for example one that creates windows from menus or the command bar) is valid:
     ```rs
     App::new().desktop(MyDesktop::new()).app_bar().command_bar().run()
     ```
 * The factory passed to `.window(...)` must return a **non-modal** window. Open modal dialogs later from a running window, not from the builder.
-* Window flags such as `Sizeable` and `FixedPosition` are allowed. In single-window mode `Sizeable` is not.
+* Window flags such as `Sizeable` and `FixedPosition` are allowed. 
 * There can be only one application per process. A second `App::new().run()` while another instance is running returns an error.
 
 ## Example
