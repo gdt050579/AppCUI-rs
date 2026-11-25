@@ -6,7 +6,7 @@
 //! | Constructor | Builder | Typical use |
 //! |-------------|---------|-------------|
 //! | [`App::new`](crate::system::App::new) | [`MultiWindowAppBuilder`] | Desktop with one or more windows |
-//! | [`App::single_window`](crate::system::App::single_window) | [`MainWindowAppBuilder`] | A single window that fills the desktop |
+//! | [`App::main_window`](crate::system::App::main_window) | [`MainWindowAppBuilder`] | A single window that fills the desktop |
 //! | [`App::frame_app`](crate::system::App::frame_app) | [`FrameAppBuilder`] | Games or animations that update every frame |
 //! | [`App::input_app`](crate::system::App::input_app) | [`InputAppBuilder`] | Custom paint and input without window chrome |
 //!
@@ -17,7 +17,7 @@
 mod internal_builder;
 mod app_desktop;
 mod multi_window_app_builder;
-mod single_window_app_builder;
+mod main_window_app_builder;
 mod frame_app_builder;
 mod input_app_builder;
 #[cfg(test)]
@@ -29,7 +29,7 @@ pub(crate) use app_desktop::impl_app_desktop_methods;
 pub(crate) use internal_builder::InternalBuilder;
 
 pub use multi_window_app_builder::MultiWindowAppBuilder;
-pub use single_window_app_builder::MainWindowAppBuilder;
+pub use main_window_app_builder::MainWindowAppBuilder;
 pub use frame_app_builder::FrameAppBuilder;
 pub use frame_app_builder::FrameApp;
 pub use input_app_builder::InputAppBuilder;

@@ -75,7 +75,7 @@ pub(crate) struct RuntimeManager {
     recompute_parent_indexes: bool,
     update_command_and_app_bars: bool,
     request_update_timer_threads: bool,
-    single_window: bool,
+    main_window: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle<()>>,
     current_focus: Option<Handle<()>>,
@@ -133,7 +133,7 @@ impl RuntimeManager {
             update_command_and_app_bars: true,
             recompute_parent_indexes: true,
             request_update_timer_threads: false,
-            single_window: builder.single_window,
+            main_window: builder.main_window,
             mouse_pos: Point::new(-1, -1),
             key_modifier: KeyModifier::None,
             request_focus: None,
@@ -164,10 +164,10 @@ impl RuntimeManager {
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
-        let mut desktop = if manager.single_window {
+        let mut desktop = if manager.main_window {
             // first check if a desktop was provided - if so panic
             if builder.desktop_manager.is_some() {
-                panic!("When `single_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !");
+                panic!("When `main_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !");
             }
             // for a single window we will use a custom (empty) desktop
             // that does nothing
@@ -360,9 +360,9 @@ impl RuntimeManager {
         T: Control + WindowControl + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        if self.single_window && (!controls.desktop_mut().base().children.is_empty()) {
+        if self.main_window && (!controls.desktop_mut().base().children.is_empty()) {
             // check to see how many window were added
-            panic!("When `App::single_window(...)` is used to initialize an application, only one window can be added !");
+            panic!("When `App::main_window(...)` is used to initialize an application, only one window can be added !");
         }
         let controls = unsafe { &mut *self.controls };
         let handle = controls.desktop_mut().base_mut().add_child(obj);
@@ -372,7 +372,7 @@ impl RuntimeManager {
         self.set_event_processors(handle.cast(), handle.cast());
         // all good --> the window has been registered
         if let Some(win) = controls.get_mut(handle.cast()) {
-            if self.single_window {
+            if self.main_window {
                 let base = win.base_mut();
                 base.set_mainwindow_flag();
                 let top = self.appbar.is_some();
@@ -644,8 +644,8 @@ impl RuntimeManager {
         if !self.desktop_os_start_called {
             self.process_terminal_resize_event(self.backend.size());
             self.process_desktop_on_start();
-            if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
-                panic!("You can not run a single window app without a window. Pass a window factory to `App::single_window(...)`.")
+            if self.main_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
+                panic!("You can not run a single window app without a window. Pass a window factory to `App::main_window(...)`.")
             }
         }
 

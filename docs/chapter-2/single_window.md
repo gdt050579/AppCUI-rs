@@ -1,6 +1,6 @@
 # Single Window Mode
 
-A single-window mode is an AppCUI application that hosts exactly one window, docked to fill the desktop. Start it with `App::single_window(factory)`. The result is a [`MainWindowAppBuilder`](application.md#builder) that you configure and then start with `.run()`.
+A single-window mode is an AppCUI application that hosts exactly one window, docked to fill the desktop. Start it with `App::main_window(factory)`. The result is a [`MainWindowAppBuilder`](application.md#builder) that you configure and then start with `.run()`.
 
 This mode is meant for tools that do not need a window list, a custom desktop, or overlapping frames. The factory is invoked once, after the runtime is created, and must return a non-modal window (`T` implements `Control`, `WindowControl`, and `NotModalWindow`). Closing that window ends the application.
 
@@ -10,7 +10,7 @@ The factory can be a **closure** or a **function**:
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(|| {
+    App::main_window(|| {
         let mut win = window!("title:'Demo',d:f");
         win.add(label!("'Hello World !',a:c,w:13,h:1"));
         win
@@ -24,15 +24,15 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(MyWin::new).size(Size::new(40, 10)).run()
+    App::main_window(MyWin::new).size(Size::new(40, 10)).run()
 }
 ```
 
-A free function works the same way: `App::single_window(hello_world_window)`.
+A free function works the same way: `App::main_window(hello_world_window)`.
 
 The layout you pass to the window is ignored. AppCUI replaces it so that the window occupies the entire visible desktop (leaving room for the [application bar](../chapter-4/app_bar.md) and [command bar](../chapter-4/command_bar.md) when they are enabled). Using `d:f` (docked, fill) in the `window!` macro makes that intent explicit.
 
-Read more about creating windows and handling their events in the [Window](../chapter-3/event-loop/window.md) section, and about this layout in [Single Window Apps](../chapter-3/event-loop/single_window.md).
+Read more about creating windows and handling their events in the [Window](../chapter-3/event-loop/window.md) section, and about this layout in [Single Window Apps](../chapter-3/event-loop/main_window.md).
 
 ## Additional constructor methods
 
@@ -42,7 +42,7 @@ Besides the methods described in [Builder](application.md#builder) the following
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](../chapter-6/themes.md) section.
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 
-There is no `.window(...)` method on this builder. The one window is the factory passed to `App::single_window(...)`. There is also no `.desktop(...)` method; a custom desktop can only be set in [multi-window mode](multi_window.md).
+There is no `.window(...)` method on this builder. The one window is the factory passed to `App::main_window(...)`. There is also no `.desktop(...)` method; a custom desktop can only be set in [multi-window mode](multi_window.md).
 
 ## Window behavior
 
@@ -59,9 +59,9 @@ Because there is only one window, desktop actions such as `Tab` / `Ctrl+Tab` win
 * The `Sizeable` window flag is **not** allowed. If it is set, the code panics:
     ```rs
     // the following line will panic
-    App::single_window(|| window!("Test,a:c,flags: Sizeable")).run()
+    App::main_window(|| window!("Test,a:c,flags: Sizeable")).run()
     ```
-* The factory passed to `App::single_window(...)` must return a **non-modal** window. Open modal dialogs later from the running window, not from the factory.
+* The factory passed to `App::main_window(...)` must return a **non-modal** window. Open modal dialogs later from the running window, not from the factory.
 
 
 ## Example
@@ -114,6 +114,6 @@ impl WindowEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(MyWindow::new).size(Size::new(40, 10)).run()
+    App::main_window(MyWindow::new).size(Size::new(40, 10)).run()
 }
 ```

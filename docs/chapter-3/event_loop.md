@@ -134,7 +134,7 @@ For a generic control, implement the typed trait the macro creates, such as `Lis
 
 ### Creating a window without using `#[Window]` attribute
 
-The attribute is a shorthand for code you can write yourself. A type passed to `App::window` or `App::single_window` implements `Control + WindowControl + NotModalWindow`. `Control` requires the input traits and every control event trait, so a hand-written window implements each of them. Empty impls are valid: the event traits provide default methods that ignore the event.
+The attribute is a shorthand for code you can write yourself. A type passed to `App::window` or `App::main_window` implements `Control + WindowControl + NotModalWindow`. `Control` requires the input traits and every control event trait, so a hand-written window implements each of them. Empty impls are valid: the event traits provide default methods that ignore the event.
 
 `#[repr(C)]` and a leading `base: Window` field are part of that contract. The runtime reads the window through the first field of the value.
 

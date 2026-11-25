@@ -44,5 +44,5 @@ impl WindowEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(MyWindow::new).title("Square root").size(Size::new(40, 10)).run()
+    App::main_window(MyWindow::new).title("Square root").size(Size::new(40, 10)).run()
 }

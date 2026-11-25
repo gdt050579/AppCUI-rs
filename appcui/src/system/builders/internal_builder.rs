@@ -13,7 +13,7 @@ pub struct InternalBuilder {
     pub(crate) desktop_manager: Option<ControlManager>,
     pub(crate) has_app_bar: bool,
     pub(crate) has_command_bar: bool,
-    pub(crate) single_window: bool,
+    pub(crate) main_window: bool,
     pub(crate) theme: Theme,
     pub(crate) max_timer_count: u8,
     pub(crate) log_file: Option<String>,
@@ -34,7 +34,7 @@ impl InternalBuilder {
             desktop_manager: None,
             has_app_bar: false,
             has_command_bar: false,
-            single_window: false,
+            main_window: false,
             max_timer_count: 4,
             theme: Theme::new(Themes::Default),
             log_file: None,
@@ -89,8 +89,8 @@ impl InternalBuilder {
         self.has_command_bar = true;
     }
     #[inline(always)]
-    pub(crate) fn single_window(&mut self) {
-        self.single_window = true;
+    pub(crate) fn main_window(&mut self) {
+        self.main_window = true;
     }
     #[inline(always)]
     pub(crate) fn desktop<T>(&mut self, desktop: T)

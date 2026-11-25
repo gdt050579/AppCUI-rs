@@ -70,7 +70,7 @@ To add windows after the application has started, use a custom desktop and call 
 
 ## Remarks
 
-* Multi-window mode is the opposite of [single-window mode](single_window.md). Here you can register several windows, use a custom desktop, and allow windows to move or resize.
+* Multi-window mode is the opposite of [single-window mode](main_window.md). Here you can register several windows, use a custom desktop, and allow windows to move or resize.
 * `.window(...)` is optional. A desktop-only application (for example one that creates windows from menus or the command bar) is valid:
     ```rs
     App::new().desktop(MyDesktop::new()).app_bar().command_bar().run()

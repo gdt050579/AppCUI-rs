@@ -9,12 +9,12 @@ type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 
 /// Builder for a single-window AppCUI application.
 ///
-/// Obtain this builder with [`App::single_window`](crate::system::App::single_window).
+/// Obtain this builder with [`App::main_window`](crate::system::App::main_window).
 /// In this mode the application hosts exactly one non-modal window (typically
 /// docked to fill the desktop). Configure the terminal and desktop UI, then call
 /// [`run`](Self::run) to start the event loop.
 ///
-/// The factory passed to [`App::single_window`](crate::system::App::single_window)
+/// The factory passed to [`App::main_window`](crate::system::App::main_window)
 /// can be a closure (`|| window!("title:'Demo',d:f")`) or a function / constructor
 /// with no arguments (`MyWin::new`).
 ///
@@ -24,7 +24,7 @@ type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 /// use appcui::prelude::*;
 ///
 /// fn main() -> Result<(), appcui::system::Error> {
-///     App::single_window(|| window!("title:'Demo',d:f"))
+///     App::main_window(|| window!("title:'Demo',d:f"))
 ///         .size(Size::new(40, 10))
 ///         .run()
 /// }
@@ -41,7 +41,7 @@ impl MainWindowAppBuilder {
         T: Control + WindowControl + MainWindowControl + NotModalWindow + 'static,
     {
         let mut b = InternalBuilder::new();
-        b.single_window();
+        b.main_window();
         Self {
             builder: b,
             window_factory: Box::new(move |rt: &mut RuntimeManager| {

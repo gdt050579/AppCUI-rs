@@ -994,7 +994,7 @@ impl OnWindowRegistered for Window {
         if self.is_mainwindow() {
             if self.flags.contains(Flags::Sizeable) {
                 // a single window can not be sizeable and can not have the resiz grip and/or the maximized button
-                panic!("A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !");
+                panic!("A window used in a single window mode (via App::build().main_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !");
             }
             self.flags |= Flags::FixedPosition;
         }
