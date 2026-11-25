@@ -36,7 +36,7 @@ pub(crate) enum StatusFlags {
     Expanded = 0x0400,
     IncreaseRightMarginOnFocus = 0x0800,
     IncreaseBottomMarginOnFocus = 0x1000,
-    SingleWindow = 0x2000,
+    MainWindow = 0x2000,
     // TBD
     ThemeType = 0x4000,
 }
@@ -149,7 +149,7 @@ impl ControlBase {
     /// This method has no effect on a Desktop control.
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
-        if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
+        if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::MainWindow) {
             return;
         }
         self.layout.layout_resize(width, height);
@@ -168,7 +168,7 @@ impl ControlBase {
     /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignment properties will be removed.
     /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
-        if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
+        if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::MainWindow) {
             return;
         }
         self.layout.layout_set_position(x, y);
@@ -202,7 +202,7 @@ impl ControlBase {
             self.status_flags.set(StatusFlags::Visible);
         } else {
             // desktop controls can not be hidden
-            if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
+            if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::MainWindow) {
                 return;
             }
             self.status_flags.remove(StatusFlags::Visible);
@@ -273,12 +273,12 @@ impl ControlBase {
         }
     }
     #[inline(always)]
-    pub(crate) fn set_singlewindow_flag(&mut self) {
-        self.status_flags |= StatusFlags::SingleWindow;
+    pub(crate) fn set_mainwindow_flag(&mut self) {
+        self.status_flags |= StatusFlags::MainWindow;
     }
     #[inline(always)]
     pub(crate) fn is_mainwindow(&self) -> bool {
-        self.status_flags.contains(StatusFlags::SingleWindow)
+        self.status_flags.contains(StatusFlags::MainWindow)
     }
 
     #[inline(always)]

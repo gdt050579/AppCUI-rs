@@ -374,7 +374,7 @@ impl RuntimeManager {
         if let Some(win) = controls.get_mut(handle.cast()) {
             if self.single_window {
                 let base = win.base_mut();
-                base.set_singlewindow_flag();
+                base.set_mainwindow_flag();
                 let top = self.appbar.is_some();
                 let bottom = self.commandbar.is_some();
                 base.layout = ControlLayout::from(match () {
