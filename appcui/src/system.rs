@@ -100,7 +100,7 @@ pub use self::background_task::BackgroundTask;
 pub use self::background_task::BackgroundTaskConector;
 pub(crate) use self::builders::InternalBuilder;
 pub use self::builders::MultiWindowAppBuilder;
-pub use self::builders::SingleWindowAppBuilder;
+pub use self::builders::MainWindowAppBuilder;
 pub use self::builders::FrameAppBuilder;
 pub use self::builders::FrameApp;
 pub use self::builders::InputAppBuilder;

@@ -29,12 +29,12 @@ type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 ///         .run()
 /// }
 /// ```
-pub struct SingleWindowAppBuilder {
+pub struct MainWindowAppBuilder {
     builder: InternalBuilder,
     window_factory: WindowFactory,
 }
 
-impl SingleWindowAppBuilder {
+impl MainWindowAppBuilder {
     pub(crate) fn new<F, T>(factory: F) -> Self
     where
         F: FnOnce() -> T + 'static,

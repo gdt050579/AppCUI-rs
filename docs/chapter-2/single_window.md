@@ -1,6 +1,6 @@
 # Single Window Mode
 
-A single-window mode is an AppCUI application that hosts exactly one window, docked to fill the desktop. Start it with `App::single_window(factory)`. The result is a [`SingleWindowAppBuilder`](application.md#builder) that you configure and then start with `.run()`.
+A single-window mode is an AppCUI application that hosts exactly one window, docked to fill the desktop. Start it with `App::single_window(factory)`. The result is a [`MainWindowAppBuilder`](application.md#builder) that you configure and then start with `.run()`.
 
 This mode is meant for tools that do not need a window list, a custom desktop, or overlapping frames. The factory is invoked once, after the runtime is created, and must return a non-modal window (`T` implements `Control`, `WindowControl`, and `NotModalWindow`). Closing that window ends the application.
 

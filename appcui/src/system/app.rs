@@ -29,7 +29,7 @@ const WEBTERMINAL_END_MESSAGE_HTML: &str = "<h1>{} has ended</h1><p>To re-start 
 /// | Constructor | Builder | Use when |
 /// |-------------|---------|----------|
 /// | [`App::new`] | [`crate::system::MultiWindowAppBuilder`] | Classic desktop with one or more windows |
-/// | [`App::single_window`] | [`crate::system::SingleWindowAppBuilder`] | A single window that fills the desktop |
+/// | [`App::single_window`] | [`crate::system::MainWindowAppBuilder`] | A single window that fills the desktop |
 /// | [`App::frame_app`] | [`crate::system::FrameAppBuilder`] | Games or animations that update every frame |
 /// | [`App::input_app`] | [`crate::system::InputAppBuilder`] | Custom paint and input without window chrome |
 ///
@@ -143,12 +143,12 @@ impl App {
     /// }
     /// ```
     #[allow(clippy::new_ret_no_self)]
-    pub fn single_window<F, T>(factory: F) -> crate::system::SingleWindowAppBuilder
+    pub fn single_window<F, T>(factory: F) -> crate::system::MainWindowAppBuilder
     where
         F: FnOnce() -> T + 'static,
         T: Control + WindowControl + MainWindowControl + NotModalWindow + 'static,
     {
-        crate::system::SingleWindowAppBuilder::new(factory)
+        crate::system::MainWindowAppBuilder::new(factory)
     }
     /// Creates a builder for a frame-based application.
     ///
