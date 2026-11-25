@@ -1,6 +1,6 @@
-# Single Window Mode
+# Main Window Mode
 
-A single-window mode is an AppCUI application that hosts exactly one window, docked to fill the desktop. Start it with `App::main_window(factory)`. The result is a [`MainWindowAppBuilder`](application.md#builder) that you configure and then start with `.run()`.
+A main-window mode is an AppCUI application that hosts exactly one window, docked to fill the desktop. Start it with `App::main_window(factory)`. The result is a [`MainWindowAppBuilder`](application.md#builder) that you configure and then start with `.run()`.
 
 This mode is meant for tools that do not need a window list, a custom desktop, or overlapping frames. The factory is invoked once, after the runtime is created, and must return a non-modal window (`T` implements `Control`, `WindowControl`, and `NotModalWindow`). Closing that window ends the application.
 
@@ -32,11 +32,11 @@ A free function works the same way: `App::main_window(hello_world_window)`.
 
 The layout you pass to the window is ignored. AppCUI replaces it so that the window occupies the entire visible desktop (leaving room for the [application bar](../chapter-4/app_bar.md) and [command bar](../chapter-4/command_bar.md) when they are enabled). Using `d:f` (docked, fill) in the `window!` macro makes that intent explicit.
 
-Read more about creating windows and handling their events in the [Window](../chapter-3/event-loop/window.md) section, and about this layout in [Single Window Apps](../chapter-3/event-loop/main_window.md).
+Read more about creating windows and handling their events in the [Window](../chapter-3/event-loop/window.md) section, and about this layout in [Main Window Apps](../chapter-3/event-loop/main_window.md).
 
 ## Additional constructor methods
 
-Besides the methods described in [Builder](application.md#builder) the following methods are available for a single-window mode setup:
+Besides the methods described in [Builder](application.md#builder) the following methods are available for a main-window mode setup:
 * `.app_bar()` to enable the application top app bar. Read more in [Application bar](../chapter-4/app_bar.md).
 * `.command_bar()` to enable the application command bar. Read more in [Command bar](../chapter-4/command_bar.md).
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](../chapter-6/themes.md) section.
@@ -46,7 +46,7 @@ There is no `.window(...)` method on this builder. The one window is the factory
 
 ## Window behavior
 
-The single window is created with the `FixedPosition` flag. It cannot be moved or resized, and it has no maximize or resize grip. The visible area is the terminal minus the app bar (top) and the command bar (bottom), if those bars are enabled.
+The main window is created with the `FixedPosition` flag. It cannot be moved or resized, and it has no maximize or resize grip. The visible area is the terminal minus the app bar (top) and the command bar (bottom), if those bars are enabled.
 
 Closing the window (the close button, `Escape`, or `close()`) closes the application. You can intercept that with `WindowEvents::on_cancel` and return `ActionRequest::Deny` if you need a confirmation dialog.
 
@@ -54,7 +54,7 @@ Because there is only one window, desktop actions such as `Tab` / `Ctrl+Tab` win
 
 ## Remarks
 
-* Single-window mode is the opposite of [multi-window mode](multi_window.md). Here you cannot register a second window, use a custom desktop, or allow the window to move or resize.
+* Main-window mode is the opposite of [multi-window mode](multi_window.md). Here you cannot register a second window, use a custom desktop, or allow the window to move or resize.
 * `.desktop(...)` is **not** available on this builder. A custom desktop can only be set in multi-window mode, via `App::new().desktop(...)`.
 * The `Sizeable` window flag is **not** allowed. If it is set, the code panics:
     ```rs
