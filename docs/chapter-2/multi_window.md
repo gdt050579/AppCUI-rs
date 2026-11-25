@@ -76,7 +76,7 @@ To add windows after the application has started, use a custom desktop and call 
     App::new().desktop(MyDesktop::new()).app_bar().command_bar().run()
     ```
 * The factory passed to `.window(...)` must return a **non-modal** window. Open modal dialogs later from a running window, not from the builder.
-* Window flags such as `Sizeable` and `FixedPosition` are allowed. In main-window mode `Sizeable` is not.
+* Window flags such as `Sizeable` and `FixedPosition` are allowed. 
 * There can be only one application per process. A second `App::new().run()` while another instance is running returns an error.
 
 ## Example

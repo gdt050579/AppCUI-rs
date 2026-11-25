@@ -5,7 +5,7 @@ An application in `AppCUI` is the **context** that holds all of the framework da
 To create an application, one of the following constructors can be used:
 1. `App::new()`. This creates a builder for a classic desktop with one or more windows and chooses the best-fit terminal available on the current operating system.
 
-2. `App::main_window(factory)`. This creates a builder for an application with exactly one window that fills the desktop. The `factory` is invoked once, after the runtime is created, and must return that window. It can be a closure (`|| window!("Demo,d:f")`) or a function / constructor with no arguments (`MyWin::new`).
+2. `App::main_window(factory)`. This creates a builder for an application with exactly one window that fills the desktop. The `factory` is invoked once, after the runtime is created, and must return a `MainWindow` or a struct declared with `#[MainWindow]`. It can be a closure (`|| MainWindow::new()`) or a function / constructor with no arguments (`MyWin::new`). See [Main Window Mode](main_window.md).
 
 3. `App::frame_app(frame_app)`. This creates a builder for games or animations that paint the full surface every frame. The provided type must implement `FrameApp`.
 

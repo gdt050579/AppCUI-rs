@@ -113,6 +113,8 @@ MyWin {
 
 `#[ModalWindow(...)]` rewrites a struct the same way. Its `base` field has type `ModalWindow<Response>` instead of `Window`. See [Modal Window](event-loop/modal_window.md).
 
+`#[MainWindow(...)]` is the attribute for [main-window mode](../chapter-2/main_window.md). Its `base` field has type `MainWindow` and is initialized with `MainWindow::new()`, which takes no title, layout, or flags. `window!(...)` is not a main window.
+
 To print the code the compiler actually compiles, install [`cargo-expand`](https://github.com/dtolnay/cargo-expand) and run `cargo expand` on the module that contains the struct. The output is this expansion, with every generated impl written out.
 
 ### Compiler errors for `#[Window]`
@@ -134,7 +136,7 @@ For a generic control, implement the typed trait the macro creates, such as `Lis
 
 ### Creating a window without using `#[Window]` attribute
 
-The attribute is a shorthand for code you can write yourself. A type passed to `App::window` or `App::main_window` implements `Control + WindowControl + NotModalWindow`. `Control` requires the input traits and every control event trait, so a hand-written window implements each of them. Empty impls are valid: the event traits provide default methods that ignore the event.
+The attribute is a shorthand for code you can write yourself. A type passed to `App::window` implements `Control + WindowControl + NotModalWindow`. `Control` requires the input traits and every control event trait, so a hand-written window implements each of them. Empty impls are valid: the event traits provide default methods that ignore the event. A main window is a different type: pass `MainWindow` or a `#[MainWindow]` struct to `App::main_window`. See [Main Window Mode](../chapter-2/main_window.md).
 
 `#[repr(C)]` and a leading `base: Window` field are part of that contract. The runtime reads the window through the first field of the value.
 

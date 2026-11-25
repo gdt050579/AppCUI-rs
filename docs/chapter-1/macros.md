@@ -24,7 +24,7 @@ The same pairing holds for the other macros. The [first application](first_appli
 | `label!("'Hello',a:c,w:5,h:1")` | `Label::new("Hello", layout)` |
 | `menu!(...)` | `Menu::new()`, then `add` for each item. [Build a menu with macros](../chapter-4/menu/macro_builder.md) shows both. |
 
-`#[Window]`, `#[ModalWindow]`, `#[CustomControl]`, and `#[Desktop]` insert a `base` field and the trait implementations the runtime expects. That struct can be written by hand. [Event loop](../chapter-3/event_loop.md) shows what `#[Window]` generates and the version without the attribute.
+`#[Window]`, `#[MainWindow]`, `#[ModalWindow]`, `#[CustomControl]`, and `#[Desktop]` insert a `base` field and the trait implementations the runtime expects. That struct can be written by hand. [Event loop](../chapter-3/event_loop.md) shows what `#[Window]` generates and the version without the attribute. `#[MainWindow]` is the attribute for [main-window mode](../chapter-2/main_window.md): its `base` field is a `MainWindow`, initialized with `MainWindow::new()`.
 
 The string inside a function-like macro (`window!`, `button!`, `layout!`, and one macro per stock control) is described in [Instantiate via Macros](../chapter-3/instantiate_via_macros.md).
 
