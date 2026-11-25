@@ -184,18 +184,21 @@ Every AppCUI program starts in one of four modes. In the first two, you place co
 App::main_window(MyWindow::new())?.run();   // one full-screen window
 ```
 
-|                         | Multi-window            | Main window                  | Frame app          | Input app             |
-| ----------------------- | ----------------------- | ---------------------------- | ------------------ | --------------------- |
-| Who paints              | Framework               | Framework                    | You                | You                   |
-| Windows                 | Many, movable           | One, fixed, full screen      | None               | None                  |
-| Stock controls, themes  | Yes                     | Yes                          | No                 | No                    |
-| App bar, command bar    | Yes                     | Yes                          | No                 | No                    |
-| Custom desktop          | Yes                     | No                           | No                 | No                    |
-| Screen updates          | On UI events            | On UI events                 | Every frame        | On processed input    |
-| Exit                    | `Esc` or `App::close()` | `Esc` (`on_cancel`) or `App::close()` | `Esc` (`.auto_close`) | `Esc` (`.auto_close`) |
-| Typical use             | Several-window apps     | A single full-screen tool    | Games, animations  | Editors, menus        |
+|                        | Multi-window            | Main window                           | Frame app             | Input app             |
+| ---------------------- | ----------------------- | ------------------------------------- | --------------------- | --------------------- |
+| Constructor            | `App::new()`            | `App::main_window(...)`               | `App::frame_app(...)` | `App::input_app(...)` |
+| UI Model               | Retained                | Retained                              | Immediate             | Immediate             |
+| Who paints             | Framework               | Framework                             | You                   | You                   |
+| Windows                | Many, movable           | One, fixed, full screen               | None                  | None                  |
+| Stock controls, themes | Yes                     | Yes                                   | No                    | No                    |
+| App bar, command bar   | Yes                     | Yes                                   | No                    | No                    |
+| Custom desktop         | Yes                     | No                                    | No                    | No                    |
+| Screen updates         | On UI events            | On UI events                          | Every frame           | On processed input    |
+| Exit                   | `Esc` or `App::close()` | `Esc` (`on_cancel`) or `App::close()` | `Esc` (`.auto_close`) | `Esc` (`.auto_close`) |
+| Typical use            | Several-window apps     | A single full-screen tool             | Games, animations     | Editors, menus        |
 
 `ModalWindow` dialogs work in every mode (in a ModalWindow you can use all existing UI controls)
+
 ## 🚀 Quick Start
 
 Add the following to your `Cargo.toml`:
