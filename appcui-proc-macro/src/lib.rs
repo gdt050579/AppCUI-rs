@@ -388,6 +388,85 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     procmacro_builder::build(args, input, BaseControlType::ModalWindow, &mut config)
 }
 
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn MainWindow(args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut config = TraitsConfig::new("MainWindow");
+    // Deref is mandatory
+    config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::WindowControl, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::NotModalWindow, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::ModalWindowMethods, TraitImplementation::BaseFallbackNonOverwritable);
+    // Raw events (implemente by default)
+    config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnFocus, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnExpand, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnDefaultAction, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
+    // control events
+    config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MarkdownComposerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericBufferViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::UsageChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHeatMapEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::Default);
+
+    // custom events
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);
+
+    // desktop
+    config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
+
+    procmacro_builder::build(args, input, BaseControlType::MainWindow, &mut config)
+}
+
+
 /// Used to create window and intercepts/process events from children controls.
 /// The general format is: `#[Desktop(overwrite = ..., events= ...)]`
 /// Where the **overwrite** parameter is a list of traits that can be overwritten that include:
