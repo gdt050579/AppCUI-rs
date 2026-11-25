@@ -18,6 +18,7 @@ impl MaximizeRestoreButton {
             Type::Classic => 3,
             Type::Rounded => 3,
             Type::Panel => 2,
+            Type::Borderless => 2,
         };
         Self {
             base: ItemBase::with_width(w, "Press to maximize or restore",window_type, true),
@@ -45,6 +46,13 @@ impl MaximizeRestoreButton {
                 };
                 surface.write_string(x, y, s, st.window_bar_attr(theme, theme.window.bar.maximize_button), false);
             }
+            Type::Borderless => {
+                let s = match data.maximized {
+                    true => "🗗 ", // ⧉  ⮻  
+                    false => "⏹ ", // 🗖 🗖 ⏹ ■ 🗖 🞏 🗔 📰 🖵
+                };
+                surface.write_string(x, y, s, st.attr(theme, theme.symbol.maximized), false);
+            }            
         }
     }
 }

@@ -19,5 +19,11 @@ fn main() -> Result<(), appcui::system::Error> {
         w.set_hotkey(key!("Alt+3"));
 
         w
+    }).window(|| {
+        let mut w = Window::with_type("Type::Borderless", layout!("x:50,y:15,w:40,h:10"), window::Flags::Sizeable, window::Type::Borderless, window::Background::Normal);
+        w.set_tag("win");
+        w.set_hotkey(key!("Alt+4"));
+
+        w
     }).run()
 }

@@ -155,6 +155,7 @@ impl ToolBar {
                 Type::Classic => GroupPosition::TopLeft,
                 Type::Rounded => GroupPosition::TopLeft,
                 Type::Panel => GroupPosition::TopRight,
+                Type::Borderless => GroupPosition::TopRight,
             },        
             id: ToolBar::MAXIMIZE_RESTORE_GROUP_ID,
         }

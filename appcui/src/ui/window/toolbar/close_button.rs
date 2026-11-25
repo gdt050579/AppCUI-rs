@@ -18,6 +18,7 @@ impl CloseButton {
             Type::Classic => 3,
             Type::Rounded => 3,
             Type::Panel => 2,
+            Type::Borderless => 2,
         };
         CloseButton {
             base: ItemBase::with_width(w, "Press to close this window", window_type, true),
@@ -38,6 +39,9 @@ impl CloseButton {
             }
             Type::Panel => {
                 surface.write_string(x, y, "✖ ", st.window_bar_attr(theme, theme.window.bar.close_button), false);
+            }
+            Type::Borderless => {
+                surface.write_string(x, y, "✖ ", st.attr(theme, theme.symbol.close), false);
             }
         }
     }

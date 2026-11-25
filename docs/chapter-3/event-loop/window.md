@@ -12,32 +12,34 @@ These screenshots show focused windows rendered by the [window guide example](ht
 
 ### Frame styles
 
-| Type                                                                         | Screenshot                                                                                                                     |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `Type::Classic`<br>Double-line frame while focused;<br>single-line when inactive or moving. | <img src="img/window-classic.png" alt="Classic window with a double-line border and a bracketed close button." width="320" /> |
-| `Type::Rounded`<br>Single-line frame with rounded corners.                   | <img src="img/window-rounded.png" alt="Rounded window with rounded corners and a bracketed close button." width="320" />      |
-| `Type::Panel`<br>Title bar with no surrounding frame.                        | <img src="img/window-panel.png" alt="Panel window with a title bar and no surrounding border." width="320" />                 |
+| Type                                                                                                                     | Screenshot                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `Type::Classic`<br>Double-line frame while focused;<br>single-line when inactive or moving.                              | <img src="img/window-classic.png" alt="Classic window with a double-line border and a bracketed close button." width="320" />          |
+| `Type::Rounded`<br>Single-line frame with rounded corners.                                                               | <img src="img/window-rounded.png" alt="Rounded window with rounded corners and a bracketed close button." width="320" />               |
+| `Type::Panel`<br>Title bar with no surrounding frame.<br>The title is centered.                                          | <img src="img/window-panel.png" alt="Panel window with a title bar and no surrounding border." width="320" />                          |
+| `Type::Borderless`<br>No frame and no inner margin.<br>The title is left-aligned.<br>The tag, when set, is on the right. | <img src="img/window-borderless.png" alt="Borderless window with a left-aligned title and a close button on the right." width="320" /> |
 
 ### Backgrounds
 
 The colors below are the default theme's; other themes can choose different colors.
 
-| Background                                                               | Screenshot                                                                                                    |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `Background::Normal`<br>Dark blue (`#000080`); the default.              | <img src="img/window-classic.png" alt="Normal window with a dark blue background." width="320" />            |
-| `Background::Error`<br>Dark red (`#800000`) for failures.                | <img src="img/window-error.png" alt="Error window with a dark red background." width="320" />                |
-| `Background::Warning`<br>Olive (`#808000`) for cautions.                 | <img src="img/window-warning.png" alt="Warning window with an olive background." width="320" />              |
-| `Background::Notification`<br>Dark green (`#008000`) for information.    | <img src="img/window-notification.png" alt="Notification window with a dark green background." width="320" /> |
+| Background                                                            | Screenshot                                                                                                    |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Background::Normal`<br>Dark blue (`#000080`); the default.           | <img src="img/window-classic.png" alt="Normal window with a dark blue background." width="320" />             |
+| `Background::Error`<br>Dark red (`#800000`) for failures.             | <img src="img/window-error.png" alt="Error window with a dark red background." width="320" />                 |
+| `Background::Warning`<br>Olive (`#808000`) for cautions.              | <img src="img/window-warning.png" alt="Warning window with an olive background." width="320" />               |
+| `Background::Notification`<br>Dark green (`#008000`) for information. | <img src="img/window-notification.png" alt="Notification window with a dark green background." width="320" /> |
 
 ### Initialization flags
 
-| Flags                                                                         | Screenshot                                                                                                          |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `Flags::None`<br>Movable, fixed size, with a close button.                    | <img src="img/window-classic.png" alt="Default window with a close button and no resize grip." width="320" />      |
-| `Flags::Sizeable`<br>Adds the maximize/restore button<br>and the resize grip. | <img src="img/window-sizeable.png" alt="Sizeable window with maximize, close, and resize controls." width="320" /> |
-| `Flags::NoCloseButton`<br>Hides the close button.                             | <img src="img/window-no-close.png" alt="Window whose title bar has no close button." width="320" />                |
+| Flags                                                                                  | Screenshot                                                                                                                 |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `Flags::None`<br>Movable, fixed size, with a close button.                             | <img src="img/window-classic.png" alt="Default window with a close button and no resize grip." width="320" />              |
+| `Flags::Sizeable`<br>Adds the maximize/restore button<br>and the resize grip.          | <img src="img/window-sizeable.png" alt="Sizeable window with maximize, close, and resize controls." width="320" />         |
+| `Flags::NoCloseButton`<br>Hides the close button.                                      | <img src="img/window-no-close.png" alt="Window whose title bar has no close button." width="320" />                        |
+| `Flags::NoTitle`<br>Hides the title text.<br>The frame, buttons, tag, and hotkey stay. | <img src="img/window-no-title.png" alt="Classic window with a frame and a close button, and no title text." width="320" /> |
 
-`Flags::FixedPosition` prevents moving the window and adds no separate visual indicator. Flags can be combined with `|`; for example, `Flags::Sizeable | Flags::NoCloseButton` permits resizing while hiding the close button.
+`Flags::FixedPosition` prevents moving the window and adds no separate visual indicator. Flags can be combined with `|`; for example, `Flags::Sizeable | Flags::NoCloseButton` permits resizing while hiding the close button. `Flags::NoTitle` only hides the title text: a `Classic` or `Rounded` frame is still drawn, and the close button, tag, and hotkey remain.
 
 Run the example from the repository root to try each option:
 
@@ -47,7 +49,7 @@ cargo run --example window_guide -- notification
 cargo run --example window_guide -- sizeable
 ```
 
-The other choices are `rounded`, `panel`, `error`, `warning`, `no-close`, and `fixed-position`.
+The other choices are `rounded`, `panel`, `borderless`, `error`, `warning`, `no-close`, `no-title`, and `fixed-position`.
 
 For example, a resizable error dialog can combine `Flags::Sizeable` with `Background::Error`:
 
@@ -112,18 +114,20 @@ A window supports the following initialization flags:
 * `window::Flags::Sizeable` or `Sizeable` (for **window!** macro) - a window that has the resize grip and the maximize button
 * `window::Flags::NoCloseButton` or `NoCloseButton` (for **window!** macro) - a window without a close button
 * `window::Flags::FixedPosition` or `FixedPosition` (for **window!** macro) - a window that can not be moved
+* `window::Flags::NoTitle` or `NoTitle` (for **window!** macro) - hides the title text. The frame (when the type has one), the close button, the tag, and the hotkey stay visible
 
 the following types:
-* `window::Type::Classic` or `Classic` (for **window!** macro) - a regular window with a classic look (double border)
-* `window::Type::Rounded` or `Rounded` (for **window!** macro) - a window with rounded corners
-* `window::Type::Panel` or `Panel` (for **window!** macro) - a window with a top bar and no borders
+* `window::Type::Classic` or `Classic` (for **window!** macro) - a regular window with a classic look (double border). The title is centered
+* `window::Type::Rounded` or `Rounded` (for **window!** macro) - a window with rounded corners. The title is centered
+* `window::Type::Panel` or `Panel` (for **window!** macro) - a window with a top bar and no borders. The title is centered
+* `window::Type::Borderless` or `Borderless` (for **window!** macro) - a window with no frame and no inner margin. The title is left-aligned, and the tag is placed on the right
 
 
 the following backgrounds:
-* `window::Type::Normal` or `Normal` (for **window!** macro) - a regular window (using the default background color)
-* `window::Type::Error` or `Error` (for **window!** macro) - a window with a red background to indicate an error message
-* `window::Type::Notification` or `Notification` (for **window!** macro) - a window with a different background designed for notification messages
-* `window::Type::Warning` or `Warning` (for **window!** macro) - a window with a different background designed for Warning messages
+* `window::Background::Normal` or `Normal` (for **window!** macro) - a regular window (using the default background color)
+* `window::Background::Error` or `Error` (for **window!** macro) - a window with a red background to indicate an error message
+* `window::Background::Notification` or `Notification` (for **window!** macro) - a window with a different background designed for notification messages
+* `window::Background::Warning` or `Warning` (for **window!** macro) - a window with a different background designed for Warning messages
 
 
 ## Methods
@@ -230,6 +234,8 @@ fn main() -> Result<(), appcui::system::Error> {
 ```
 should generate a window that looks like the following:
 <img src="img/window_with_tag.png" width=400/>
+
+On a `Classic`, `Rounded`, or `Panel` window the tag is drawn on the left side of the title bar, as in the picture above. On a `Borderless` window the tag is drawn on the right.
 
 ## Window Hot Key
 

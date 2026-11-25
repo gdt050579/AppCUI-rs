@@ -295,7 +295,7 @@ impl ControlBase {
         self.status_flags |= StatusFlags::SingleWindow;
     }
     #[inline(always)]
-    pub(crate) fn is_singlewindow(&self) -> bool {
+    pub(crate) fn is_mainwindow(&self) -> bool {
         self.status_flags.contains(StatusFlags::SingleWindow)
     }
 

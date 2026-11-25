@@ -18,6 +18,7 @@ impl ResizeGrip {
             Type::Classic => 2,
             Type::Rounded => 2,
             Type::Panel => 1,
+            Type::Borderless => 1,
         };
         Self {
             base: ItemBase::with_width(w, "Drag to resize this window", window_type, true),
@@ -38,7 +39,7 @@ impl ResizeGrip {
                     surface.write_char(x + 1, y, Character::with_attributes('\u{256F}', a));
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
-                Type::Panel => {
+                Type::Panel | Type::Borderless => {
                     surface.write_char(x, y, Character::with_attributes('⣠', a));
                 }
             }

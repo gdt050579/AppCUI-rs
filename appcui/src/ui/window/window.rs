@@ -160,48 +160,48 @@ impl Window {
         }
         Handle::None
     }
-    
+
     /// Creates a new window with the specified title, layout, and flags.
     /// The window will have default type associated with the current theme and background `Background::Normal`.
-    /// 
+    ///
     /// # Parameters
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window
     /// * `flags` - The flags for the window
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let mut win = Window::new("My Window", 
-    ///                           layout!("a:c,w:40,h:10"), 
+    ///
+    /// let mut win = Window::new("My Window",
+    ///                           layout!("a:c,w:40,h:10"),
     ///                           window::Flags::Sizeable);
     /// ```
     #[inline(always)]
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         Window::internal_create(title, layout, flags, None, Background::Normal, StatusFlags::ThemeType)
-    }   
+    }
 
     /// Creates a new window with the specified title, layout, flags, type, and background.
-    /// The type parameter determines the visual style of the window (e.g., Classic, Rounded, Panel).
+    /// The type parameter determines the visual style of the window (`Classic`, `Rounded`, `Panel`, or `Borderless`).
     /// The background parameter sets the window's background color scheme.
-    /// 
+    ///
     /// # Parameters
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window
     /// * `flags` - The flags for the window
     /// * `window_type` - The visual type of the window
     /// * `background` - The background color scheme of the window
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut win = Window::with_type("My Panel Window",
     ///                                 layout!("a:c,w:40,h:10"),
     ///                                 window::Flags::Sizeable,
     ///                                 window::Type::Panel,
-    ///                                 window::Background::Normal); 
+    ///                                 window::Background::Normal);
     /// ```
     #[inline(always)]
     pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type, background: Background) -> Self {
@@ -210,23 +210,23 @@ impl Window {
 
     /// Creates a new window with the specified title, layout, flags, and background.
     /// The window will have default type associated with the current theme.
-    /// 
+    ///
     /// # Parameters
     /// * `title` - The title of the window
     /// * `layout` - The layout of the window
     /// * `flags` - The flags for the window
     /// * `background` - The background color scheme of the window
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut win = Window::with_background("My Themed Window",
     ///                                     layout!("a:c,w:40,h:10"),
     ///                                     window::Flags::Sizeable,
     ///                                     window::Background::Normal);
     /// ```
-    /// 
+    ///
     #[inline(always)]
     pub fn with_background(title: &str, layout: Layout, flags: Flags, background: Background) -> Self {
         Window::internal_create(title, layout, flags, None, background, StatusFlags::ThemeType)
@@ -261,7 +261,9 @@ impl Window {
             tag_handle: Handle::None,
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
-        win.set_margins(1, 1, 1, 1);
+        if wtype != Type::Borderless {
+            win.set_margins(1, 1, 1, 1);
+        }
         if !flags.contains(Flags::NoCloseButton) {
             let g = win.toolbar.close_button_group();
             win.toolbar.add(g, toolbar::CloseButton::new(wtype));
@@ -277,7 +279,12 @@ impl Window {
         win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new(wtype));
 
         // tag
-        let g = win.toolbar.create_group(GroupPosition::TopLeft);
+        let g = win.toolbar.create_group(match wtype {
+            Type::Classic => GroupPosition::TopLeft,
+            Type::Rounded => GroupPosition::TopLeft,
+            Type::Panel => GroupPosition::TopLeft,
+            Type::Borderless => GroupPosition::TopRight,
+        });
         win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(wtype));
 
         win
@@ -599,7 +606,7 @@ impl Window {
     /// win.enter_resize_mode();
     /// ```
     pub fn enter_resize_mode(&mut self) {
-        if (self.has_focus()) && (!self.is_singlewindow()) {
+        if (self.has_focus()) && (!self.is_mainwindow()) {
             self.rm_status = ResizeMoveStatus::ResizeMoveViaKeyboard;
             self.base.set_key_input_before_children_flag(true);
         }
@@ -851,7 +858,7 @@ impl Window {
             let result = WindowEvents::on_cancel(interface);
             if result == ActionRequest::Allow {
                 // logic to remove me
-                if self.is_singlewindow() {
+                if self.is_mainwindow() {
                     // close the entire app
                     RuntimeManager::get().close();
                 } else {
@@ -984,7 +991,7 @@ impl Window {
 
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
-        if self.is_singlewindow() {
+        if self.is_mainwindow() {
             if self.flags.contains(Flags::Sizeable) {
                 // a single window can not be sizeable and can not have the resiz grip and/or the maximized button
                 panic!("A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !");
@@ -1018,7 +1025,9 @@ impl OnPaint for Window {
         self.toolbar.paint(surface, theme, has_focus, self.maximized);
 
         // paint title
-        self.title.paint(surface, theme, self.rm_status, has_focus);
+        if !self.flags.contains(Flags::NoTitle) {
+            self.title.paint(surface, theme, self.rm_status, has_focus);
+        }
     }
 }
 

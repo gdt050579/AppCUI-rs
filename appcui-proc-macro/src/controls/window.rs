@@ -6,11 +6,9 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "Sizeable",
     "NoCloseButton",
     "FixedPosition",
-    "ErrorWindow",
-    "NotifyWindow",
-    "WarningWindow",
+    "NoTitle",
 ]);
-static TYPES: FlagsSignature = FlagsSignature::new(&["Classic", "Rounded", "Panel"]);
+static TYPES: FlagsSignature = FlagsSignature::new(&["Classic", "Rounded", "Panel", "Borderless"]);
 static BACKGROUNDS: FlagsSignature = FlagsSignature::new(&["Normal", "Error", "Warning", "Notification"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("title", ParamType::String)];
