@@ -75,6 +75,53 @@ fn check_single_window_app() {
 }
 
 #[test]
+fn check_main_window_on_cancel() {
+    #[MainWindow(events = WindowEvents, internal: true)]
+    struct DemoWindow {}
+    impl DemoWindow {
+        fn new() -> Self {
+            let mut w = Self {
+                base: MainWindow::new(),
+            };
+            w.add(label!("'Press Escape to exit',a:c,w:22,h:1"));
+            w
+        }
+    }
+    impl WindowEvents for DemoWindow {
+        fn on_cancel(&mut self) -> ActionRequest {
+            if dialogs::validate("Exit", "Close application ?") {
+                ActionRequest::Allow
+            } else {
+                ActionRequest::Deny
+            }
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial main window')
+        CheckHash(0xBFF76BD46D05AFA0)
+        Key.Pressed(Escape)
+        Paint('2. Exit question')
+        CheckHash(0xF2BE1C5B4F33C872)
+        Key.Pressed(Escape)
+        Paint('3. Dialog dismissed, app still running')
+        CheckHash(0xBFF76BD46D05AFA0)
+        Key.Pressed(Escape)
+        Paint('4. Exit question again')
+        CheckHash(0xF2BE1C5B4F33C872)
+        Key.Pressed(Alt+Y)
+        Paint('5. App should already be closed')
+        CheckHash(0x0)
+    ";
+    App::main_window(DemoWindow::new)
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_frame_app() {
     struct Demo {
         message: &'static str,
