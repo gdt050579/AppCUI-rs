@@ -1,9 +1,7 @@
 use std::marker::PhantomData;
 use std::sync::Mutex;
 
-use crate::ui::common::traits::Control;
-use crate::ui::common::traits::NotModalWindow;
-use crate::ui::common::traits::WindowControl;
+use crate::ui::common::traits::{Control, MainWindowControl, NotModalWindow, WindowControl};
 
 use super::Error;
 use super::ErrorKind;
@@ -148,7 +146,7 @@ impl App {
     pub fn single_window<F, T>(factory: F) -> crate::system::SingleWindowAppBuilder
     where
         F: FnOnce() -> T + 'static,
-        T: Control + WindowControl + NotModalWindow + 'static,
+        T: Control + WindowControl + MainWindowControl + NotModalWindow + 'static,
     {
         crate::system::SingleWindowAppBuilder::new(factory)
     }

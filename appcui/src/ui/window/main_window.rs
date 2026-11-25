@@ -143,23 +143,4 @@ impl OnWindowRegistered for MainWindow {
         self.base.on_registered();
     }
 }
-// impl MainWindowMethods for MainWindow {
-//     fn show(self) -> Option {
-//         // do nothing
-//         None
-//     }
-
-//     fn exit_with(&mut self, result: T) {
-//         self.result = Some(result);
-//         RuntimeManager::get().exit_execution_loop();
-//     }
-
-//     fn exit(&mut self) {
-//         self.result = None;
-//         RuntimeManager::get().exit_execution_loop();
-//     }
-
-//     fn close(&mut self) {
-//         self.exit();
-//     }
-// }
+impl MainWindowControl for MainWindow {}

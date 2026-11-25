@@ -2,9 +2,8 @@ use super::impl_terminal_builder_methods;
 use super::impl_ui_builder_methods;
 use super::InternalBuilder;
 use crate::system::RuntimeManager;
-use crate::ui::common::traits::Control;
-use crate::ui::common::traits::NotModalWindow;
-use crate::ui::common::traits::WindowControl;
+use crate::ui::common::traits::{Control, MainWindowControl, NotModalWindow, WindowControl};
+
 
 type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 
@@ -39,7 +38,7 @@ impl SingleWindowAppBuilder {
     pub(crate) fn new<F, T>(factory: F) -> Self
     where
         F: FnOnce() -> T + 'static,
-        T: Control + WindowControl + NotModalWindow + 'static,
+        T: Control + WindowControl + MainWindowControl + NotModalWindow + 'static,
     {
         let mut b = InternalBuilder::new();
         b.single_window();

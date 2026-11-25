@@ -29,14 +29,14 @@ fn check_multi_window_app() {
 
 #[test]
 fn check_single_window_app() {
-    #[Window(events = CommandBarEvents, internal: true, commands: Ping)]
+    #[MainWindow(events = CommandBarEvents, internal: true, commands: Ping)]
     struct DemoWindow {
         info: Handle<Label>,
     }
     impl DemoWindow {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("title:'Single',d:f"),
+                base: MainWindow::new(),
                 info: Handle::None,
             };
             w.info = w.add(label!("'Press F1',a:c,w:16,h:1"));
