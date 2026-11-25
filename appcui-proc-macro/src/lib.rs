@@ -397,8 +397,8 @@ pub fn MainWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowControl, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::NotModalWindow, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MainWindow, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::BaseFallbackNonOverwritable);
-    config.set(AppCUITrait::ModalWindowMethods, TraitImplementation::BaseFallbackNonOverwritable);
     // Raw events (implemente by default)
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
