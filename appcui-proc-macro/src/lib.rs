@@ -455,7 +455,7 @@ pub fn MainWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVStackedBarChartEvents, TraitImplementation::Default);
 
     // custom events
-    config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
     // timer events
     config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);

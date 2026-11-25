@@ -1197,5 +1197,5 @@ impl ListViewEvents<XAxisGroup> for LineChartEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(LineChartEditor::new).title("Line chart editor").run()
+    App::new().window(LineChartEditor::new).title("Line chart editor").run()
 }

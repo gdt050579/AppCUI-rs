@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Surface loaded from: {}", srf_path.display());
 
     App::single_window(move || {
-        let mut win = Window::new("Surface Serialization Demo", layout!("d:f"), window::Flags::NoCloseButton);
+        let mut win = MainWindow::new();
 
         let mut canvas = Canvas::new(loaded_surface.size(), layout!("l:0,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
         let drawing_surface = canvas.drawing_surface_mut();
@@ -24,6 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         win.add(canvas);
         win
     })
+    .title("Surface Serialization Demo")
     .run()?;
     Ok(())
 }

@@ -1210,5 +1210,5 @@ impl CharPickerEvents for StackedBarChartEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(StackedBarChartEditor::new).title("Stacked bar chart editor").run()
+    App::new().window(StackedBarChartEditor::new).title("Stacked bar chart editor").run()
 }
