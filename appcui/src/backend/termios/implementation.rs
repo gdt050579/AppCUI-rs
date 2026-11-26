@@ -4,6 +4,8 @@
 use copypasta::ClipboardContext;
 use copypasta::ClipboardProvider;
 use std::sync::mpsc::Sender;
+use crate::backend::TerminalRestorer;
+use crate::backend::RestoreReason;
 
 use super::{
     super::SystemEvent,
@@ -26,9 +28,30 @@ use super::api::Termios;
 /// the standard input descriptor
 pub struct TermiosTerminal {
     size: Size,
-    orig_termios: Termios,
     ansi_buffer: AnsiFormatter,
+    restorer: Option<Box<dyn TerminalRestorer>>,
+}
+
+pub(crate) struct TermiosTerminalRestorer {
+    orig_termios: Termios,    
     palette_changed: bool,
+}
+
+impl TerminalRestorer for TermiosTerminalRestorer {
+    fn restore(mut self: Box<Self>, reason: RestoreReason) {
+        let mut af = AnsiFormatter::new(256, AnsiFlags::None);
+        af.clear();
+        if reason == RestoreReason::Normal {
+            af.reset_screen();
+        }
+        if self.palette_changed {
+            af.reset_palette();
+        }
+        af.disable_mouse_events();
+        af.show_cursor();
+        af.execute();
+        self.orig_termios.restore();
+    }
 }
 
 impl TermiosTerminal {
@@ -40,10 +63,13 @@ impl TermiosTerminal {
             ));
         };
 
-        let mut t = TermiosTerminal {
-            size: Size::new(80, 30),
+        let mut restorer = TermiosTerminalRestorer {
             orig_termios,
             palette_changed: false,
+        };
+        let mut t = TermiosTerminal {
+            size: Size::new(80, 30),
+            restorer: None,
             ansi_buffer: AnsiFormatter::new(
                 16384,
                 if builder.use_rgb_for_palette {
@@ -78,13 +104,13 @@ impl TermiosTerminal {
                 t.size = size;
             }
         }
-        t.palette_changed = builder.is_palette_changed();
+        restorer.palette_changed = builder.is_palette_changed();
         t.ansi_buffer.clear();
         t.ansi_buffer.enable_mouse_events();
         t.ansi_buffer.set_palette(builder.palette);
         //t.ansi_buffer.write_string("\x1b[?1000h\x1b[?1002h\x1b[?1003h");
         t.ansi_buffer.execute();
-
+        t.restorer = Some(Box::new(restorer));
         Input::new().start(sender.clone());
         SizeReader::new(get_resize_notification().clone()).start(sender);
         Ok(t)
@@ -131,15 +157,7 @@ impl Backend for TermiosTerminal {
         false
     }
 
-    fn on_close(&mut self) {
-        self.ansi_buffer.clear();
-        self.ansi_buffer.reset_screen();
-        if self.palette_changed {
-            self.ansi_buffer.reset_palette();
-        }
-        self.ansi_buffer.disable_mouse_events();
-        self.ansi_buffer.show_cursor();
-        self.ansi_buffer.execute();
-        self.orig_termios.restore();
+    fn take_restorer(&mut self) -> Option<Box<dyn TerminalRestorer>> {
+        self.restorer.take()
     }
 }
