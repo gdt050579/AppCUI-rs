@@ -1,6 +1,6 @@
 # Modal Window
 
-A modal window is a window that captures the entire focus for the duration of its existance. In other word, when a modal window is started, it will be on top of everything else and the entire input (mouse and keyboard will be treated by it). 
+A modal window is a window that captures the entire focus for the duration of its existence. In other words, when a modal window is started, it will be on top of everything else and the entire input (mouse and keyboard will be treated by it). 
 
 When a modal window is opened the rest of the windows or other modal windows will be disabled:
 <img src="img/modal_window.png"/>
@@ -21,7 +21,7 @@ Besides the normal [methods](./window.md#methods) that a regular Window has, the
 | Method                | Purpose                                                                                                                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `exit()` or `close()` | Exits the current modal window without returning anything. This translates into returning `None` from the call of method `show(...)`                                                             |
-| `exit_with(...)`      | Exits and returns a value of the same type as the parameter `reponse` from the `#[ModalWindo(...)]` definition. This translates into returning `Some(value)` from the call of method `show(...)` |
+| `exit_with(...)`      | Exits and returns a value of the same type as the parameter `response` from the `#[ModalWindow(...)]` definition. This translates into returning `Some(value)` from the call of method `show(...)` |
 | `show()`              | Shows the modal window and capture the entire input. The execution flow is blocked until method `show` returns.                                                                                  |
 
 
@@ -29,7 +29,7 @@ Besides the keys that a regular (non-modal) window supports, the following keys 
 
 | Key      | Purpose                                                                                                                                                                                                                   |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Escape` | Trigers a call to `on_cancel(...)` method. By default this will close the modal window and will return `None` to the caller. The behavior can be changed by returning `ActionRequest::Deny` from the `on_cancel` callback |
+| `Escape` | Triggers a call to `on_cancel(...)` method. By default this will close the modal window and will return `None` to the caller. The behavior can be changed by returning `ActionRequest::Deny` from the `on_cancel` callback |
 | `Enter`  | Calls the `on_accept(...)` method. This will not close the window unless you call `exit()` or `exit_with(...)` from within the callback                                                                                   |
 
 
