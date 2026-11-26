@@ -27,16 +27,31 @@ struct NcursesTerminalRestorer;
 
 impl TerminalRestorer for NcursesTerminalRestorer {
     fn restore(self: Box<Self>, reason: RestoreReason) {
-        // endwin restores the tty modes saved by initscr (raw, noecho, nonl, keypad).
-        // ANSI must be written after that, while the terminal is back in cooked mode.
+        // Read the size before endwin. endwin restores the tty modes saved by initscr
+        // (raw, noecho, nonl, keypad). ANSI is written after that, in cooked mode.
+        let panic_row = if reason == RestoreReason::Panic {
+            let mut rows = 0;
+            let mut cols = 0;
+            ncursesapi::lib::ncurses_getmaxyx(ncursesapi::lib::ncurses_stdscr(), &mut rows, &mut cols);
+            Some(rows.saturating_sub(1))
+        } else {
+            None
+        };
         ncursesapi::lib::ncurses_endwin();
         let mut ansi = AnsiFormatter::new(64, AnsiFlags::None);
         if reason == RestoreReason::Normal {
             ansi.reset_screen();
         }
         ansi.disable_mouse_events();
+        if let Some(row) = panic_row {
+            // Last visible row. The newline below scrolls the panic text under the desktop.
+            ansi.set_cursor_position(0, row);
+        }
         ansi.show_cursor();
         ansi.execute();
+        if reason == RestoreReason::Panic {
+            println!();
+        }
     }
 }
 
