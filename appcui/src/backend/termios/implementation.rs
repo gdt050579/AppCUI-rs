@@ -48,9 +48,18 @@ impl TerminalRestorer for TermiosTerminalRestorer {
             af.reset_palette();
         }
         af.disable_mouse_events();
+        if reason == RestoreReason::Panic {
+            // Last visible row. The newline after cooked mode scrolls the panic text under the desktop.
+            if let Ok(size) = get_terminal_size() {
+                af.set_cursor_position(0, size.height.saturating_sub(1) as i32);
+            }
+        }
         af.show_cursor();
         af.execute();
         self.orig_termios.restore();
+        if reason == RestoreReason::Panic {
+            println!();
+        }
     }
 }
 
