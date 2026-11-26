@@ -153,7 +153,7 @@ Besides the [Common methods for all Controls](../common_methods.md), a window al
 ## Key association
 
 In terms of key association, a Window has two modes:
-* Normal mode (for whem a window is has focus)
+* Normal mode (for when a window has focus)
 * Resize/Move mode (in this mode you can use arrows and various combinations to move the window)
 
 ### For normal mode
@@ -161,13 +161,13 @@ In terms of key association, a Window has two modes:
 | Key                                                  | Purpose                                                                                                                                                                               |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Ctrl`+`Alt`+`M` or <br> `Ctrl`+`Alt`+`R`            | Switch the window to resize/move mode                                                                                                                                                 |
-| `Escape`                                             | Trigers a call cu `on_cancel(...)` method. By default this will close the window. Howeverm you can change the behavior and return `ActionRequest::Deny` from the `on_cancel` callback |
-| `Up` or <br> `Alt`+`Up` or <br> `Ctrl`+`Up`          | Moves to the closes control on upper side the curent one.                                                                                                                             |
-| `Down` or <br> `Alt`+`Down` or <br> `Ctrl`+`Down`    | Moves to the closest control on the bottom side of the curent one                                                                                                                     |
-| `Left` or <br> `Alt`+`Left` or <br> `Ctrl`+`Left`    | Moves to the closest control on the left side of the curent one                                                                                                                       |
-| `Right` or <br> `Alt`+`Right` or <br> `Ctrl`+`Right` | Moves to the closest control on the right side of the curent one                                                                                                                      |
+| `Escape`                                             | Triggers a call to `on_cancel(...)` method. By default this will close the window. However you can change the behavior and return `ActionRequest::Deny` from the `on_cancel` callback |
+| `Up` or <br> `Alt`+`Up` or <br> `Ctrl`+`Up`          | Moves to the closest control on the upper side of the current one.                                                                                                                             |
+| `Down` or <br> `Alt`+`Down` or <br> `Ctrl`+`Down`    | Moves to the closest control on the bottom side of the current one                                                                                                                     |
+| `Left` or <br> `Alt`+`Left` or <br> `Ctrl`+`Left`    | Moves to the closest control on the left side of the current one                                                                                                                       |
+| `Right` or <br> `Alt`+`Right` or <br> `Ctrl`+`Right` | Moves to the closest control on the right side of the current one                                                                                                                      |
 
-**OBS**: Keep in mind that if any of these keys (in particular `Left`, `Right`, `Up` and `Down`) are capture by one of the children of a window, they will not pe process by the window.
+**OBS**: Keep in mind that if any of these keys (in particular `Left`, `Right`, `Up` and `Down`) are captured by one of the children of a window, they will not be processed by the window.
 
 
 ### For resize/move mode
@@ -177,7 +177,7 @@ In terms of key association, a Window has two modes:
 | `Escape` or `Enter` or `Tab` or `Space` | Switch back to the normal mode                                                                                                                                   |
 | `Left`, `Up`, `Right`, `Down`           | Arrow keys can be used to move the window                                                                                                                        |
 | `C`                                     | Centers the current window to the Desktop                                                                                                                        |
-| `M` or `R`                              | Maximizes or Restores the size of the current Windows                                                                                                            |
+| `M` or `R`                              | Maximizes or Restores the size of the current window                                                                                                            |
 | `Alt`+{`Left`, `Up`, `Right`, `Down`}   | Moves the window towards one of the margins of the Desktop. For example `Alt`+`Up` will move current window to the top margin of the client space of the Desktop |
 | `Ctrl`+{`Left`, `Up`, `Right`, `Down`}  | Increases or decreases the Width or Height of the current Window                                                                                                 |
 
@@ -206,7 +206,7 @@ pub trait WindowEvents {
 }
 ```
 
-These methods are called under the following scenarious:
+These methods are called under the following scenarios:
 
 | Method                   | Called when                                                                                                                                                                                                                                                                                                                                  |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -239,7 +239,7 @@ On a `Classic`, `Rounded`, or `Panel` window the tag is drawn on the left side o
 
 ## Window Hot Key
 
-You can also associate a hot key to a window. A hot key allows you to quickly switch between windows. In the next example, we set up `Alt+7` as a hot key for a windows.
+You can also associate a hot key to a window. A hot key allows you to quickly switch between windows. In the next example, we set up `Alt+7` as a hot key for a window.
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
