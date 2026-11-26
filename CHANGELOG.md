@@ -5,10 +5,47 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
-## Untracked
-
+## [0.5.11] - 2026-11-26
+ 
 ### Added
-- `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and aqua accents) by @emreocell
+- **Terminal restore on panic**: a panic hook restores the terminal (screen, cursor, mouse reporting,
+  palette) before the panic message is printed. On a normal exit the same restore path runs.
+  Each backend provides its own restorer: Windows Console, Windows VT, Termios, NCurses and
+  CrossTerm. New example: `panic` (closes #300).
+- **Palettes** for the 16 named colors (closes #306):
+  - `Palette` (`Terminal`, `BuiltIn`, `Custom`) and `ColorPalette` (`built_in()`, `from_pairs(...)`)
+    in `appcui::backend`;
+  - the `palette(...)` and `palette_as_rgb(...)` application builder methods;
+  - supported by Windows Console, Windows VT, Termios and CrossTerm (NCurses and the Web Terminal
+    ignore the palette). Termios and CrossTerm reset the palette with OSC 104 on exit;
+  - new examples: `palette` and `palette_gray`.
+- **MainWindow**: a borderless window with no title and no close button that fills the desktop and
+  is used with `App::main_window(...)`. Adds the `MainWindowControl` marker trait, the
+  `#[MainWindow]` proc-macro attribute and the event-trait wiring for all controls (#313).
+- `window::Type::Borderless`: a title bar without a surrounding frame and without inner margins.
+  The title is left-aligned and the toolbar items (tag, hotkey, buttons) are placed on the right
+  (closes #311, #312).
+- `window::Flags::NoTitle`: hides the title text while keeping the frame, close button, tag and
+  hotkey. `window!` accepts `Borderless` and `NoTitle`.
+- `Themes::HighContrast`, a high-contrast predefined theme (black surfaces, white text, yellow and
+  aqua accents) by @emreocell in #303 (#309).
+- documentation: a `MainWindow` chapter, palette sections in the application and backend chapters,
+  a refreshed event-loop `Window` chapter and a `HighContrast` entry in the predefined themes.
+### Changed
+- **Breaking:** `App::single_window` is renamed `App::main_window`, and `SingleWindowAppBuilder`
+  is renamed `MainWindowAppBuilder`. The window must implement `MainWindowControl`
+  (use `MainWindow` or `#[MainWindow]`).
+- **Breaking:** `color_schema(bool)` is removed from the application builders; use `palette(...)`
+  and `palette_as_rgb(...)`. `palette_as_rgb(true)` with `Palette::Terminal` makes `run()` return
+  `ErrorKind::InvalidParameter`.
+- Window tab, hotkey and title colors are now computed per window type (including `Borderless`).
+- Internal: Windows console code split into `console` and `console_restorer`;
+  `Backend::on_close` replaced by `take_restorer`.
+- `appcui_proc_macro` bumped to 0.3.11.
+### Fixed
+- The Windows console palette is restored on exit (only the palette, not the whole console state).
+- Several Termios and CrossTerm fixes found while adding palette support.
+- Various compiler and Clippy warnings.
 
 ## [0.5.10] - 2026-11-20
 
@@ -333,6 +370,7 @@ background tasks, dialogs, themes, the layout builder and the gallery. The
 [0.4.0 release notes](https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.4.0) list every pull
 request and its author.
 
+[0.5.11]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.11
 [0.5.10]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.10
 [0.5.9]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.9
 [0.5.8]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.8
