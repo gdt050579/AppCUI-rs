@@ -8,7 +8,8 @@ use super::ErrorKind;
 use super::RuntimeManager;
 use super::Theme;
 use super::ThemeMethods;
-
+use crate::backend::RestoreReason;
+use super::terminal_restorer;
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
 /// HTML message displayed at the end of the application for WASM targets.
@@ -222,8 +223,9 @@ impl App {
         }
         // must pe self so that after a run a second call will not be possible
         RuntimeManager::get().run();
-        // close the backend
-        RuntimeManager::get().backend_mut().on_close();
+        // close/restore the backend
+        terminal_restorer::restore(RestoreReason::Normal);
+        // RuntimeManager::get().backend_mut().on_close();
         // clear the mutex from open_save_dialog to clear the last path
         crate::dialogs::clear_last_path();
 

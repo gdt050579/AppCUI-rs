@@ -2,6 +2,7 @@ use super::super::utils::win32;
 use super::super::SystemEventReader;
 use super::super::Backend;
 use super::input::Input;
+use crate::backend::TerminalRestorer;
 use crate::backend::utils::win32::constants::*;
 use crate::backend::utils::win32::structs::*;
 use crate::graphics::*;
@@ -11,6 +12,7 @@ use std::sync::mpsc::Sender;
 
 pub struct WindowsConsoleTerminal {
     console: win32::Console,
+    restorer: Option<Box<dyn TerminalRestorer>>,
     chars: Vec<CHAR_INFO>,
 }
 
@@ -20,10 +22,11 @@ impl WindowsConsoleTerminal {
     // if font is present --> apply font & size
 
     pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
-        let console = win32::Console::new(builder, false)?;
+        let (console, restorer) = win32::Console::new(builder, false)?;
         let input_console = console.clone();
         let mut term = WindowsConsoleTerminal {
             console,
+            restorer: Some(Box::new(restorer)),
             chars: Vec::with_capacity(1024),
         };
         // println!("Start region: {:?}",term.visible_region);
@@ -48,8 +51,8 @@ impl Backend for WindowsConsoleTerminal {
         self.chars.resize(w * h * 2, CHAR_INFO { code: 32, attr: 0 });
         self.console.on_resize(new_size);
     }
-    fn on_close(&mut self) {
-        self.console.on_close();
+    fn take_restorer(&mut self) -> Option<Box<dyn TerminalRestorer>> {
+        self.restorer.take()
     }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);

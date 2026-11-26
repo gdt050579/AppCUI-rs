@@ -321,6 +321,10 @@ name = "counter"
 path = "counter/main.rs"
 
 [[example]]
+name = "panic"
+path = "panic/main.rs"
+
+[[example]]
 name = "window_toolbar_button"
 path = "window_toolbar_button/main.rs"
 

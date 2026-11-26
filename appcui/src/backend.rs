@@ -85,7 +85,18 @@ pub(crate) trait Backend {
         None
     }
     fn is_single_threaded(&self) -> bool;
-    fn on_close(&mut self) {}
+    fn take_restorer(&mut self) -> Option<Box<dyn TerminalRestorer>> {
+        None
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub(crate) enum RestoreReason {
+    Normal,
+    Panic,
+}
+pub(crate) trait TerminalRestorer: Send {
+    fn restore(self: Box<Self>, reason: RestoreReason);
 }
 
 #[repr(u8)]

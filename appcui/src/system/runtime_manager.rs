@@ -6,6 +6,7 @@ use self::menu::events::MousePressedMenuResult;
 
 use super::background_task::BackgroundTaskManager;
 use super::runtime_manager_traits::*;
+use super::terminal_restorer;
 use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::backend::{self, Backend};
@@ -116,7 +117,10 @@ impl RuntimeManager {
         }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
-        let backend_term = backend::new(&builder, sender.clone())?;
+        let mut backend_term = backend::new(&builder, sender.clone())?;
+        if let Some(restorer) = backend_term.take_restorer() {
+            terminal_restorer::init(restorer);
+        }
         let term_sz = backend_term.size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {

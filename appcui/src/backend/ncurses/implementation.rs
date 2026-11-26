@@ -1,5 +1,5 @@
 use super::super::SystemEvent;
-use crate::backend::Backend;
+use crate::backend::{utils::{AnsiFlags, AnsiFormatter}, Backend, RestoreReason, TerminalRestorer};
 use super::ncursesapi::lib::ncurses_wcwidth;
 use super::ncursesapi::externs::*;
 use crate::backend::ncurses::ncursesapi::input::Input;
@@ -20,6 +20,39 @@ use ncursesapi::constants::mmask_t;
 pub struct NcursesTerminal {
     size: Size,
     win: WINDOW,
+    restorer: Option<Box<dyn TerminalRestorer>>,
+}
+
+struct NcursesTerminalRestorer;
+
+impl TerminalRestorer for NcursesTerminalRestorer {
+    fn restore(self: Box<Self>, reason: RestoreReason) {
+        // Read the size before endwin. endwin restores the tty modes saved by initscr
+        // (raw, noecho, nonl, keypad). ANSI is written after that, in cooked mode.
+        let panic_row = if reason == RestoreReason::Panic {
+            let mut rows = 0;
+            let mut cols = 0;
+            ncursesapi::lib::ncurses_getmaxyx(ncursesapi::lib::ncurses_stdscr(), &mut rows, &mut cols);
+            Some(rows.saturating_sub(1))
+        } else {
+            None
+        };
+        ncursesapi::lib::ncurses_endwin();
+        let mut ansi = AnsiFormatter::new(64, AnsiFlags::None);
+        if reason == RestoreReason::Normal {
+            ansi.reset_screen();
+        }
+        ansi.disable_mouse_events();
+        if let Some(row) = panic_row {
+            // Last visible row. The newline below scrolls the panic text under the desktop.
+            ansi.set_cursor_position(0, row);
+        }
+        ansi.show_cursor();
+        ansi.execute();
+        if reason == RestoreReason::Panic {
+            println!();
+        }
+    }
 }
 
 #[cfg(target_family = "unix")]
@@ -62,13 +95,15 @@ impl NcursesTerminal {
         let mut y: i32 = 0;
         ncursesapi::lib::ncurses_getmaxyx(win, &mut y, &mut x);
 
-        let term = NcursesTerminal {
+        let mut term = NcursesTerminal {
             size: Size::new(x as u32, y as u32),
             win,
+            restorer: None,
         };
 
         // Start the event thread
         Input::new().start(sender);
+        term.restorer = Some(Box::new(NcursesTerminalRestorer));
 
         Ok(term)
     }
@@ -192,8 +227,7 @@ impl Backend for NcursesTerminal {
         false
     }
 
-    fn on_close(&mut self) {
-        println!("\x1b[0m\x1b[2J\x1b[3J\x1b[H");
-        println!("\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l")
+    fn take_restorer(&mut self) -> Option<Box<dyn TerminalRestorer>> {
+        self.restorer.take()
     }
 }
