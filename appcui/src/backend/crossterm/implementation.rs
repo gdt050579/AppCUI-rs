@@ -2,7 +2,7 @@ use super::input::Input;
 use crate::{
     backend::{
         utils::{AnsiFlags, AnsiFormatter},
-        Backend, ColorPalette, Palette, SystemEventReader,
+        Backend, ColorPalette, Palette, RestoreReason, SystemEventReader, TerminalRestorer,
     },
     graphics::{CharFlags, Color, Size, Surface},
     system::{Error, SystemEvent},
@@ -10,7 +10,7 @@ use crate::{
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
-    execute, queue,
+    execute,
     style::{Color as CrosstermColor, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::{disable_raw_mode, enable_raw_mode, size, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -29,9 +29,30 @@ use copypasta::ClipboardProvider;
 pub(crate) struct CrossTerm {
     size: Size,
     use_rgb_for_palette: bool,
-    palette_changed: bool,
     rgb_palette: ColorPalette,
-    screen_chars: Vec<Character> // Contains characters painted on screen
+    screen_chars: Vec<Character>, // Contains characters painted on screen
+    restorer: Option<Box<dyn TerminalRestorer>>,
+}
+
+struct CrossTermRestorer {
+    palette_changed: bool,
+}
+
+impl TerminalRestorer for CrossTermRestorer {
+    fn restore(self: Box<Self>, reason: RestoreReason) {
+        let _ = execute!(stdout(), DisableMouseCapture);
+        if self.palette_changed {
+            let mut ansi = AnsiFormatter::new(256, AnsiFlags::Use16ColorSchema);
+            ansi.reset_palette();
+            let _ = execute!(stdout(), Print(ansi.text()));
+        }
+        let _ = execute!(stdout(), LeaveAlternateScreen, Show, ResetColor);
+        let _ = disable_raw_mode();
+        if reason == RestoreReason::Panic {
+            // The panic hook prints after this returns. Start that message on its own line.
+            println!();
+        }
+    }
 }
 
 impl CrossTerm {
@@ -61,13 +82,13 @@ impl CrossTerm {
         let mut term = CrossTerm {
             size: Size::new(width as u32, height as u32),
             use_rgb_for_palette: builder.use_rgb_for_palette,
-            palette_changed: builder.is_palette_changed(),
             rgb_palette: match builder.palette {
                 Palette::Custom(palette) => palette,
                 // Palette::Terminal never reaches RGB mode (rejected by InternalBuilder::build)
                 _ => ColorPalette::built_in(),
             },
-            screen_chars: Vec::new()
+            screen_chars: Vec::new(),
+            restorer: None,
         };
         
         for _n in 0..(width * height) {
@@ -85,7 +106,8 @@ impl CrossTerm {
             )
         })?;
 
-        if term.palette_changed {
+        let palette_changed = builder.is_palette_changed();
+        if palette_changed {
             // indexed mode: reprogram the 16 terminal slots (OSC 4)
             let mut ansi = AnsiFormatter::new(512, AnsiFlags::Use16ColorSchema);
             ansi.set_palette(builder.palette);
@@ -93,6 +115,7 @@ impl CrossTerm {
         }
 
         Input::new().start(sender);
+        term.restorer = Some(Box::new(CrossTermRestorer { palette_changed }));
 
         Ok(term)
     }
@@ -279,14 +302,7 @@ impl Backend for CrossTerm {
         false
     }
 
-    fn on_close(&mut self) {
-        let _ = execute!(stdout(), DisableMouseCapture);
-        if self.palette_changed {
-            let mut ansi = AnsiFormatter::new(256, AnsiFlags::Use16ColorSchema);
-            ansi.reset_palette();
-            let _ = execute!(stdout(), Print(ansi.text()));
-        }
-        let _ = execute!(stdout(), LeaveAlternateScreen, Show, ResetColor);
-        let _ = disable_raw_mode();
+    fn take_restorer(&mut self) -> Option<Box<dyn TerminalRestorer>> {
+        self.restorer.take()
     }
 }
