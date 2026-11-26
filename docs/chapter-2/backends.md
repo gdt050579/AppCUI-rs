@@ -175,6 +175,25 @@ System events are events that are not related to the keyboard or mouse, but are 
 * `N/A` (not applicable) means that there is no original screen prior to the app execution so there is nothing to restore.
 * **Restore palette** is `Yes` for Termios and CrossTerm because those backends send OSC 104 on exit. The terminal decides whether those colors actually return. Some terminals, such as WSL, keep the palette that was set. See [Termios](backends/termios.md#limitations) and [CrossTerm](backends/crossterm.md#palette).
 
+## Panic
+
+If the application panics, AppCUI restores the terminal before Rust prints the panic message. Raw mode is turned off, mouse capture stops, and the cursor is shown. A palette the backend changed is reset the same way as on a normal exit.
+
+Windows Console, Windows VT, Termios, and NCurses keep the last frame on screen. Windows Console and Windows VT move the cursor to the line under that frame, so the panic message starts there. Termios and NCurses leave the cursor where the last frame placed it.
+
+| Backend         | What a panic does                                                                                                                                                                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows Console | Keeps the last frame. Moves the cursor to the line under the AppCUI surface and shows the cursor. Restores the console mode and, when it was changed, the 16-color table.                                                                                                     |
+| Windows VT      | Keeps the last frame and places the cursor the same way as Windows Console. Turns mouse tracking off. Sends OSC 104 when the 16 color slots were changed.                                                                                                                     |
+| Termios         | Keeps the last frame. Restores the termios modes from before the application, turns mouse tracking off, and shows the cursor. Sends OSC 104 when the 16 color slots were changed.                                                                                             |
+| NCurses         | Keeps the last frame. Leaves ncurses with `endwin`, which restores the tty modes from startup, turns mouse tracking off, and shows the cursor.                                                                                                                                |
+| CrossTerm       | Leaves the alternate screen, which brings back the terminal contents from before the application. Turns raw mode and mouse capture off, shows the cursor, and resets colors. Prints a blank line, then the panic message. Sends OSC 104 when the 16 color slots were changed. |
+| Web Terminal    | Leaves the canvas as it is. The panic message is written to the browser console.                                                                                                                                                                                              |
+
+A normal exit runs the same mode, mouse, cursor, and palette cleanup. Windows Console and Windows VT then put back the screen from before the application. Termios and NCurses clear the screen. CrossTerm leaves the alternate screen.
+
+The `panic` example (`examples/panic`) opens a window with a button that panics.
+
 ## Clipboard
 
 AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following backends:
