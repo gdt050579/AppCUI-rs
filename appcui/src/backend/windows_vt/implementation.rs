@@ -26,24 +26,16 @@ impl TerminalRestorer for WindowsVTTerminalRestorer {
     fn restore(mut self: Box<Self>, reason: RestoreReason) {
         let mut af = AnsiFormatter::new(256, AnsiFlags::None);
         af.clear();
-        af.reset_screen();
+        if reason == RestoreReason::Normal {
+            af.reset_screen();
+        }
         if self.palette_changed {
             af.reset_palette();
         }
         af.disable_mouse_events();
         af.execute();
-        match reason {
-            RestoreReason::Normal => {
-                if let Some(restorer) = self.restorer.take() {
-                    restorer.restore(reason);
-                }
-            }
-            RestoreReason::Panic => {
-                af.clear();
-                // move the cursor to the bottom of the screen
-                af.set_cursor_position(0, 999);
-                af.execute();
-            }
+        if let Some(restorer) = self.restorer.take() {
+            restorer.restore(reason);
         }
     }
 }
