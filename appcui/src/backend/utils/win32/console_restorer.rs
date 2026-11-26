@@ -42,20 +42,20 @@ impl TerminalRestorer for ConsoleRestorer {
                 }
             }
             RestoreReason::Panic => {
-                // move the cursor at the list line of the screen (top, bottom-most)
+                // place the cursor on the line immediately below the AppCUI drawing surface
                 unsafe {
                     let mut cbuf = structs::CONSOLE_SCREEN_BUFFER_INFOEX {
                         structure_size: 0x60,
                         ..Default::default()
                     };
                     if api::GetConsoleScreenBufferInfoEx(self.stdout, &mut cbuf) == constants::TRUE {
-                        api::SetConsoleCursorPosition(
-                            self.stdout,
-                            structs::COORD {
-                                x: 0,
-                                y: cbuf.size.y.saturating_sub(1),
-                            },
-                        );
+                        let y = cbuf.window.bottom.saturating_add(1).min(cbuf.size.y.saturating_sub(1));
+                        api::SetConsoleCursorPosition(self.stdout, structs::COORD { x: 0, y });
+                        let ci = structs::CONSOLE_CURSOR_INFO {
+                            size: 10,
+                            visible: constants::TRUE,
+                        };
+                        api::SetConsoleCursorInfo(self.stdout, &ci);
                     }
                     println!(); // write an enter to the terminal to move to the next line
                 }
