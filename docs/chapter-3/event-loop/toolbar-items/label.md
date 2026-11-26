@@ -1,6 +1,6 @@
 # Label toolbar item
 
-A toolbar label is a text that can be written on the top or bottom part of a windows (like in the following image).
+A toolbar label is a text that can be written on the top or bottom part of a window (like in the following image).
 
 <img src="img/label.png" width=400/>
 
@@ -32,12 +32,12 @@ Besides the default methods that every toolbar item has (as described [here](../
 
 | Method             | Purpose                                                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `set_caption(...)` | Set the new caption for a label. The size of the label is the considered the number of characters in its content |
+| `set_caption(...)` | Set the new caption for a label. The size of the label is considered to be the number of characters in its content |
 | `caption()`        | Returns the current caption of a label.                                                                          |
 
 # Example
 
-The following example shows 3 lables that show a number written in base 10, 16 and 2. 
+The following example shows 3 labels that show a number written in base 10, 16 and 2. 
 * the first two labels (for base 10 and base 16 are part of one group located on the bottom left part of the window); 
 * the last label is part of a separate group located on the top-right side of the window. 
 * at the left of the window, there is a button that if clicked increases the number and updates the values in each label;
