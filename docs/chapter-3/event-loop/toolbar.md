@@ -1,8 +1,8 @@
 # Toolbar
 
-A toolbar is a generic concept of an area over the margins of a window (top or bottom margins) where several controls (or toolbar items) reside. A toolbar items are simplier controls that convey their events directly to the window via a spcial trait: `ToolBarEvents`. 
+A toolbar is a generic concept of an area over the margins of a window (top or bottom margins) where several controls (or toolbar items) reside. Toolbar items are simpler controls that convey their events directly to the window via a special trait: `ToolBarEvents`. 
 
-All toolbar items are organized in groups. A group is similar to a flow (all toolbar items are aligned one after another, depending on the direction of the flow). It is important to notice that a toolbar item does not have a layout of itself (its position is decided by the group). The following direction are supported by a toolbar group (via enum `toolbar::GroupPosition`):
+All toolbar items are organized in groups. A group is similar to a flow (all toolbar items are aligned one after another, depending on the direction of the flow). It is important to notice that a toolbar item does not have a layout of itself (its position is decided by the group). The following directions are supported by a toolbar group (via enum `toolbar::GroupPosition`):
 
 ```rs
 pub enum GroupPosition {
@@ -20,7 +20,7 @@ To add a toolbar item into a window, you need to perform the following steps:
 2. create a toolbar item
 3. add the previously created toolbar item to the group created on step 1.
 
-Typically, a toolbar initialization mechanims is done when creating a window, in a similar manner as with the next snippet:
+Typically, a toolbar initialization mechanism is done when creating a window, in a similar manner as with the next snippet:
 ```rs
 #[Window(...)]
 struct MyWin {
@@ -43,7 +43,7 @@ To create a toolbar item, there are two options:
 * use `toolbar::<Item>::new(...)` method
 * use `toolbaritem!` macro
 
-Curenly AppCUI supports the following toolbar item types:
+Currently AppCUI supports the following toolbar item types:
 * [Label](toolbar-items/label.md)
 * [CheckBox](toolbar-items/checkbox.md)
 * [SingleChoice](toolbar-items/singlechoice.md)
@@ -55,7 +55,7 @@ All toolbar items have a set of common methods that can be used to modify their 
 
 | Method              | Purpose                                                                                                          |
 |---------------------|------------------------------------------------------------------------------------------------------------------|
-| `set_toooltip(...)` | Set the tooltip for the current item. Using this method with an empty string clears the tooltip |
-| `get_tooltip()`     | Returns the current tooltip associated with an toolbar item |
+| `set_tooltip(...)` | Set the tooltip for the current item. Using this method with an empty string clears the tooltip |
+| `get_tooltip()`     | Returns the current tooltip associated with a toolbar item |
 | `set_visible()`     | Changes the visibility settings for a selected toolbar item |
 | `is_visible()`      | Returns `true` if the current toolbar item is visible, or `false` otherwise |

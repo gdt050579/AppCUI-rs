@@ -1,12 +1,12 @@
 # SingleChoice toolbar item
 
-A toolbar singlechoice item is a item that can be positioned on the top or bottom part of a windows (like in the following image)  that can have two states (selected or un-selected).
+A toolbar singlechoice item is an item that can be positioned on the top or bottom part of a window (like in the following image)  that can have two states (selected or un-selected).
 
 Within a group, only one singlechoice item can be selected.
 
 <img src="img/singlechoice.png" width=400/>
 
-To create a checkbox within a toolbar use the `toolbar::SingleChoice::new(...)` method:
+To create a single choice item within a toolbar use the `toolbar::SingleChoice::new(...)` method:
 
 ```rust
 let toolbar_singlechoice = toolbar::SingleChoice::new("SingleChoice");
@@ -30,29 +30,29 @@ The following parameters are supported for a toolbar singlechoice:
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
 | ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
 | `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on the single choice                                               |
-| `type`              | String | **No**                              | For a singlechoince use: `type:SingleChoince`                                                 |
+| `type`              | String | **No**                              | For a singlechoice use: `type:SingleChoice`                                                 |
 | `tooltip`           | String | **No**                              | The tooltip associated with the singlechoice                                                  |
 | `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
 
-Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
+Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar single choice item:
 
 | Method             | Purpose                                                                                                                                                  |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `set_caption(...)` | Sets the new caption for a singlechoince. The width (in characters) of the singlechoince is the considered to be the number of characters in its content |
+| `set_caption(...)` | Sets the new caption for a singlechoice. The width (in characters) of the singlechoice is considered to be the number of characters in its content |
 | `caption()`        | Returns the current caption of a singlechoice item.                                                                                                      |
-| `select()`         | Sets the current single choice as the selected single choince for the current group.                                                                     |
+| `select()`         | Sets the current single choice as the selected single choice for the current group.                                                                     |
 | `is_selected()`    | `true` if the toolbar single choice is selected or `false` otherwise                                                                                     |
 
-**OBS**: Keep in mind that using `select()` method only works if the single choice has already been added to a toolbar. Using this methid without adding the item to a toolbar will result in a panic.
+**OBS**: Keep in mind that using `select()` method only works if the single choice has already been added to a toolbar. Using this method without adding the item to a toolbar will result in a panic.
 
 ## Events
 
-To intercept if the current choice has change, you need to implement `ToolBarEvents` for the current window, as presented in the following example:
+To intercept if the current choice has changed, you need to implement `ToolBarEvents` for the current window, as presented in the following example:
 ```rust,no_run
 #[Window(events=ToolBarEvents)]
 struct MyWin { /* data members */ }
 
-impl ToolBarEvens for MyWin {
+impl ToolBarEvents for MyWin {
     fn on_choice_selected(&mut self, _handle: Handle<toolbar::SingleChoice>) -> EventProcessStatus {
         // do an action based on the new selection
     }
