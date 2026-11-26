@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use super::{api, constants, structs};
-use crate::backend::utils::win32::OriginalScreen;
+use crate::backend::utils::win32::{ConsoleRestorer, OriginalScreen};
 use crate::backend::Palette;
 use crate::input::Key;
 use crate::input::KeyCode;
@@ -26,20 +26,15 @@ use crate::system::SystemEvent;
 pub(crate) struct Console {
     stdin: structs::HANDLE,
     stdout: structs::HANDLE,
-    stdin_original_mode_flags: u32,
-    stdout_original_mode_flags: u32,
     size: Size,
     visible_region: structs::SMALL_RECT,
     shift_state: KeyModifier,
     last_mouse_pos: Point,
     shared_visible_region: Arc<Mutex<structs::SMALL_RECT>>,
-    orig_screen: Option<OriginalScreen>,
-    orig_color_table: [u32; 16],
-    color_table_changed: bool,
 }
 
 impl Console {
-    pub(crate) fn new(builder: &crate::system::InternalBuilder, vt: bool) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, vt: bool) -> Result<(Self, ConsoleRestorer), Error> {
         unsafe {
             let h_stdin = api::GetStdHandle(constants::STD_INPUT_HANDLE);
             if h_stdin == constants::INVALID_HANDLE_VALUE {
@@ -172,20 +167,25 @@ impl Console {
             } else {
                 None
             };
-            Ok(Self {
+            let console_restorer = ConsoleRestorer {
+                stdin: h_stdin,
+                stdout: h_stdout,
+                stdin_original_mode_flags,
+                stdout_original_mode_flags,
+                orig_screen,
+                orig_color_table,
+                color_table_changed: chage_color_table,
+            };
+            let console = Self {
                 stdin: h_stdin,
                 stdout: h_stdout,
                 size: Size::new(w, h),
-                stdin_original_mode_flags,
-                stdout_original_mode_flags,
                 visible_region: info.window,
                 shift_state: KeyModifier::None,
                 last_mouse_pos: Point::new(i32::MAX, i32::MAX),
                 shared_visible_region: Arc::new(Mutex::new(info.window)),
-                orig_screen,
-                orig_color_table,
-                color_table_changed: chage_color_table,
-            })
+            };
+            Ok((console, console_restorer))
         }
     }
     #[inline(always)]
@@ -376,26 +376,6 @@ impl Console {
             //println!("OnResize: -> region: {:?}",self.visible_region);
         }
     }
-
-    pub(crate) fn on_close(&mut self) {
-        unsafe {
-            let _ = api::SetConsoleMode(self.stdin, self.stdin_original_mode_flags);
-            let _ = api::SetConsoleMode(self.stdout, self.stdout_original_mode_flags);
-            // revert the console color table (read the current info first, so that
-            // only the color table is changed and not the size, cursor, etc.)
-            if self.color_table_changed {
-                if let Ok(mut info) = Self::screen_buffer_info(self.stdout) {
-                    info.color_table = self.orig_color_table;
-                    let _ = api::SetConsoleScreenBufferInfoEx(self.stdout, &info);
-                }
-                self.color_table_changed = false;
-            }
-        }
-        if let Some(os) = self.orig_screen.take() {
-            os.restore();
-        }
-    }
-
     fn screen_buffer_info(stdout: structs::HANDLE) -> Result<structs::CONSOLE_SCREEN_BUFFER_INFOEX, Error> {
         unsafe {
             let mut cbuf = structs::CONSOLE_SCREEN_BUFFER_INFOEX {
