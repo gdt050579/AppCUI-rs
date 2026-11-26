@@ -79,6 +79,7 @@ mod handle;
 mod menu_handle_manager;
 mod runtime_manager;
 mod runtime_manager_traits;
+mod terminal_restorer;
 #[cfg(test)]
 mod tests;
 mod theme;
