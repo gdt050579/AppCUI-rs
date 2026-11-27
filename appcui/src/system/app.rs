@@ -222,7 +222,11 @@ impl App {
             console_error_panic_hook::set_once();
         }
         // must pe self so that after a run a second call will not be possible
+        #[cfg(feature = "BENCHMARKS")]
+        let start_run_time = std::time::Instant::now();
         RuntimeManager::get().run();
+        #[cfg(feature = "BENCHMARKS")]
+        let end_run_time = std::time::Instant::now();
         // close/restore the backend
         terminal_restorer::restore(RestoreReason::Normal);
         // RuntimeManager::get().backend_mut().on_close();
@@ -235,6 +239,13 @@ impl App {
             RuntimeManager::destroy();
             let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
             *app_created = false;
+        }
+        #[cfg(feature = "BENCHMARKS")]
+        {
+            let uninit_time = std::time::Instant::now();
+            let s = RuntimeManager::statistics_mut();
+            s.run_time = end_run_time - start_run_time;
+            s.uninit_time = uninit_time - start_run_time;
         }
         // For WASM, APP_CREATED_MUTEX is reset via drop_app
         // called from RuntimeManager's animation loop when it terminates.
@@ -289,11 +300,19 @@ impl App {
         }
     }
 
+    #[cfg(feature = "BENCHMARKS")]
+    pub fn statistics() -> super::statistics::Statistics {
+        RuntimeManager::statistics_mut().clone()
+    }
+
     pub(crate) fn drop_app() {
         if APP_CREATED_MUTEX.is_poisoned() {
             APP_CREATED_MUTEX.clear_poison();
         }
         if RuntimeManager::is_instantiated() {
+            #[cfg(feature = "BENCHMARKS")]
+            RuntimeManager::get().save_statistics();
+            // destroy the runtime manager
             RuntimeManager::destroy();
         }
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();

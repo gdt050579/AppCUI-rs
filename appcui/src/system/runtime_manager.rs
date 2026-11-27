@@ -97,11 +97,14 @@ pub(crate) struct RuntimeManager {
     #[cfg(feature = "EVENT_RECORDER")]
     event_recorder: super::event_recorder::EventRecorder,
     #[cfg(feature = "BENCHMARKS")]
-    statistics: Statistics,
+    statistics: super::statistics::Statistics,
 }
 
 #[cfg(feature = "GLOBAL_RUNTIME")]
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
+
+#[cfg(feature = "BENCHMARKS")]
+static mut BENCHMARK_STATISTICS: super::statistics::Statistics = super::statistics::Statistics::new();
 
 #[cfg(not(feature = "GLOBAL_RUNTIME"))]
 thread_local! {
@@ -224,6 +227,20 @@ impl RuntimeManager {
             let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
             unsafe { &mut *(mut_ref as *mut RuntimeManager) }
         })
+    }
+    #[cfg(feature = "BENCHMARKS")]
+    pub(crate) fn statistics_mut() -> &'static mut super::statistics::Statistics {
+        if Self::is_instantiated() {
+            &mut Self::get().statistics
+        } else {
+            unsafe { &mut BENCHMARK_STATISTICS }
+        }
+    }
+    #[cfg(feature = "BENCHMARKS")]
+    pub(crate) fn save_statistics(&self) {
+        unsafe {
+            BENCHMARK_STATISTICS = self.statistics.clone();
+        }
     }
     pub(crate) fn terminal_size(&self) -> Size {
         self.backend.size()
@@ -1136,7 +1153,7 @@ impl RuntimeManager {
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
             for (i, handle) in base.children.iter().enumerate().take(base.children.len()) {
-            //for i in 0..base.children.len() {
+                //for i in 0..base.children.len() {
                 //let child_handle = base.children[i];
                 let child_handle = *handle;
                 if let Some(child) = unsafe { (*self.controls).get_mut(child_handle) } {
