@@ -5,7 +5,7 @@ publish = false
 edition = "2021"
 
 [dependencies]
-appcui = "0.5"
+appcui = { version = "0.5", features = ["BENCHMARKS"] }
 
 [lints]
 workspace = true

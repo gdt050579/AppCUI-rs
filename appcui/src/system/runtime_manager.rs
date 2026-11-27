@@ -96,6 +96,8 @@ pub(crate) struct RuntimeManager {
     event_sender: Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
     event_recorder: super::event_recorder::EventRecorder,
+    #[cfg(feature = "BENCHMARKS")]
+    statistics: Statistics,
 }
 
 #[cfg(feature = "GLOBAL_RUNTIME")]
@@ -167,6 +169,8 @@ impl RuntimeManager {
             appbar: if builder.has_app_bar { Some(AppBar::new(term_sz.width)) } else { None },
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
+            #[cfg(feature = "BENCHMARKS")]
+            statistics: super::statistics::Statistics::new(),
         };
         let mut desktop = if manager.main_window {
             // first check if a desktop was provided - if so panic

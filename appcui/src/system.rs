@@ -75,6 +75,8 @@ mod control_handle_manager;
 mod error;
 #[cfg(feature = "EVENT_RECORDER")]
 mod event_recorder;
+#[cfg(feature = "BENCHMARKS")]
+mod statistics; 
 mod handle;
 mod menu_handle_manager;
 mod runtime_manager;
