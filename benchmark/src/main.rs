@@ -28,6 +28,7 @@ fn run_benchmark(params: &Params, lst: &mut BenchmarkList) {
             benchmark.evaluate(params, &mut results);
         }
     }
+    benchmark::print_results(&results, params);
 }
 fn show_help() {
     println!("Usage: benchmark command [arguments]");

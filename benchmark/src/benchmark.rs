@@ -56,3 +56,18 @@ impl BenchmarkResult {
         }
     }
 }
+
+pub(crate) fn print_results(result: &[BenchmarkResult], _params: &Params) {
+    print_text_results(result);
+}
+
+fn print_text_results(result: &[BenchmarkResult]) {
+    println!("Benchmark Results:");
+    println!(" +--------------------------------+----------+------------------------------------------------------");
+    println!(" | Test Name                      | Duration | Description ");
+    println!(" +--------------------------------+----------+------------------------------------------------------");
+    for r in result {
+        let t = r.duration as f64 / r.times as f64;
+        println!(" | {:30} | {:8.2} ms | {}", r.name, t, r.description);
+    }
+}
