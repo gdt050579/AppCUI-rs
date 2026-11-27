@@ -5,7 +5,8 @@ struct TestEmptyDesktop;
 
 impl Benchmark for TestEmptyDesktop {
     fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
-        let script = "ForceRepaint\n".repeat(times);
+        let mut script = "DisableChecks\nPaint.Enable(false)\n".to_string();
+        script += "Paint\n".repeat(times).as_str();
         let _ = App::new().debug_script(&script).size(Size::new(100, 100)).run();
         let stats = App::statistics();
         results.push(BenchmarkResult::new(
