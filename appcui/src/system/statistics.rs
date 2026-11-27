@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Statistics {
     pub init_time: Duration,
     pub run_time: Duration,

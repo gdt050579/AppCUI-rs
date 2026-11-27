@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 use std::sync::mpsc::{Receiver, Sender};
+#[cfg(feature = "BENCHMARKS")]
+use std::sync::Mutex;
 
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
@@ -104,7 +106,7 @@ pub(crate) struct RuntimeManager {
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 #[cfg(feature = "BENCHMARKS")]
-static mut BENCHMARK_STATISTICS: super::statistics::Statistics = super::statistics::Statistics::new();
+static BENCHMARK_STATISTICS: Mutex<super::statistics::Statistics> = Mutex::new(super::statistics::Statistics::new());
 
 #[cfg(not(feature = "GLOBAL_RUNTIME"))]
 thread_local! {
@@ -229,17 +231,34 @@ impl RuntimeManager {
         })
     }
     #[cfg(feature = "BENCHMARKS")]
-    pub(crate) fn statistics_mut() -> &'static mut super::statistics::Statistics {
+    pub(crate) fn update_statistics<F>(callback: F)
+    where
+        F: FnOnce(&mut super::statistics::Statistics),
+    {
         if Self::is_instantiated() {
-            &mut Self::get().statistics
+            callback(&mut Self::get().statistics);
         } else {
-            unsafe { &mut BENCHMARK_STATISTICS }
+            if let Ok(mut stats) = BENCHMARK_STATISTICS.lock() {
+                callback(&mut stats);
+            }
+        }
+    }
+    #[cfg(feature = "BENCHMARKS")]
+    pub(crate) fn clone_statistics() -> super::statistics::Statistics {
+        if Self::is_instantiated() {
+            Self::get().statistics
+        } else {
+            if let Ok(stats) = BENCHMARK_STATISTICS.lock() {
+                *stats
+            } else {
+                super::statistics::Statistics::new()
+            }
         }
     }
     #[cfg(feature = "BENCHMARKS")]
     pub(crate) fn save_statistics(&self) {
-        unsafe {
-            BENCHMARK_STATISTICS = self.statistics.clone();
+        if let Ok(mut stats) = BENCHMARK_STATISTICS.lock() {
+            *stats = self.statistics;
         }
     }
     pub(crate) fn terminal_size(&self) -> Size {

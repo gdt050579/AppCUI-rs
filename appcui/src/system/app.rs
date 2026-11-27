@@ -246,9 +246,10 @@ impl App {
         #[cfg(feature = "BENCHMARKS")]
         {
             let uninit_time = std::time::Instant::now();
-            let s = RuntimeManager::statistics_mut();
-            s.run_time = end_run_time - start_run_time;
-            s.uninit_time = uninit_time - start_run_time;
+            RuntimeManager::update_statistics(|s| {
+                s.run_time = end_run_time - start_run_time;
+                s.uninit_time = uninit_time - start_run_time;
+            });
         }
         // For WASM, APP_CREATED_MUTEX is reset via drop_app
         // called from RuntimeManager's animation loop when it terminates.
@@ -305,7 +306,7 @@ impl App {
 
     #[cfg(feature = "BENCHMARKS")]
     pub fn statistics() -> super::statistics::Statistics {
-        RuntimeManager::statistics_mut().clone()
+        RuntimeManager::clone_statistics()
     }
 
     pub(crate) fn drop_app() {
