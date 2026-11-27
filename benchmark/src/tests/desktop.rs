@@ -1,26 +1,14 @@
 use appcui::prelude::*;
+use crate::utils;
 use crate::benchmark::{Benchmark, BenchmarkList, BenchmarkResult};
 
 struct TestEmptyDesktop;
 
 impl Benchmark for TestEmptyDesktop {
     fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
-        let mut script = "DisableChecks\nPaint.Enable(true)\n".to_string();
-        script += "ForceRepaint\n".repeat(times).as_str();
-        let _ = App::new().debug_script(&script).size(Size::new(100, 100)).run();
-        let stats = App::statistics();
-        results.push(BenchmarkResult::new(
-            self.name(),
-            self.description(),
-            stats.run_time.as_millis(),
-            times,
-        ));
-        results.push(BenchmarkResult::new(
-            "Screen Update Time",
-            "The time taken to update the screen",
-            stats.update_screen_time.as_millis(),
-            stats.update_screen_count,
-        ));
+        let script = utils::basic_paint_script(times);
+        let _ = App::new().debug_script(&script).size(Size::new(1000, 1000)).run();
+        utils::update_times_for_runtime_execution(self, times, results);
     }
     fn name(&self) -> &'static str {
         "Desktop::ForceRepaint"

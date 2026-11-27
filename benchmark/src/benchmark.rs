@@ -31,6 +31,9 @@ impl BenchmarkList {
     pub(crate) fn expand(&mut self, lst: BenchmarkList) {
         self.list.extend(lst.list);
     }
+    pub(crate) fn list(&self) -> &[Box<dyn Benchmark>] {
+        &self.list
+    }
     pub(crate) fn run(&mut self, name: &str, times: usize) -> Vec<BenchmarkResult> {
         let mut results = Vec::new();
         for b in &mut self.list {
