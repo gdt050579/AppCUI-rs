@@ -5,7 +5,7 @@ struct TestEmptyDesktop;
 
 impl Benchmark for TestEmptyDesktop {
     fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
-        let script = "Paint\n".repeat(times);
+        let script = "ForceRepaint\n".repeat(times);
         let _ = App::new().debug_script(&script).size(Size::new(100, 100)).run();
         let stats = App::statistics();
         results.push(BenchmarkResult::new(
@@ -16,7 +16,7 @@ impl Benchmark for TestEmptyDesktop {
         ));
     }
     fn name(&self) -> &'static str {
-        "Desktop::Create"
+        "Desktop::ForceRepaint"
     }
     fn description(&self) -> &'static str {
         "An empty desktop"

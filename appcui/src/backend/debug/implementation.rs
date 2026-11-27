@@ -114,61 +114,15 @@ impl DebugTerminal {
         }
         hash
     }
-}
-impl Backend for DebugTerminal {
-    fn is_single_threaded(&self) -> bool {
-        true
-    }
-
-    fn update_screen(&mut self, surface: &Surface) {
-        let surface_hash = DebugTerminal::compute_surface_hash(surface);
-        if let Some(hash_to_test) = self.hash_to_test {
-            // no need to paint --> just a check hash command
-            self.paint = false;
-            if hash_to_test != surface_hash {
-                if self.errors_disabled {
-                    println!(
-                        "\x1b[91;40m[Error] Invalid hash: (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})\x1b[0m"
-                    );
-                    //println!("        at: {}",&self.paint_title);
-                } else {
-                    panic!(
-                        "Invalid hash for surface (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})"
-                    );
-                }
-            }
-        }
-        let cursor = if !surface.cursor.is_visible() {
+    #[inline(always)]
+    fn surface_to_cursor(&self, surface: &Surface) -> Point {
+        if !surface.cursor.is_visible() {
             Point::new(-1, -1)
         } else {
             Point::new(surface.cursor.x as i32, surface.cursor.y as i32)
-        };
-        if let Some(point) = self.cursor_point_to_check {
-            if point != cursor {
-                let cursor_pos = format!("({},{})", cursor.x, cursor.y);
-                let cursor_repr = if cursor.x < 0 { "Hidden" } else { cursor_pos.as_str() };
-                let point_pos = format!("({},{})", point.x, point.y);
-                let point_repr = if point.x < 0 { "Hidden" } else { point_pos.as_str() };
-                if self.errors_disabled {
-                    println!(
-                        "\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}\x1b[0m"
-                    );
-                } else {
-                    panic!(
-                        "Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}"
-                    );
-                }
-            }
         }
-
-        self.hash_to_test = None;
-        self.cursor_point_to_check = None;
-        // only paint if requested
-        if !self.paint {
-            return;
-        }
-        self.paint = false;
-
+    }
+    fn print_screen(&mut self, surface: &Surface, hash: u64) {
         println!();
         self.ansi_buffer.clear();
         // firt border
@@ -192,7 +146,7 @@ impl Backend for DebugTerminal {
         // hash
         self.ansi_buffer.write_string("| Hash  : ");
         self.ansi_buffer.set_color(Color::Yellow, Color::Black);
-        self.ansi_buffer.write_string(format!("0x{surface_hash:X}").as_str());
+        self.ansi_buffer.write_string(format!("0x{hash:X}").as_str());
         while self.ansi_buffer.text().len() < (self.size.width + 16) as usize {
             self.ansi_buffer.write_char(' ');
         }
@@ -201,6 +155,7 @@ impl Backend for DebugTerminal {
         self.ansi_buffer.clear();
 
         // cursor
+        let cursor = self.surface_to_cursor(surface);
         self.ansi_buffer.write_string("| Cursor: ");
         self.ansi_buffer.set_color(Color::Yellow, Color::Black);
         if !surface.cursor.is_visible() {
@@ -302,6 +257,57 @@ impl Backend for DebugTerminal {
         self.ansi_buffer.write_char('|');
         println!("{}", self.ansi_buffer.text());
     }
+    fn check_screen(&mut self, surface: &Surface) -> u64 {
+        // check screen hash
+        let surface_hash = DebugTerminal::compute_surface_hash(surface);
+        if let Some(hash_to_test) = self.hash_to_test {
+            // no need to paint --> just a check hash command
+            self.paint = false;
+            if hash_to_test != surface_hash {
+                if self.errors_disabled {
+                    println!("\x1b[91;40m[Error] Invalid hash: (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})\x1b[0m");
+                    //println!("        at: {}",&self.paint_title);
+                } else {
+                    panic!("Invalid hash for surface (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})");
+                }
+            }
+        }
+
+        // check cursor position
+        let cursor = self.surface_to_cursor(surface);
+        if let Some(point) = self.cursor_point_to_check {
+            if point != cursor {
+                let cursor_pos = format!("({},{})", cursor.x, cursor.y);
+                let cursor_repr = if cursor.x < 0 { "Hidden" } else { cursor_pos.as_str() };
+                let point_pos = format!("({},{})", point.x, point.y);
+                let point_repr = if point.x < 0 { "Hidden" } else { point_pos.as_str() };
+                if self.errors_disabled {
+                    println!("\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}\x1b[0m");
+                } else {
+                    panic!("Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}");
+                }
+            }
+        }
+
+        // return the surface hash
+        surface_hash
+    }
+}
+impl Backend for DebugTerminal {
+    fn is_single_threaded(&self) -> bool {
+        true
+    }
+
+    fn update_screen(&mut self, surface: &Surface) {
+        let surface_hash = self.check_screen(surface);
+        self.hash_to_test = None;
+        self.cursor_point_to_check = None;
+        // only paint if requested
+        if self.paint {
+            self.paint = false;
+            self.print_screen(surface, surface_hash);
+        }
+    }
 
     fn size(&self) -> Size {
         self.size
@@ -375,6 +381,7 @@ impl Backend for DebugTerminal {
                 }
                 Command::ForceRepaint(_) => {
                     RuntimeManager::get().request_repaint();
+                    self.paint = true;
                     return None;
                 }
                 Command::ErrorDisable(obj) => {
