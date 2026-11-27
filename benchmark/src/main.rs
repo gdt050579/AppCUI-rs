@@ -20,8 +20,14 @@ fn list_benchmarks(params: &Params, lst: &BenchmarkList) {
         }
     }
 }
-fn run_benchmark(params: &Params, lst: &BenchmarkList) {
-
+fn run_benchmark(params: &Params, lst: &mut BenchmarkList) {
+    let mut results = Vec::new();
+    for benchmark in lst.list_mut() {
+        if benchmark.name().to_lowercase().contains(&params.filter) {
+            println!("* Running benchmark: {} ({} times)", benchmark.name(), params.times);
+            benchmark.evaluate(params, &mut results);
+        }
+    }
 }
 fn show_help() {
     println!("Usage: benchmark command [arguments]");
@@ -51,11 +57,11 @@ fn main() {
             return;
         }
     };
-    let benchmark_list = init_benchmark_list();
+    let mut benchmark_list = init_benchmark_list();
     match args[0].as_str() {
         "help" => show_help(),
         "list" => list_benchmarks(&params, &benchmark_list),
-        "run" => run_benchmark(&params, &benchmark_list),
+        "run" => run_benchmark(&params, &mut benchmark_list),
         _ => show_help(),
     }
 }   

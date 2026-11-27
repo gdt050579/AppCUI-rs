@@ -1,12 +1,13 @@
+use crate::params::Params;
 pub(crate) trait Benchmark {
     fn init(&mut self) {}
     fn run(&mut self) {}
     fn name(&self) -> &'static str;
     fn description(&self) -> &'static str;
-    fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
+    fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
         self.init();
         let start = std::time::Instant::now();
-        for _ in 0..times {
+        for _ in 0..params.times {
             self.run();
         }
         let end = std::time::Instant::now();
@@ -14,7 +15,7 @@ pub(crate) trait Benchmark {
             self.name(),
             self.description(),
             end.duration_since(start).as_millis(),
-            times,
+            params.times as usize,
         ));
     }
 }
@@ -34,15 +35,9 @@ impl BenchmarkList {
     pub(crate) fn list(&self) -> &[Box<dyn Benchmark>] {
         &self.list
     }
-    pub(crate) fn run(&mut self, name: &str, times: usize) -> Vec<BenchmarkResult> {
-        let mut results = Vec::new();
-        for b in &mut self.list {
-            if b.name().to_lowercase().contains(&name.to_lowercase()) {
-                b.evaluate(times, &mut results);
-            }
-        }
-        results
-    }
+    pub(crate) fn list_mut(&mut self) -> &mut [Box<dyn Benchmark>] {
+        &mut self.list
+    }    
 }
 #[derive(Debug, Clone)]
 pub(crate) struct BenchmarkResult {

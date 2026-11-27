@@ -1,8 +1,9 @@
 use crate::benchmark::{Benchmark, BenchmarkList, BenchmarkResult};
 use crate::utils;
+use crate::params::Params;
 use appcui::prelude::*;
 
-fn run_overlapping_windows(count: i32, times: usize) {
+fn run_overlapping_windows(count: i32, times: u32) {
     let script = utils::basic_paint_script(times);
     let mut app = App::new().debug_script(&script).size(Size::new(1000, 1000));
     for index in 0..count {
@@ -17,9 +18,9 @@ fn run_overlapping_windows(count: i32, times: usize) {
 
 struct Test900WindowOverlapp;
 impl Benchmark for Test900WindowOverlapp {
-    fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
-        run_overlapping_windows(900, times);
-        utils::update_times_for_runtime_execution(self, times, results);
+    fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
+        run_overlapping_windows(900, params.times);
+        utils::update_times_for_runtime_execution(self, params.times, results);
     }
     fn name(&self) -> &'static str {
         "Window::900 Overlapping"
@@ -31,9 +32,9 @@ impl Benchmark for Test900WindowOverlapp {
 
 struct Test100WindowOverlapp;
 impl Benchmark for Test100WindowOverlapp {
-    fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
-        run_overlapping_windows(100, times);
-        utils::update_times_for_runtime_execution(self, times, results);
+    fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
+        run_overlapping_windows(100, params.times);
+        utils::update_times_for_runtime_execution(self, params.times, results);
     }
     fn name(&self) -> &'static str {
         "Window::100 Overlapping"
@@ -44,9 +45,9 @@ impl Benchmark for Test100WindowOverlapp {
 }
 struct Test10WindowOverlapp;
 impl Benchmark for Test10WindowOverlapp {
-    fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
-        run_overlapping_windows(10, times);
-        utils::update_times_for_runtime_execution(self, times, results);
+    fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
+        run_overlapping_windows(10, params.times);
+        utils::update_times_for_runtime_execution(self, params.times, results);
     }
     fn name(&self) -> &'static str {
         "Window::10 Overlapping"
