@@ -236,6 +236,9 @@ impl App {
         // clear the mutex so that other apps can be created after this step
         #[cfg(not(target_arch = "wasm32"))]
         {
+            #[cfg(feature = "BENCHMARKS")]
+            RuntimeManager::get().save_statistics();
+            // destroy            
             RuntimeManager::destroy();
             let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
             *app_created = false;

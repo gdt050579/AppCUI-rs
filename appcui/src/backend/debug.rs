@@ -8,6 +8,7 @@ mod mouse_move_command;
 mod mouse_drag_command;
 mod mouse_wheel_command;
 mod paint_command;
+mod force_repaint_command;
 mod paint_enable_command;
 mod disable_checks_command;
 mod error_disable_command;

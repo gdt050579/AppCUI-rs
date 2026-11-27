@@ -1348,7 +1348,14 @@ impl PaintMethods for RuntimeManager {
             self.surface.reset_clip_and_origin();
             self.paint_menu(self.opened_menu_handle, true);
         }
+        #[cfg(feature = "BENCHMARKS")]
+        let start = std::time::Instant::now();
         self.backend.update_screen(&self.surface);
+        #[cfg(feature = "BENCHMARKS")]
+        {
+            self.statistics.update_screen_time += start.elapsed();
+            self.statistics.update_screen_count += 1;
+        }
     }
     fn paint_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };

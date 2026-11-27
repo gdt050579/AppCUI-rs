@@ -388,6 +388,10 @@ impl Backend for DebugTerminal {
                     self.checks_are_enabled = false;
                     return None;
                 }
+                Command::ForceRepaint(_) => {
+                    RuntimeManager::get().request_repaint();
+                    return None;
+                }
                 Command::ErrorDisable(obj) => {
                     self.errors_disabled = obj.is_error_disabled();
                     return None;
