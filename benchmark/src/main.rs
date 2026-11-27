@@ -8,6 +8,10 @@ fn init_benchmark_list() -> benchmark::BenchmarkList {
 }
 fn main() {
     let mut b = init_benchmark_list();
-    b.run("surface", 100);
-    b.run("sprite", 100);
+    //b.run("surface", 1000);
+    //b.run("sprite", 1000);
+    let results = b.run("",100);
+    for result in results {
+        println!("{:?}", result);
+    }
 }

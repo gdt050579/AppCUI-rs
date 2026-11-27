@@ -16,10 +16,31 @@ impl Benchmark for TestSurfaceWriteChar {
         }
     }
     fn name(&self) -> &'static str {
-        "Surface::WriteCharr"
+        "Surface::WriteChar"
     }
     fn description(&self) -> &'static str {
-        "Test the performance of Surface::write_char over a 1000x1000 surface"
+        "Write 1M chars to a surface"
+    }
+}
+struct TestSurfaceWriteTransparentChar {
+    surface: Surface,
+}
+impl Benchmark for TestSurfaceWriteTransparentChar {
+    fn init(&mut self) {
+        self.surface = Surface::new(1000, 1000);
+    }
+    fn run(&mut self) {
+        for x in 0..1000 {
+            for y in 0..1000 {
+                self.surface.write_char(x,y, Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
+            }
+        }
+    }
+    fn name(&self) -> &'static str {
+        "Surface::WriteTransparentChar"
+    }
+    fn description(&self) -> &'static str {
+        "Write 1M transparent chars to a surface"
     }
 }
 
@@ -41,13 +62,14 @@ impl Benchmark for TestSpriteWriteChar {
         "Sprite::set"
     }
     fn description(&self) -> &'static str {
-        "Test the performance of Sprite::set over a 1000x1000 sprite"
+        "Write 1M chars to a sprite"
     }
 }
 
 pub(crate) fn test_list() -> BenchmarkList {
     let mut benchmark_list = BenchmarkList::new();
     benchmark_list.add(Box::new(TestSurfaceWriteChar { surface: Surface::new(1, 1) }));
+    benchmark_list.add(Box::new(TestSurfaceWriteTransparentChar { surface: Surface::new(1, 1) }));
     benchmark_list.add(Box::new(TestSpriteWriteChar { sprite: Sprite::new(1, 1) }));
     benchmark_list
 }
