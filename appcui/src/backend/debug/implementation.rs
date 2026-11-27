@@ -21,6 +21,7 @@ pub(crate) struct DebugTerminal {
     sys_events: VecDeque<SystemEvent>,
     paint: bool,
     ignore_paint_command: bool,
+    checks_are_enabled: bool,
     paint_title: String,
     hash_to_test: Option<u64>,
     cursor_point_to_check: Option<Point>,
@@ -69,6 +70,7 @@ impl DebugTerminal {
             paint: false,
             ignore_paint_command: false,
             errors_disabled: false,
+            checks_are_enabled: true,
             paint_title: String::new(),
             hash_to_test: None,
             cursor_point_to_check: None,
@@ -299,9 +301,12 @@ impl Backend for DebugTerminal {
     }
 
     fn update_screen(&mut self, surface: &Surface) {
-        let surface_hash = self.check_screen(surface);
-        self.hash_to_test = None;
-        self.cursor_point_to_check = None;
+        let mut surface_hash = 0u64;
+        if self.checks_are_enabled {
+            surface_hash = self.check_screen(surface);
+            self.hash_to_test = None;
+            self.cursor_point_to_check = None;
+        }
         // only paint if requested
         if self.paint {
             self.paint = false;
@@ -379,9 +384,8 @@ impl Backend for DebugTerminal {
                     self.ignore_paint_command = !obj.is_paint_enabled();
                     return None;
                 }
-                Command::ForceRepaint(_) => {
-                    RuntimeManager::get().request_repaint();
-                    self.paint = true;
+                Command::DisableChecks(_) => {
+                    self.checks_are_enabled = false;
                     return None;
                 }
                 Command::ErrorDisable(obj) => {
@@ -410,7 +414,7 @@ impl Backend for DebugTerminal {
                     return None;
                 }
                 Command::CheckClipboardText(obj) => {
-                    if obj.get_text() != self.clipboard_text {
+                    if self.checks_are_enabled && obj.get_text() != self.clipboard_text {
                         if self.errors_disabled {
                             println!(
                                 "\x1b[91;40m[Error] Invalid clipboard text: (expecting: '{}' but found '{}')\x1b[0m",
