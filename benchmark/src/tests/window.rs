@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use crate::benchmark::{Benchmark, BenchmarkList};
+use crate::benchmark::{Benchmark, BenchmarkList, BenchmarkResult};
 
 struct TestDesktopCreate;
 
@@ -13,9 +13,18 @@ impl Benchmark for TestDesktopCreate {
         let _ = App::new().debug_script(script).size(Size::new(100, 100)).run();
     }
     fn evaluate(&mut self, times: usize, results: &mut Vec<BenchmarkResult>) {
+        let mut script = String::new();
         for _ in 0..times {
-            self.run();
+            script.push_str("Paint\n");
         }
+        let _ = App::new().debug_script(&script).size(Size::new(100, 100)).run();
+        let stats = App::statistics();
+        results.push(BenchmarkResult::new(
+            self.name(),
+            self.description(),
+            stats.run_time.as_millis(),
+            times,
+        ));
     }
     fn name(&self) -> &'static str {
         "Window::Create"
