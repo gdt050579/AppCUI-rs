@@ -373,6 +373,10 @@ impl Backend for DebugTerminal {
                     self.ignore_paint_command = !obj.is_paint_enabled();
                     return None;
                 }
+                Command::ForceRepaint(_) => {
+                    RuntimeManager::get().request_repaint();
+                    return None;
+                }
                 Command::ErrorDisable(obj) => {
                     self.errors_disabled = obj.is_error_disabled();
                     return None;

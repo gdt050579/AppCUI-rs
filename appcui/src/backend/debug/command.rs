@@ -25,6 +25,7 @@ use super::{
     paint_enable_command::PaintEnableCommand, 
     resize_command::ResizeCommand,
     keymodifier_command::KeyModifierCommand,
+    force_repaint_command::ForceRepaintCommand,
 };
 
 pub(super) enum Command {
@@ -47,6 +48,7 @@ pub(super) enum Command {
     ClipboardSetText(ClipboardSetTextCommand),
     ClipboardClear(ClipboardClearCommand),
     CheckClipboardText(CheckClipboardTextCommand),
+    ForceRepaint(ForceRepaintCommand),
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -87,6 +89,10 @@ impl Command {
             "Paint.Enable" => {
                 let variant = PaintEnableCommand::new(&cp)?;
                 Ok(Command::PaintEnable(variant))
+            }
+            "ForceRepaint" => {
+                let variant = ForceRepaintCommand::new(&cp)?;
+                Ok(Command::ForceRepaint(variant))
             }
             "CheckHash" => {
                 let variant = CheckHashCommand::new(&cp)?;
@@ -150,6 +156,7 @@ impl Command {
             Command::KeyModifier(cmd) => cmd.generate_event(sys_events, key_modifier_state),
             Command::Paint(_) => {}
             Command::PaintEnable(_) => {}
+            Command::ForceRepaint(_) => {}
             Command::ErrorDisable(_) => {}
             Command::CheckHash(_) => {}
             Command::CheckCursor(_) => {},
