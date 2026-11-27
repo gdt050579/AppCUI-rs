@@ -5,7 +5,7 @@ pub(crate) struct Params {
 impl Params {
     pub(crate) fn new(args: &[String]) -> Result<Self, String> {
         let mut me = Self { times: 10, filter: String::new() };
-        let mut index = 0;
+        let mut index = 1; // first argument is the command
         while index < args.len() {
             let arg = args[index].as_str();
             match arg {
