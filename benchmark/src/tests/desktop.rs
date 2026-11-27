@@ -1,9 +1,9 @@
 use appcui::prelude::*;
 use crate::benchmark::{Benchmark, BenchmarkList, BenchmarkResult};
 
-struct TestDesktopCreate;
+struct TestEmptyDesktop;
 
-impl Benchmark for TestDesktopCreate {
+impl Benchmark for TestEmptyDesktop {
     fn init(&mut self) {
     }
     fn run(&mut self) {
@@ -27,15 +27,15 @@ impl Benchmark for TestDesktopCreate {
         ));
     }
     fn name(&self) -> &'static str {
-        "Window::Create"
+        "Desktop::Create"
     }
     fn description(&self) -> &'static str {
-        "Create a window"
+        "An empty desktop"
     }
 }
 
 pub(crate) fn test_list() -> BenchmarkList {
     let mut benchmark_list = BenchmarkList::new();
-    benchmark_list.add(Box::new(TestDesktopCreate { }));
+    benchmark_list.add(Box::new(TestEmptyDesktop { }));
     benchmark_list
 }

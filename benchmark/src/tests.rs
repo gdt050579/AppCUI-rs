@@ -1,2 +1,2 @@
 pub(crate) mod surface;
-pub(crate) mod window;
+pub(crate) mod desktop;
