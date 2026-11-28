@@ -5,6 +5,7 @@ pub(crate) struct Params {
     pub(crate) filter: String,
     pub(crate) screen_size: Size,
     pub(crate) show_screen: bool,
+    pub(crate) elements_count: u32,
 }
 impl Params {
     pub(crate) fn new(args: &[String]) -> Result<Self, String> {
@@ -13,6 +14,7 @@ impl Params {
             filter: String::new(),
             screen_size: Size::new(180, 60),
             show_screen: false,
+            elements_count: 50,
         };
         let mut index = 1; // first argument is the command
         while index < args.len() {
@@ -33,6 +35,10 @@ impl Params {
                 "--show-screen" => {
                     me.show_screen = true;
                     index += 1;
+                }
+                "--elements-count" => {
+                    me.elements_count = Self::parse_elements_count(args, index + 1)?;
+                    index += 2;
                 }
                 _ => {
                     return Err(format!("Unknown argument: {}", arg));
@@ -73,5 +79,15 @@ impl Params {
         } else {
             Err("Screen size must be in the format WIDTHxHEIGHT (e.g. 180x60)".to_string())
         }
+    }
+    fn parse_elements_count(arg: &[String], index: usize) -> Result<u32, String> {
+        if index >= arg.len() {
+            return Err("Missing argument for --elements-count".to_string());
+        }
+        let value = arg[index].parse::<u32>().map_err(|e| e.to_string())?;
+        if value == 0 {
+            return Err("Elements count must be greater than 0".to_string());
+        }
+        Ok(value)
     }
 }
