@@ -3,13 +3,13 @@ use crate::utils;
 use crate::params::Params;
 use appcui::prelude::*;
 
-fn run_overlapping_windows(count: i32, times: u32) {
-    let script = utils::basic_paint_script(times);
-    let mut app = App::new().debug_script(&script).size(Size::new(1000, 1000));
+fn run_overlapping_windows(count: i32, params: &Params) {
+    let script = utils::basic_paint_script(params.times);
+    let mut app = App::new().debug_script(&script).size(params.screen_size);
     for index in 0..count {
         app = app.window(move || {
             let title = format!("Window {}", index);
-            let layout = LayoutBuilder::new().left_anchor(index).top_anchor(index).right_anchor(0).bottom_anchor(0).build();
+            let layout = LayoutBuilder::new().left_anchor(index % 10).top_anchor(index % 10).right_anchor(0).bottom_anchor(0).build();
             Window::new(&title, layout, window::Flags::Sizeable)
         });
     }
@@ -19,7 +19,7 @@ fn run_overlapping_windows(count: i32, times: u32) {
 struct Test900WindowOverlapp;
 impl Benchmark for Test900WindowOverlapp {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
-        run_overlapping_windows(900, params.times);
+        run_overlapping_windows(900, params);
         utils::update_times_for_runtime_execution(self, params.times, results);
     }
     fn name(&self) -> &'static str {
@@ -36,7 +36,7 @@ impl Benchmark for Test900WindowOverlapp {
 struct Test100WindowOverlapp;
 impl Benchmark for Test100WindowOverlapp {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
-        run_overlapping_windows(100, params.times);
+        run_overlapping_windows(100, params);
         utils::update_times_for_runtime_execution(self, params.times, results);
     }
     fn name(&self) -> &'static str {
@@ -52,7 +52,7 @@ impl Benchmark for Test100WindowOverlapp {
 struct Test10WindowOverlapp;
 impl Benchmark for Test10WindowOverlapp {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
-        run_overlapping_windows(10, params.times);
+        run_overlapping_windows(10, params);
         utils::update_times_for_runtime_execution(self, params.times, results);
     }
     fn name(&self) -> &'static str {

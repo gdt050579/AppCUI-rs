@@ -1,5 +1,5 @@
-use appcui::prelude::*;
 use crate::benchmark::{Benchmark, BenchmarkList};
+use appcui::prelude::*;
 
 struct TestSurfaceWriteChar {
     surface: Surface,
@@ -9,9 +9,10 @@ impl Benchmark for TestSurfaceWriteChar {
         self.surface = Surface::new(1000, 1000);
     }
     fn run(&mut self) {
-        for x in 0..1000 {
-            for y in 0..1000 {
-                self.surface.write_char(x,y, char!("A,white,black"));
+        let size = self.surface.size();
+        for x in 0..size.width as i32 {
+            for y in 0..size.height as i32 {
+                self.surface.write_char(x, y, char!("A,white,black"));
             }
         }
     }
@@ -22,7 +23,7 @@ impl Benchmark for TestSurfaceWriteChar {
         "Write 1M chars to a surface"
     }
     fn size(&self) -> Size {
-        Size::new(1000, 1000)
+        self.surface.size()
     }
 }
 struct TestSurfaceWriteTransparentChar {
@@ -35,7 +36,8 @@ impl Benchmark for TestSurfaceWriteTransparentChar {
     fn run(&mut self) {
         for x in 0..1000 {
             for y in 0..1000 {
-                self.surface.write_char(x,y, Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
+                self.surface
+                    .write_char(x, y, Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
             }
         }
     }
@@ -60,7 +62,7 @@ impl Benchmark for TestSpriteWriteChar {
     fn run(&mut self) {
         for x in 0..1000 {
             for y in 0..1000 {
-                self.sprite.set(x,y, char!("A,white,black"));
+                self.sprite.set(x, y, char!("A,white,black"));
             }
         }
     }
