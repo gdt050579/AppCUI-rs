@@ -11,6 +11,7 @@ fn init_benchmark_list() -> BenchmarkList {
     benchmark_list.expand(tests::surface::test_list());
     benchmark_list.expand(tests::desktop::test_list());
     benchmark_list.expand(tests::overlapping_windows::test_list());
+    benchmark_list.expand(tests::nested_panels::test_list());
     benchmark_list
 }
 fn list_benchmarks(params: &Params, lst: &BenchmarkList) {
