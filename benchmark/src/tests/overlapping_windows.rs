@@ -28,6 +28,9 @@ impl Benchmark for Test900WindowOverlapp {
     fn description(&self) -> &'static str {
         "900 windows overlapping each other on a 1000x1000 screen"
     }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
+    }
 }
 
 struct Test100WindowOverlapp;
@@ -42,6 +45,9 @@ impl Benchmark for Test100WindowOverlapp {
     fn description(&self) -> &'static str {
         "100 windows overlapping each other on a 1000x1000 screen"
     }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
+    }
 }
 struct Test10WindowOverlapp;
 impl Benchmark for Test10WindowOverlapp {
@@ -54,6 +60,9 @@ impl Benchmark for Test10WindowOverlapp {
     }
     fn description(&self) -> &'static str {
         "10 windows overlapping each other on a 1000x1000 screen"
+    }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
     }
 }
 

@@ -21,6 +21,9 @@ impl Benchmark for TestSurfaceWriteChar {
     fn description(&self) -> &'static str {
         "Write 1M chars to a surface"
     }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
+    }
 }
 struct TestSurfaceWriteTransparentChar {
     surface: Surface,
@@ -41,6 +44,9 @@ impl Benchmark for TestSurfaceWriteTransparentChar {
     }
     fn description(&self) -> &'static str {
         "Write 1M transparent chars to a surface"
+    }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
     }
 }
 
@@ -63,6 +69,9 @@ impl Benchmark for TestSpriteWriteChar {
     }
     fn description(&self) -> &'static str {
         "Write 1M chars to a sprite"
+    }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
     }
 }
 

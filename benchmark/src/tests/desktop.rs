@@ -17,6 +17,9 @@ impl Benchmark for TestEmptyDesktop {
     fn description(&self) -> &'static str {
         "An empty desktop"
     }
+    fn size(&self) -> Size {
+        Size::new(1000, 1000)
+    }
 }
 
 pub(crate) fn test_list() -> BenchmarkList {

@@ -38,8 +38,9 @@ fn show_help() {
     println!("  run  - Run a benchmark");
     println!();
     println!("Arguments:");
-    println!("  --filter <text> - a text to filter the list of benchmarks");
-    println!("  --times <count> - The number of times to run the benchmark (default: 10)");
+    println!("  --filter <text>                 - a text to filter the list of benchmarks");
+    println!("  --times <count>                 - The number of times to run the benchmark (default: 10)");
+    println!("  --screen-size <width>x<height>  - The size of the screen (default: 180x60)");
 }
 fn main() {
     let mut args = std::env::args().collect::<Vec<String>>();

@@ -17,11 +17,13 @@ where
         obj.description(),
         stats.run_time.as_millis(),
         times as usize,
+        obj.size(),
     ));
     results.push(BenchmarkResult::new(
         format!("{} (update screen)", obj.name()).as_str(),
         "The time taken to update the screen",
         stats.update_screen_time.as_millis(),
         stats.update_screen_count,
+        obj.size(),
     ));
 }

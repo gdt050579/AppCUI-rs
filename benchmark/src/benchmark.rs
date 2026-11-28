@@ -1,9 +1,11 @@
 use crate::params::Params;
+use appcui::prelude::*;
 pub(crate) trait Benchmark {
     fn init(&mut self) {}
     fn run(&mut self) {}
     fn name(&self) -> &'static str;
     fn description(&self) -> &'static str;
+    fn size(&self) -> Size;
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
         self.init();
         let start = std::time::Instant::now();
@@ -16,6 +18,7 @@ pub(crate) trait Benchmark {
             self.description(),
             end.duration_since(start).as_millis(),
             params.times as usize,
+            self.size(),
         ));
     }
 }
@@ -43,14 +46,16 @@ impl BenchmarkList {
 pub(crate) struct BenchmarkResult {
     name: String,
     description: String,
+    size: Size,
     duration: u128,
     times: usize,
 }
 impl BenchmarkResult {
-    pub(crate) fn new(name: &str, description: &str, duration: u128, times: usize) -> Self {
+    pub(crate) fn new(name: &str, description: &str, duration: u128, times: usize, size: Size) -> Self {
         Self {
             name: name.to_string(),
             description: description.to_string(),
+            size,
             duration,
             times,
         }
@@ -62,12 +67,14 @@ pub(crate) fn print_results(result: &[BenchmarkResult], _params: &Params) {
 }
 
 fn print_text_results(result: &[BenchmarkResult]) {
+    println!();
     println!("Benchmark Results:");
-    println!(" +--------------------------------+----------+------------------------------------------------------");
-    println!(" | Test Name                      | Duration | Description ");
-    println!(" +--------------------------------+----------+------------------------------------------------------");
+    println!(" +--------------------------------+-------------+-----------+----------------------------------------------");
+    println!(" | Test Name                      |  Duration   | Scr. Size | Description ");
+    println!(" +--------------------------------+-------------+-----------+----------------------------------------------");
     for r in result {
         let t = r.duration as f64 / r.times as f64;
-        println!(" | {:30} | {:8.2} ms | {}", r.name, t, r.description);
+        println!(" | {:30} | {:8.2} ms | {:4}x{:4} | {}", r.name, t, r.size.width, r.size.height, r.description);
     }
+    println!(" +--------------------------------+-------------+-----------+----------------------------------------------");
 }
