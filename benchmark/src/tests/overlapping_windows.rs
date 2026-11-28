@@ -16,9 +16,12 @@ fn run_overlapping_windows(count: i32, params: &Params) {
     let _ = app.run();
 }
 
-struct Test900WindowOverlapp;
+struct Test900WindowOverlapp {
+    size: Size,
+}
 impl Benchmark for Test900WindowOverlapp {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
+        self.size = params.screen_size;
         run_overlapping_windows(900, params);
         utils::update_times_for_runtime_execution(self, params.times, results);
     }
@@ -29,13 +32,16 @@ impl Benchmark for Test900WindowOverlapp {
         "900 windows overlapping each other on a 1000x1000 screen"
     }
     fn size(&self) -> Size {
-        Size::new(1000, 1000)
+        self.size
     }
 }
 
-struct Test100WindowOverlapp;
+struct Test100WindowOverlapp {
+    size: Size,
+}
 impl Benchmark for Test100WindowOverlapp {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
+        self.size = params.screen_size;
         run_overlapping_windows(100, params);
         utils::update_times_for_runtime_execution(self, params.times, results);
     }
@@ -46,12 +52,15 @@ impl Benchmark for Test100WindowOverlapp {
         "100 windows overlapping each other on a 1000x1000 screen"
     }
     fn size(&self) -> Size {
-        Size::new(1000, 1000)
+        self.size
     }
 }
-struct Test10WindowOverlapp;
+struct Test10WindowOverlapp {
+    size: Size,
+}
 impl Benchmark for Test10WindowOverlapp {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
+        self.size = params.screen_size;
         run_overlapping_windows(10, params);
         utils::update_times_for_runtime_execution(self, params.times, results);
     }
@@ -62,14 +71,14 @@ impl Benchmark for Test10WindowOverlapp {
         "10 windows overlapping each other on a 1000x1000 screen"
     }
     fn size(&self) -> Size {
-        Size::new(1000, 1000)
+        self.size
     }
 }
 
 pub(crate) fn test_list() -> BenchmarkList {
     let mut benchmark_list = BenchmarkList::new();
-    benchmark_list.add(Box::new(Test900WindowOverlapp {}));
-    benchmark_list.add(Box::new(Test100WindowOverlapp {}));
-    benchmark_list.add(Box::new(Test10WindowOverlapp {}));
+    benchmark_list.add(Box::new(Test900WindowOverlapp { size: Size::new(1, 1) }));
+    benchmark_list.add(Box::new(Test100WindowOverlapp { size: Size::new(1, 1) }));
+    benchmark_list.add(Box::new(Test10WindowOverlapp { size: Size::new(1, 1) }));
     benchmark_list
 }
