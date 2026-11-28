@@ -5,9 +5,9 @@ pub(crate) fn basic_paint_script(times: u32, show_screen: bool) -> String {
     let mut script = "DisableChecks\nPaint.Enable(".to_string();
     script += if show_screen { "true)\n" } else { "false)\n" };
     if show_screen {
-        script += "ForceRepaint\n".repeat(times as usize).as_str();
-    } else {
         script += "Paint\n".repeat(times as usize).as_str();
+    } else {
+        script += "ForceRepaint\n".repeat(times as usize).as_str();
     }
     script
 }
