@@ -4,7 +4,7 @@ use crate::params::Params;
 use appcui::prelude::*;
 
 fn run_overlapping_windows(count: i32, params: &Params) {
-    let script = utils::basic_paint_script(params.times);
+    let script = utils::basic_paint_script(params.times, params.show_screen);
     let mut app = App::new().debug_script(&script).size(params.screen_size);
     for index in 0..count {
         app = app.window(move || {

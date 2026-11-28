@@ -1,9 +1,14 @@
 use crate::benchmark::{Benchmark, BenchmarkResult};
 use appcui::prelude::*;
 
-pub(crate) fn basic_paint_script(times: u32) -> String {
-    let mut script = "DisableChecks\nPaint.Enable(true)\n".to_string();
-    script += "ForceRepaint\n".repeat(times as usize).as_str();
+pub(crate) fn basic_paint_script(times: u32, show_screen: bool) -> String {
+    let mut script = "DisableChecks\nPaint.Enable(".to_string();
+    script += if show_screen { "true)\n" } else { "false)\n" };
+    if show_screen {
+        script += "ForceRepaint\n".repeat(times as usize).as_str();
+    } else {
+        script += "Paint\n".repeat(times as usize).as_str();
+    }
     script
 }
 
@@ -20,7 +25,7 @@ where
         obj.size(),
     ));
     results.push(BenchmarkResult::new(
-        format!("{} (update screen)", obj.name()).as_str(),
+        " > Update Screen",
         "The time taken to update the screen",
         stats.update_screen_time.as_millis(),
         stats.update_screen_count,

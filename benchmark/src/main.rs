@@ -41,6 +41,7 @@ fn show_help() {
     println!("  --filter <text>                 - a text to filter the list of benchmarks");
     println!("  --times <count>                 - The number of times to run the benchmark (default: 10)");
     println!("  --screen-size <width>x<height>  - The size of the screen (default: 180x60)");
+    println!("  --show-screen                   - shows the output of the debug script")
 }
 fn main() {
     let mut args = std::env::args().collect::<Vec<String>>();

@@ -1,14 +1,17 @@
-use crate::benchmark::{Benchmark, BenchmarkList};
+use crate::{
+    benchmark::{Benchmark, BenchmarkList},
+    params::Params,
+};
 use appcui::prelude::*;
 
 struct TestSurfaceWriteChar {
     surface: Surface,
 }
 impl Benchmark for TestSurfaceWriteChar {
-    fn init(&mut self) {
-        self.surface = Surface::new(1000, 1000);
+    fn init(&mut self, params: &Params) {
+        self.surface = Surface::new(params.screen_size.width, params.screen_size.height);
     }
-    fn run(&mut self) {
+    fn run(&mut self, _params: &Params) {
         let size = self.surface.size();
         for x in 0..size.width as i32 {
             for y in 0..size.height as i32 {
@@ -30,12 +33,13 @@ struct TestSurfaceWriteTransparentChar {
     surface: Surface,
 }
 impl Benchmark for TestSurfaceWriteTransparentChar {
-    fn init(&mut self) {
-        self.surface = Surface::new(1000, 1000);
+    fn init(&mut self, params: &Params) {
+        self.surface = Surface::new(params.screen_size.width, params.screen_size.height);
     }
-    fn run(&mut self) {
-        for x in 0..1000 {
-            for y in 0..1000 {
+    fn run(&mut self, _params: &Params) {
+        let size = self.surface.size();
+        for x in 0..size.width as i32 {
+            for y in 0..size.height as i32 {
                 self.surface
                     .write_char(x, y, Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
             }
@@ -48,7 +52,7 @@ impl Benchmark for TestSurfaceWriteTransparentChar {
         "Write 1M transparent chars to a surface"
     }
     fn size(&self) -> Size {
-        Size::new(1000, 1000)
+        self.surface.size()
     }
 }
 
@@ -56,12 +60,13 @@ struct TestSpriteWriteChar {
     sprite: Sprite,
 }
 impl Benchmark for TestSpriteWriteChar {
-    fn init(&mut self) {
-        self.sprite = Sprite::new(1000, 1000);
+    fn init(&mut self, params: &Params) {
+        self.sprite = Sprite::new(params.screen_size.width, params.screen_size.height);
     }
-    fn run(&mut self) {
-        for x in 0..1000 {
-            for y in 0..1000 {
+    fn run(&mut self, _params: &Params) {
+        let size = self.sprite.size();
+        for x in 0..size.width {
+            for y in 0..size.height {
                 self.sprite.set(x, y, char!("A,white,black"));
             }
         }
@@ -73,7 +78,7 @@ impl Benchmark for TestSpriteWriteChar {
         "Write 1M chars to a sprite"
     }
     fn size(&self) -> Size {
-        Size::new(1000, 1000)
+        self.sprite.size()
     }
 }
 

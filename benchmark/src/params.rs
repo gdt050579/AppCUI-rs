@@ -4,10 +4,16 @@ pub(crate) struct Params {
     pub(crate) times: u32,
     pub(crate) filter: String,
     pub(crate) screen_size: Size,
+    pub(crate) show_screen: bool,
 }
 impl Params {
     pub(crate) fn new(args: &[String]) -> Result<Self, String> {
-        let mut me = Self { times: 10, filter: String::new(), screen_size: Size::new(180, 60) };
+        let mut me = Self {
+            times: 10,
+            filter: String::new(),
+            screen_size: Size::new(180, 60),
+            show_screen: false,
+        };
         let mut index = 1; // first argument is the command
         while index < args.len() {
             let arg = args[index].as_str();
@@ -23,6 +29,10 @@ impl Params {
                 "--screen-size" => {
                     me.screen_size = Self::parse_screen_size(args, index + 1)?;
                     index += 2;
+                }
+                "--show-screen" => {
+                    me.show_screen = true;
+                    index += 1;
                 }
                 _ => {
                     return Err(format!("Unknown argument: {}", arg));

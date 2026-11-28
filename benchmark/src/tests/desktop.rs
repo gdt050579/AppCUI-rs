@@ -9,7 +9,7 @@ struct TestEmptyDesktop {
 
 impl Benchmark for TestEmptyDesktop {
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
-        let script = utils::basic_paint_script(params.times);
+        let script = utils::basic_paint_script(params.times, params.show_screen);
         self.size = params.screen_size;
         let _ = App::new().debug_script(&script).size(params.screen_size).run();
         utils::update_times_for_runtime_execution(self, params.times, results);

@@ -1,16 +1,16 @@
 use crate::params::Params;
 use appcui::prelude::*;
 pub(crate) trait Benchmark {
-    fn init(&mut self) {}
-    fn run(&mut self) {}
+    fn init(&mut self, _params: &Params) {}
+    fn run(&mut self, _params: &Params) {}
     fn name(&self) -> &'static str;
     fn description(&self) -> &'static str;
     fn size(&self) -> Size;
     fn evaluate(&mut self, params: &Params, results: &mut Vec<BenchmarkResult>) {
-        self.init();
+        self.init(params);
         let start = std::time::Instant::now();
         for _ in 0..params.times {
-            self.run();
+            self.run(params);
         }
         let end = std::time::Instant::now();
         results.push(BenchmarkResult::new(
@@ -74,7 +74,13 @@ fn print_text_results(result: &[BenchmarkResult]) {
     println!(" +--------------------------------+-------------+-----------+----------------------------------------------");
     for r in result {
         let t = r.duration as f64 / r.times as f64;
-        println!(" | {:30} | {:8.2} ms | {:4}x{:4} | {}", r.name, t, r.size.width, r.size.height, r.description);
+        let size = format!("{}x{}", r.size.width, r.size.height);
+        let name = if r.name.len() > 30 {
+            r.name[..27].to_string() + "..."
+        } else {
+            r.name.to_string()
+        };
+        println!(" | {:30} | {:8.2} ms | {:9} | {}", name, t, size, r.description);
     }
     println!(" +--------------------------------+-------------+-----------+----------------------------------------------");
 }
